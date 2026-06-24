@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Blog — Aditya Dutta</title>
+  <meta name="description" content="Notes on robotics, embedded systems and the process of building hardware — by Aditya Dutta." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/theme.css" />
+  <meta property="og:title" content="Blog — Aditya Dutta" />
+  <meta property="og:type" content="website" />
+</head>
+<body>
+  <picture class="bg">
+    <source type="image/webp" sizes="100vw"
+      srcset="../assets/bg/bg-400.webp 400w, ../assets/bg/bg-600.webp 600w, ../assets/bg/bg-800.webp 800w, ../assets/bg/bg-1080.webp 1080w, ../assets/bg/bg-1440.webp 1440w, ../assets/bg/bg-1920.webp 1920w, ../assets/bg/bg-2400.webp 2400w" />
+    <img src="../assets/bg/bg-800.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high"
+      sizes="100vw"
+      srcset="../assets/bg/bg-400.jpg 400w, ../assets/bg/bg-600.jpg 600w, ../assets/bg/bg-800.jpg 800w, ../assets/bg/bg-1080.jpg 1080w, ../assets/bg/bg-1440.jpg 1440w, ../assets/bg/bg-1920.jpg 1920w, ../assets/bg/bg-2400.jpg 2400w" />
+  </picture>
+
+  <header class="topbar">
+    <a class="logo brand" href="../" aria-label="Dutta — home"><span class="l-d">Dutta</span></a>
+    <nav class="nav">
+      <a href="../portfolio/">Portfolio</a>
+      <a href="../projects/">Projects</a>
+      <a href="../blog/" class="active">Blog</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="lede reveal" style="margin-bottom:1.6rem">
+      <h1>Blog</h1>
+      <p>Notes on robotics, embedded systems, and the messy reality of turning ideas into hardware.</p>
+    </div>
+
+    <div class="posts">
+      <a class="card post-row reveal" href="energy-first-sylvara/">
+        <time>24 June 2026 · Embedded</time>
+        <h3>Energy-first: making a sensor run a year on twenty minutes of sun</h3>
+        <p>Most “smart plant” gadgets die in a drawer because they need charging. Here's how treating energy as the first design constraint — not an afterthought — reshaped every decision behind Sylvara.</p>
+        <span class="post-tags">
+          <span class="pill">Power design</span>
+          <span class="pill">ESP32</span>
+          <span class="pill">Sylvara</span>
+        </span>
+      </a>
+    </div>
+
+    <div class="footer reveal" style="margin-top:2.4rem">More posts coming. In the meantime, the work itself lives under <a href="../projects/" style="color:var(--blue-bright)">Projects</a>.</div>
+
+    <footer class="site-footer reveal">
+      <div class="foot-links">
+        <a class="foot-icon" href="mailto:adityadutta2006@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></a>
+        <a class="foot-icon" href="https://github.com/thedutta" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.2 11.19.6.11.82-.25.82-.56v-2.2c-3.34.71-4.04-1.58-4.04-1.58-.55-1.36-1.33-1.73-1.33-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.22 1.84 1.22 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.84 0-1.29.47-2.34 1.23-3.17-.12-.3-.53-1.52.12-3.16 0 0 1-.32 3.3 1.21a11.6 11.6 0 0 1 3-.4c1.02 0 2.05.13 3 .4 2.28-1.53 3.29-1.21 3.29-1.21.65 1.64.24 2.86.12 3.16.77.83 1.23 1.88 1.23 3.17 0 4.54-2.81 5.53-5.49 5.83.43.37.81 1.1.81 2.22v3.29c0 .31.21.68.82.56A12.01 12.01 0 0 0 24 12.29C24 5.78 18.63.5 12 .5z"/></svg></a>
+        <a class="foot-icon" href="https://www.linkedin.com/in/aditya-dutta-058808213" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.27c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.79 1.75 1.75-.78 1.76-1.75 1.76zm13.5 12.27h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96v5.7h-3v-11h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59v6.47z"/></svg></a>
+      </div>
+      <div class="foot-note">© Aditya Dutta · Kolkata, India</div>
+    </footer>
+  </div>
+
+  <script src="../assets/reveal.js"></script>
+  <script src="../assets/ui.js"></script>
+</body>
+</html>
