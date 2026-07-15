@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>FlexNode — Distributed CAN-FD Motor + Sensor Node · Aditya Dutta</title>
+  <meta name="description" content="FlexNode — a distributed compute node for mobile robots: high-current field-oriented motor control and sensor fusion over CAN-FD. Built on moteus, one node per actuator, designed for CatBot." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>" type="image/svg+xml" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <meta property="og:title" content="FlexNode — Distributed CAN-FD Motor + Sensor Node" />
+  <meta property="og:description" content="High-current FOC actuation and sensor fusion over CAN-FD. One node per actuator, daisy-chained to an onboard Jetson. Built on moteus, for CatBot." />
+  <meta property="og:type" content="article" />
+  <style>
+    /* page-scoped: mirror the blog article's list/code styling for this doc,
+       and offset in-page anchors below the fixed topbar */
+    .doc-section[id] { scroll-margin-top: 72px; }
+    .prose ul, .prose ol { margin: 0.4rem 0 0.2rem 1.2rem; }
+    .prose li { color: rgba(255,255,255,0.82); margin-bottom: 0.5rem; font-weight: 300; line-height: 1.65; }
+    .prose code { font-family: ui-monospace, "SF Mono", Menlo, monospace; background: rgba(255,255,255,0.08); padding: 0.1em 0.4em; border-radius: 6px; font-size: 0.86em; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <picture class="bg">
+    <source type="image/webp" sizes="100vw"
+      srcset="../../assets/bg/bg-400.webp 400w, ../../assets/bg/bg-600.webp 600w, ../../assets/bg/bg-800.webp 800w, ../../assets/bg/bg-1080.webp 1080w, ../../assets/bg/bg-1440.webp 1440w, ../../assets/bg/bg-1920.webp 1920w, ../../assets/bg/bg-2400.webp 2400w" />
+    <img src="../../assets/bg/bg-800.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high"
+      sizes="100vw"
+      srcset="../../assets/bg/bg-400.jpg 400w, ../../assets/bg/bg-600.jpg 600w, ../../assets/bg/bg-800.jpg 800w, ../../assets/bg/bg-1080.jpg 1080w, ../../assets/bg/bg-1440.jpg 1440w, ../../assets/bg/bg-1920.jpg 1920w, ../../assets/bg/bg-2400.jpg 2400w" />
+  </picture>
+
+  <header class="topbar">
+    <a class="logo brand" href="../../" aria-label="Dutta — home"><span class="l-d">Dutta</span></a>
+    <nav class="nav">
+      <a href="../../portfolio/">Portfolio</a>
+      <a href="../../projects/" class="active">Projects</a>
+      <a href="../../blog/">Blog</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <a class="back reveal" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> All projects</a>
+
+    <div class="doc-hero reveal">
+      <span class="kicker">Distributed Compute Node</span>
+      <h1>FlexNode</h1>
+      <p class="doc-sub">A distributed compute node for mobile robots — high-current field-oriented motor control and sensor fusion, all over CAN-FD. One node per actuator, daisy-chained back to an onboard Jetson, so every joint gets local hard-real-time control while the host just plans.</p>
+      <div class="doc-meta">
+        <span class="badge ongoing">v1.0 · Bring-up</span>
+        <span class="chip">CAN-FD</span>
+        <span class="chip">Field-oriented control</span>
+        <span class="chip">STM32G4</span>
+        <span class="chip">moteus-based</span>
+      </div>
+    </div>
+
+    <!-- Board-in-hand utility band -->
+    <div class="card reveal">
+      <h2 style="margin:0 0 0.5rem;font-size:1.15rem">You scanned a FlexNode.</h2>
+      <p class="prose" style="margin:0 0 1rem">This is a <strong>v1.0</strong> board — hardware is fabricated and firmware bring-up is in progress. Here is the source, the specs, and how to power it without letting the magic smoke out. <em>Not yet hardware-validated — treat everything here as work in progress.</em></p>
+      <div class="actions" style="justify-content:flex-start">
+        <a class="btn call" href="https://github.com/thedutta/FlexNode" target="_blank" rel="noopener">GitHub repo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+        <a class="btn" href="#specs">Specs</a>
+        <a class="btn" href="#safety">Safety</a>
+        <a class="btn" href="#firmware">Flash it</a>
+      </div>
+    </div>
+
+    <!-- Board hero render -->
+    <div class="card reveal" style="padding:0;overflow:hidden">
+      <span style="display:block;aspect-ratio:1600/842;background:#0a0a0d">
+        <img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board — top view showing the DRV8353 gate driver, STM32G4, six Infineon power FETs and the SHA/SHB/SHC phase pads" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+      </span>
+    </div>
+
+    <section class="doc-section reveal">
+      <h2>What it is</h2>
+      <div class="prose">
+        <p>FlexNode fuses a <strong>field-oriented motor controller</strong> and a <strong>sensor-fusion front end</strong> onto a single compact PCB that hangs off a <strong>CAN-FD</strong> bus. Many nodes daisy-chain back to a host, so each limb or joint runs its own tens-of-kHz current loop locally while the host does high-level planning.</p>
+        <p>It began as a fork of the <a href="https://github.com/mjbots/moteus" target="_blank" rel="noopener">mjbots <strong>moteus r4.11</strong></a> controller — the proven power stage, gate driver and STM32G4 core are kept intact — and adds the digital sensing and I/O a distributed robot node needs: a 6-axis IMU, optional multizone ranging, a servo/aux port with onboard current sensing, addressable status RGB, and everything reported over CAN-FD.</p>
+        <p>The design target is <a href="../catbot/"><strong>CatBot</strong></a>, a lightweight, highly agile jumping quadruped: FlexNode drives its geared hip actuators and lighter leg motors, one node per actuator, all chained to the onboard Jetson.</p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>How it fits</h2>
+      <div class="prose">
+        <p>Each actuator carries its own FlexNode bolted to the back of the motor — closing the FOC loop millimetres from the windings and the magnetic encoder, with only a CAN-FD pair and power leaving the joint. Split the chain left/right (or front/back) and a single bus fault takes down one side, not the whole robot.</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1600/801;background:#0a0a0d">
+          <img src="../../assets/img/flexnode-actuator.jpg" alt="FlexNode mounted on the rear of a geared quadruped actuator, status LED glowing" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="specs">
+      <h2>Technical specifications</h2>
+      <div class="card">
+        <dl class="specs">
+          <div><dt>Microcontroller</dt><dd>STM32G473CEU6 — Cortex-M4F @170 MHz, 512 KB flash, 5× ADC, 3× FDCAN, UFQFPN-48</dd></div>
+          <div><dt>Gate driver</dt><dd>TI DRV8353S — 3-phase, SPI-configurable</dd></div>
+          <div><dt>Power stage</dt><dd>Six 60 V / 1.6 mΩ N-channel MOSFETs (TDSON-8)</dd></div>
+          <div><dt>Motor supply</dt><dd>Up to ~44 V bus (10S LiPo class)</dd></div>
+          <div><dt>Logic rails</dt><dd>LGS5160C synchronous buck → 5 V / 3 A · ME6216A33 LDO → 3.3 V</dd></div>
+          <div><dt>Rotor feedback</dt><dd>AS5047P on-axis magnetic encoder (SPI)</dd></div>
+          <div><dt>Comms</dt><dd>CAN-FD via TCAN334G — daisy-chain in/out, 120 Ω leaf-node termination</dd></div>
+          <div><dt>Inertial</dt><dd>LSM6DS3TR-C 6-axis IMU (I²C)</dd></div>
+          <div><dt>Ranging (optional)</dt><dd>VL53L7CX 8×8 multizone ToF — footprint present, DNP</dd></div>
+          <div><dt>Status</dt><dd>WS2812B addressable RGB LED</dd></div>
+          <div><dt>Aux I/O</dt><dd>Servo / LED output + 5 V current sense · I²C port · SPI pads — JST-PH</dd></div>
+          <div><dt>Stackup</dt><dd>4-layer, 1 oz Cu (2 oz option for full moteus phase current)</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="safety">
+      <h2>Powering it safely</h2>
+      <div class="card">
+        <div class="prose">
+          <p><strong>Bus voltage:</strong> up to ~44 V (10S LiPo). Bus ceramics are rated 50 V and the power FETs 60 V — sized for that rail, with no margin to spare above it.</p>
+          <p><span style="color:#ffcc66;font-weight:600">⚠ Never hot-plug a FlexNode onto a live pack.</span> Cable inductance and the ceramic bus form an LC tank that can ring toward 2× and blow past the 60 V FETs. Always bring the bus up through the core board's <strong>pre-charge</strong> — or a current-limited supply on the bench.</p>
+          <p><strong>Firmware note:</strong> the motor phase A/C outputs are swapped in copper relative to stock moteus; the FlexNode firmware compensates. Do not flash unmodified moteus.</p>
+          <p><strong>Status:</strong> v1.0 is fabricated but <strong>not yet hardware-validated</strong>. Everything here is subject to change until the first article is verified.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="firmware">
+      <h2>Firmware &amp; flashing</h2>
+      <div class="prose">
+        <p>The firmware is a fork of moteus, keeping the FOC inner loop, FDCAN protocol and bootloader while remapping the reused pins and adding the sensor/aux features. Key deltas: board ID hardcoded to <code>{family 0, hw_version 8}</code> (the strap pins are repurposed), pin remaps (<code>PC6</code> encoder CS, <code>PB11</code> 5 V sense, <code>PC13</code> servo/aux), and the phase-order fix.</p>
+        <p>Flash over the <strong>FLASH</strong> header (SWD — NRST · CLK · DIO · 3V3 · GND), or via the moteus bootloader over CAN.</p>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <div class="prose">
+          <p><strong>1 · Build</strong> — in WSL (Ubuntu 22.04):</p>
+          <ol>
+            <li>Clone the repo, then build the target image:<br><code>cd moteus-r4-parent &amp;&amp; tools/bazel build --config=target //:target</code></li>
+            <li>Confirm your build carries the FlexNode deltas — <code>hw_version 8</code>, the pin remaps, and the <strong>phase-order fix</strong> — before it ever drives a motor.</li>
+          </ol>
+          <p><strong>2 · First flash</strong> — virgin board, over SWD: connect an ST-Link / J-Link to the <strong>FLASH</strong> header (NRST · CLK · DIO · 3V3 · GND) and write the combined bootloader + application image to <code>0x08000000</code> with STM32CubeProgrammer or OpenOCD.</p>
+          <p><strong>3 · Updates</strong> — over CAN, once the bootloader is on: with an fdcanusb or pi3hat on the bus,<br><code>python3 -m moteus.moteus_tool -t &lt;id&gt; --flash &lt;firmware.elf&gt;</code></p>
+          <p><strong>4 · Calibrate</strong> — <code>python3 -m moteus.moteus_tool -t &lt;id&gt; --calibrate</code>, but only after the phase-order fix is in the flashed firmware; otherwise calibration fights a drive/sense pairing that lands on the wrong winding.</p>
+          <p style="color:rgba(255,255,255,0.6)"><em>WIP — the port is not hardware-validated yet, and stock moteus binaries will not run correctly (repurposed strap pins, swapped phases). The living reference is <a href="https://github.com/thedutta/FlexNode/blob/main/docs/firmware.md" target="_blank" rel="noopener">docs/firmware.md</a>.</em></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Pinout &amp; connectors</h2>
+      <div class="prose">
+        <p>Everything leaves the board on JST-PH headers or gold-plated through-holes at the edge. Connectors, by silkscreen label:</p>
+      </div>
+      <div class="card">
+        <dl class="specs">
+          <div><dt>Power &amp; phases</dt><dd>SHA · V− · V+ · SHB · V− · V+ · SHC — three motor-phase outputs interleaved with bus pads, gold-plated for high current</dd></div>
+          <div><dt>CAN in · CAN out</dt><dd>CAN-FD differential pair (CANH / CANL) + GND, daisy-chained; 120 Ω termination fitted on leaf nodes</dd></div>
+          <div><dt>FLASH (SWD)</dt><dd>NRST · CLK · DIO · 3V3 · GND — first-flash &amp; debug</dd></div>
+          <div><dt>EXT 1 · EXT 2</dt><dd>Aux expansion — I²C (SDA / SCL) plus SPI / GPIO breakouts for secondary encoders or peripherals</dd></div>
+          <div><dt>T<sub>motor</sub></dt><dd>Motor-thermistor input (NTC into an on-board divider)</dd></div>
+          <div><dt>TX · RX</dt><dd>3.3 V UART</dd></div>
+          <div><dt>LED</dt><dd>WS2812 addressable status — data in</dd></div>
+        </dl>
+      </div>
+      <div class="prose" style="margin-top:0.8rem"><p>Pin order for <strong>FLASH</strong> and the power pads is fixed as listed; confirm pin-1 orientation on the aux headers (EXT / CAN) against the board silk. A fully labelled pin-map overlaid on the board render is the next addition here.</p></div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Engineering emphasis</h2>
+      <div class="decisions">
+        <div class="decision"><h3>CAN-FD as the spine</h3><p>Every node hangs off one differential pair; the fast data phase carries both commands and telemetry. Nodes daisy-chain, with termination only on the leaves — wiring a limb is two wires plus power.</p></div>
+        <div class="decision"><h3>One node per actuator</h3><p>The current loop closes millimetres from the windings, not across the robot. The Jetson only plans; each joint owns its own hard-real-time control. Splitting the bus per side buys fault isolation for free.</p></div>
+        <div class="decision"><h3>Verified before fabricated</h3><p>The power stage, current limits and every BOM part number were independently checked against datasheets before committing copper — inductor sizing vs. the gate driver's current limit, cap voltage ratings, footprint/pinout matches, the lot.</p></div>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Build your own</h2>
+      <div class="prose">
+        <p>FlexNode is open hardware, inheriting moteus's Apache-2.0 license. Schematics, BOM and gerbers are in the repo.</p>
+      </div>
+      <div class="actions" style="justify-content:flex-start">
+        <a class="btn call" href="https://github.com/thedutta/FlexNode" target="_blank" rel="noopener">Repository
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+        <a class="btn" href="https://github.com/thedutta/FlexNode/tree/main/hardware" target="_blank" rel="noopener">Schematic &amp; BOM</a>
+        <a class="btn" href="https://github.com/thedutta/FlexNode/blob/main/docs/hardware.md" target="_blank" rel="noopener">Hardware docs</a>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Roadmap</h2>
+      <div class="prose">
+        <ul>
+          <li>✓ Schematic + layout complete — v1.0 fabricated</li>
+          <li>◦ Board bring-up: power rails, comms, encoder — <em>in progress</em></li>
+          <li>◦ Firmware port: <code>hw_version</code> hardcode, pin remaps, phase-order fix</li>
+          <li>◦ CAN time-sync + multi-node choreography</li>
+          <li>◦ CatBot integration — four hip actuators + leg motors</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Gallery</h2>
+      <div class="gallery">
+        <figure><img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board, top view" loading="lazy" /></figure>
+        <figure class="tall"><img src="../../assets/img/flexnode-actuator.jpg" alt="FlexNode integrated on a geared actuator" loading="lazy" /></figure>
+      </div>
+    </section>
+
+    <footer class="site-footer reveal">
+      <div class="foot-links">
+        <a class="foot-icon" href="mailto:adityadutta2006@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></a>
+        <a class="foot-icon" href="https://github.com/thedutta" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.2 11.19.6.11.82-.25.82-.56v-2.2c-3.34.71-4.04-1.58-4.04-1.58-.55-1.36-1.33-1.73-1.33-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.22 1.84 1.22 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.84 0-1.29.47-2.34 1.23-3.17-.12-.3-.53-1.52.12-3.16 0 0 1-.32 3.3 1.21a11.6 11.6 0 0 1 3-.4c1.02 0 2.05.13 3 .4 2.28-1.53 3.29-1.21 3.29-1.21.65 1.64.24 2.86.12 3.16.77.83 1.23 1.88 1.23 3.17 0 4.54-2.81 5.53-5.49 5.83.43.37.81 1.1.81 2.22v3.29c0 .31.21.68.82.56A12.01 12.01 0 0 0 24 12.29C24 5.78 18.63.5 12 .5z"/></svg></a>
+        <a class="foot-icon" href="https://www.linkedin.com/in/aditya-dutta-058808213" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.27c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.79 1.75 1.75-.78 1.76-1.75 1.76zm13.5 12.27h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96v5.7h-3v-11h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59v6.47z"/></svg></a>
+      </div>
+      <div class="foot-note">© Aditya Dutta · FlexNode is an ongoing project — part of <a href="../catbot/">CatBot</a> · built on <a href="https://github.com/mjbots/moteus" target="_blank" rel="noopener">moteus</a> (Apache-2.0)</div>
+    </footer>
+  </div>
+
+  <script src="../../assets/reveal.js"></script>
+  <script src="../../assets/ui.js"></script>
+</body>
+</html>
