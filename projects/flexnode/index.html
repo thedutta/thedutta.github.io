@@ -43,20 +43,21 @@
     <div class="doc-hero reveal">
       <span class="kicker">Distributed Compute Node</span>
       <h1>FlexNode</h1>
-      <p class="doc-sub">A distributed compute node for mobile robots — high-current field-oriented motor control and sensor fusion, all over CAN-FD. One node per actuator, daisy-chained back to an onboard Jetson, so every joint gets local hard-real-time control while the host just plans.</p>
+      <p class="doc-sub">A distributed compute node for mobile robots — high-current field-oriented motor control and sensor fusion, all over CAN-FD. One node per actuator, daisy-chained back to an onboard Jetson, so every joint gets local hard-real-time control while the host just plans. The goal: any sensor-fused robot reduces to <em>buy FlexNodes + actuators + sensors, wire power and CAN</em> — no electronics development.</p>
       <div class="doc-meta">
         <span class="badge ongoing">v1.0 · Bring-up</span>
         <span class="chip">CAN-FD</span>
         <span class="chip">Field-oriented control</span>
         <span class="chip">STM32G4</span>
         <span class="chip">moteus-based</span>
+        <span class="chip">One firmware · N configs</span>
       </div>
     </div>
 
     <!-- Board-in-hand utility band -->
     <div class="card reveal">
       <h2 style="margin:0 0 0.5rem;font-size:1.15rem">You scanned a FlexNode.</h2>
-      <p class="prose" style="margin:0 0 1rem">This is a <strong>v1.0</strong> board — hardware is fabricated and firmware bring-up is in progress. Here is the source, the specs, and how to power it without letting the magic smoke out. <em>Not yet hardware-validated — treat everything here as work in progress.</em></p>
+      <p class="prose" style="margin:0 0 1rem">This is a <strong>v1.0</strong> board — hardware is fabricated, and the firmware compatibility layer (board identity, pin remaps, the phase-order fix) is <strong>implemented and building</strong>. Here is the source, the specs, and how to power it without letting the magic smoke out. <em>Not yet hardware-validated — first article gates everything.</em></p>
       <div class="actions" style="justify-content:flex-start">
         <a class="btn call" href="https://github.com/thedutta/FlexNode" target="_blank" rel="noopener">GitHub repo
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
@@ -78,6 +79,7 @@
       <div class="prose">
         <p>FlexNode fuses a <strong>field-oriented motor controller</strong> and a <strong>sensor-fusion front end</strong> onto a single compact PCB that hangs off a <strong>CAN-FD</strong> bus. Many nodes daisy-chain back to a host, so each limb or joint runs its own tens-of-kHz current loop locally while the host does high-level planning.</p>
         <p>It began as a fork of the <a href="https://github.com/mjbots/moteus" target="_blank" rel="noopener">mjbots <strong>moteus r4.11</strong></a> controller — the proven power stage, gate driver and STM32G4 core are kept intact — and adds the digital sensing and I/O a distributed robot node needs: a 6-axis IMU, optional multizone ranging, a servo/aux port with onboard current sensing, addressable status RGB, and everything reported over CAN-FD.</p>
+        <p>Crucially, the fleet runs <strong>one firmware image</strong>: node identity — CAN id, encoder sources, which peripherals are attached — is per-node <em>configuration</em>, not code. Thirteen joints means thirteen identical boards, two wires between them, and a config file each.</p>
         <p>The design target is <a href="../catbot/"><strong>CatBot</strong></a>, a lightweight, highly agile jumping quadruped: FlexNode drives its geared hip actuators and lighter leg motors, one node per actuator, all chained to the onboard Jetson.</p>
       </div>
     </section>
@@ -104,7 +106,8 @@
           <div><dt>Motor supply</dt><dd>Up to ~44 V bus (10S LiPo class)</dd></div>
           <div><dt>Logic rails</dt><dd>LGS5160C synchronous buck → 5 V / 3 A · ME6216A33 LDO → 3.3 V</dd></div>
           <div><dt>Rotor feedback</dt><dd>AS5047P on-axis magnetic encoder (SPI)</dd></div>
-          <div><dt>Comms</dt><dd>CAN-FD via TCAN334G — daisy-chain in/out, 120 Ω leaf-node termination</dd></div>
+          <div><dt>Comms</dt><dd>CAN-FD via TCAN334G — 1 M / 5 M, daisy-chain in/out, 120 Ω leaf-node termination</dd></div>
+          <div><dt>Protocol</dt><dd>moteus register protocol + FlexNode block <code style="font-family:ui-monospace,Menlo,monospace;font-size:0.85em">0x080–0x0FF</code> — capabilities autodiscovery, per-node-composed queries</dd></div>
           <div><dt>Inertial</dt><dd>LSM6DS3TR-C 6-axis IMU (I²C)</dd></div>
           <div><dt>Ranging (optional)</dt><dd>VL53L7CX 8×8 multizone ToF — footprint present, DNP</dd></div>
           <div><dt>Status</dt><dd>WS2812B addressable RGB LED</dd></div>
@@ -120,7 +123,7 @@
         <div class="prose">
           <p><strong>Bus voltage:</strong> up to ~44 V (10S LiPo). Bus ceramics are rated 50 V and the power FETs 60 V — sized for that rail, with no margin to spare above it.</p>
           <p><span style="color:#ffcc66;font-weight:600">⚠ Never hot-plug a FlexNode onto a live pack.</span> Cable inductance and the ceramic bus form an LC tank that can ring toward 2× and blow past the 60 V FETs. Always bring the bus up through the core board's <strong>pre-charge</strong> — or a current-limited supply on the bench.</p>
-          <p><strong>Firmware note:</strong> the motor phase A/C outputs are swapped in copper relative to stock moteus; the FlexNode firmware compensates. Do not flash unmodified moteus.</p>
+          <p><strong>Firmware note:</strong> the motor phase A/C outputs are swapped in copper relative to stock moteus. The FlexNode firmware compensates with a drive-side channel remap — verified pin-by-pin against both schematics and already implemented in <code>main</code>. <span style="color:#ffcc66;font-weight:600">Do not flash unmodified moteus</span> — it would close the current loop on the wrong winding.</p>
           <p><strong>Status:</strong> v1.0 is fabricated but <strong>not yet hardware-validated</strong>. Everything here is subject to change until the first article is verified.</p>
         </div>
       </div>
@@ -129,7 +132,7 @@
     <section class="doc-section reveal" id="firmware">
       <h2>Firmware &amp; flashing</h2>
       <div class="prose">
-        <p>The firmware is a fork of moteus, keeping the FOC inner loop, FDCAN protocol and bootloader while remapping the reused pins and adding the sensor/aux features. Key deltas: board ID hardcoded to <code>{family 0, hw_version 8}</code> (the strap pins are repurposed), pin remaps (<code>PC6</code> encoder CS, <code>PB11</code> 5 V sense, <code>PC13</code> servo/aux), and the phase-order fix.</p>
+        <p>The firmware is a fork of moteus, keeping the FOC inner loop, FDCAN protocol and bootloader byte-for-byte. The <strong>compatibility layer is implemented and builds green</strong>: board ID hardcoded to <code>{family 0, hw_version 8}</code> with the strap-pin autodetection deleted outright, the AS5047 chip-select moved to <code>PC6</code>, and the <strong>phase-order fix</strong> — a two-line drive-side pin remap, netlist-verified, that re-pairs drive and sense without touching a single line of control code. Application image ≈ 408 KiB, leaving ~36 KiB for the sensor features.</p>
         <p>Flash over the <strong>FLASH</strong> header (SWD — NRST · CLK · DIO · 3V3 · GND), or via the moteus bootloader over CAN.</p>
       </div>
       <div class="card" style="margin-top:1rem">
@@ -137,13 +140,22 @@
           <p><strong>1 · Build</strong> — in WSL (Ubuntu 22.04):</p>
           <ol>
             <li>Clone the repo, then build the target image:<br><code>cd moteus-r4-parent &amp;&amp; tools/bazel build --config=target //:target</code></li>
-            <li>Confirm your build carries the FlexNode deltas — <code>hw_version 8</code>, the pin remaps, and the <strong>phase-order fix</strong> — before it ever drives a motor.</li>
+            <li>The FlexNode deltas — <code>hw_version 8</code>, the CS remap, and the <strong>phase-order fix</strong> — are in <code>main</code>; building from it carries them automatically.</li>
           </ol>
           <p><strong>2 · First flash</strong> — virgin board, over SWD: connect an ST-Link / J-Link to the <strong>FLASH</strong> header (NRST · CLK · DIO · 3V3 · GND) and write the combined bootloader + application image to <code>0x08000000</code> with STM32CubeProgrammer or OpenOCD.</p>
           <p><strong>3 · Updates</strong> — over CAN, once the bootloader is on: with an fdcanusb or pi3hat on the bus,<br><code>python3 -m moteus.moteus_tool -t &lt;id&gt; --flash &lt;firmware.elf&gt;</code></p>
-          <p><strong>4 · Calibrate</strong> — <code>python3 -m moteus.moteus_tool -t &lt;id&gt; --calibrate</code>, but only after the phase-order fix is in the flashed firmware; otherwise calibration fights a drive/sense pairing that lands on the wrong winding.</p>
-          <p style="color:rgba(255,255,255,0.6)"><em>WIP — the port is not hardware-validated yet, and stock moteus binaries will not run correctly (repurposed strap pins, swapped phases). The living reference is <a href="https://github.com/thedutta/FlexNode/blob/main/docs/firmware.md" target="_blank" rel="noopener">docs/firmware.md</a>.</em></p>
+          <p><strong>4 · Calibrate</strong> — <code>python3 -m moteus.moteus_tool -t &lt;id&gt; --calibrate</code> — first spin on a current-limited supply, and confirm calibration converges before allowing full current.</p>
+          <p style="color:rgba(255,255,255,0.6)"><em>Not hardware-validated yet — and stock moteus binaries will not run correctly on this board (repurposed strap pins, swapped phases). The living reference is <a href="https://github.com/thedutta/FlexNode/blob/main/docs/firmware.md" target="_blank" rel="noopener">docs/firmware.md</a>.</em></p>
         </div>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>The distributed CAN layer</h2>
+      <div class="prose">
+        <p>FlexNode extends the moteus CAN-FD register protocol instead of inventing a new one. The register map is <strong>fixed and universal</strong> — a FlexNode block at <code>0x080–0x0FF</code> covers load cell, joint encoder, IMU, ToF, NeoPixel and servo data with identical semantics on every node — while each frame is <strong>composed per node</strong>: the host reads a capabilities bitmask at boot and queries each node only for the hardware it actually carries.</p>
+        <p>Traffic runs strictly poll-response on a two-lane schedule: loop-critical signals (foot contact, joint angles) ride the per-cycle command+query frame at gait rate, while the full sensor block of one node per cycle refreshes on a rotating ~25 Hz slow lane. Bring-up runs a single 13-node chain from an fdcanusb at ~300 Hz; the scaling path makes CatBot's core board an STM32G4 "spinal cord" driving two chains at 400 Hz–1 kHz.</p>
+        <p>The full spec — frame anatomy, register map, bus-budget math — is in <a href="https://github.com/thedutta/FlexNode/blob/main/docs/can-layer.md" target="_blank" rel="noopener">docs/can-layer.md</a>.</p>
       </div>
     </section>
 
@@ -171,7 +183,10 @@
       <div class="decisions">
         <div class="decision"><h3>CAN-FD as the spine</h3><p>Every node hangs off one differential pair; the fast data phase carries both commands and telemetry. Nodes daisy-chain, with termination only on the leaves — wiring a limb is two wires plus power.</p></div>
         <div class="decision"><h3>One node per actuator</h3><p>The current loop closes millimetres from the windings, not across the robot. The Jetson only plans; each joint owns its own hard-real-time control. Splitting the bus per side buys fault isolation for free.</p></div>
-        <div class="decision"><h3>Verified before fabricated</h3><p>The power stage, current limits and every BOM part number were independently checked against datasheets before committing copper — inductor sizing vs. the gate driver's current limit, cap voltage ratings, footprint/pinout matches, the lot.</p></div>
+        <div class="decision"><h3>Verified before fabricated</h3><p>The power stage, current limits and every BOM part number were independently checked against datasheets before committing copper — inductor sizing vs. the buck's current limit, cap voltage ratings, footprint/pinout matches, all 37 line items.</p></div>
+        <div class="decision"><h3>A two-line topology fix</h3><p>The board's A/C phase swap is corrected in the firmware's pin table, not its control code — the PWM channel mapping follows the pins generically, so the entire FOC core stays byte-for-byte stock and calibration semantics survive. Verified against both netlists first.</p></div>
+        <div class="decision"><h3>One image, thirteen configs</h3><p>Node identity lives in persistent config, not code. The whole fleet flashes the same binary over CAN; a config file makes a hip a hip and a knee a knee. No per-node builds, ever.</p></div>
+        <div class="decision"><h3>Flash spent where it counts</h3><p>The ToF sensor needs an ~84 KB init blob the MCU can't spare — so the host streams it over the CAN diagnostic tunnel at boot. Zero flash cost; foot-contact detection is thresholded on-node instead, so the loop-critical signal is a single byte.</p></div>
       </div>
     </section>
 
@@ -192,11 +207,12 @@
       <h2>Roadmap</h2>
       <div class="prose">
         <ul>
-          <li>✓ Schematic + layout complete — v1.0 fabricated</li>
-          <li>◦ Board bring-up: power rails, comms, encoder — <em>in progress</em></li>
-          <li>◦ Firmware port: <code>hw_version</code> hardcode, pin remaps, phase-order fix</li>
-          <li>◦ CAN time-sync + multi-node choreography</li>
-          <li>◦ CatBot integration — four hip actuators + leg motors</li>
+          <li>✓ Schematic + layout complete — v1.0 fabricated; every BOM line datasheet-verified</li>
+          <li>✓ Firmware compatibility layer: <code>hw_version</code> hardcode, CS remap, phase-order fix — implemented, builds green</li>
+          <li>✓ Distributed CAN layer designed — register block, cadence, bus budget (<a href="https://github.com/thedutta/FlexNode/blob/main/docs/can-layer.md" target="_blank" rel="noopener">spec</a>)</li>
+          <li>◦ Board bring-up: power rails, comms, encoder, current-limited first spin — <em>next</em></li>
+          <li>◦ Sensor firmware: IMU, load cell, ToF-over-tunnel, NeoPixel, register handlers</li>
+          <li>◦ CatBot integration — four hip actuators + leg motors, core-board spinal bridge</li>
         </ul>
       </div>
     </section>
