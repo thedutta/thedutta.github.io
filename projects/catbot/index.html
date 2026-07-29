@@ -120,7 +120,7 @@
         </span>
       </div>
       <div class="prose" style="margin-top:1rem">
-        <p>v1.0 boards are <strong>fabricated and X-ray inspected</strong>; assembly and the firmware port are in progress. The full hardware architecture, pin map, power tree and firmware deltas live on their own page.</p>
+        <p>v1.0 boards are <strong>fabricated and X-ray inspected</strong>; bench testing and the firmware port are in progress. The full hardware architecture, pin map, power tree and firmware deltas live on their own page.</p>
       </div>
       <div class="actions" style="justify-content:flex-start;margin-top:0.9rem">
         <a class="btn call" href="../flexnode/">FlexNode documentation
@@ -144,7 +144,7 @@
         <dl class="specs">
           <div><dt>Sagittal hips</dt><dd>4 × <strong>GIM8108-8</strong> geared quasi-direct-drive actuators — the high-torque joints carrying stance and push-off</dd></div>
           <div><dt>Knees</dt><dd>6 × <strong>5010 360 kV</strong> BLDC motors through a <strong>14:1 dual-stage S3M belt</strong> reduction — mass pulled up off the distal limb, backdrivability retained</dd></div>
-          <div><dt>Head</dt><dd>2 × gimbal motors — the pan/tilt pair that whips the optic and acoustic array onto a target</dd></div>
+          <div><dt>Head</dt><dd>2 × gimbal motors with a simpleFOC dual driver — the pan/tilt pair that whips the optic and acoustic array onto a target</dd></div>
           <div><dt>Everywhere else</dt><dd>7 × <strong>DS3235 / DS3230</strong> servos — spine, tail and auxiliary articulation</dd></div>
           <div><dt>Total</dt><dd><strong>19 actuated DoF</strong>, one FlexNode per BLDC actuator, servos hung off node aux ports</dd></div>
         </dl>
@@ -163,7 +163,7 @@
       <h2>A sensory stack that emits nothing</h2>
       <div class="prose">
         <p>Most cheap 3D perception cheats by projecting a structured-light or IR dot pattern and reading it back. That is fine for one robot in a room and useless the moment there are two — each unit's projector blinds the other's receiver, and both degrade. It is equally useless anywhere you'd rather not announce yourself with an infrared floodlight.</p>
-        <p>So CatBot's sensing is <strong>strictly passive</strong>. Nothing on the robot illuminates the scene.</p>
+        <p>So CatBot's sensing is <strong>strictly passive</strong>. Nothing on the robot illuminates the scene. Except if you have a thermal camera and see the actuators gleaming fresh from a sprint.</p>
       </div>
       <div class="card">
         <dl class="specs">
@@ -174,7 +174,7 @@
         </dl>
       </div>
       <div class="decisions" style="margin-top:1.1rem">
-        <div class="decision"><h3>Whiskers fire before the brain knows</h3><p>The ToF array triggers a hardware interrupt straight into the STM32 — a spinal reflex. The limb has already begun retracting by the time the obstacle appears in a Jetson frame. Latency here is bounded by interrupt priority, not by a perception pipeline.</p></div>
+        <div class="decision"><h3>Whiskers fire before the brain knows</h3><p>The distributed ToF array triggers a hardware interrupt straight into the STM32 — a spinal reflex. The limb has already begun retracting by the time the obstacle appears in a Jetson frame. Latency here is bounded by interrupt priority, not by a perception pipeline.</p></div>
         <div class="decision"><h3>The same microphone feeds two consumers</h3><p>The analogue path exists so the STM32 can watch for an acoustic anomaly with the GPU completely powered down. The digital 192 kHz I²S path exists so the Jetson can do time-difference-of-arrival across the array and actually localise the source. One sensor, two very different duty cycles.</p></div>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
@@ -189,7 +189,7 @@
       <h2>Power &amp; the zero-watt state</h2>
       <div class="prose">
         <p>Energy comes from an <strong>8S2P pack of Molicel INR21700-P45B</strong> cells — sixteen cells, ~29.6 V nominal, <strong>266 Wh</strong>. The P45B was chosen for discharge headroom rather than raw capacity: a legged robot's current profile is spiky, and pack sag during a push-off is what actually limits what the gait can do.</p>
-        <p>The more interesting half is what happens when the robot isn't moving. Because the brainstem is genuinely separate silicon on its own rail, CatBot can enter a state where <strong>the Jetson and every motor ESC are fully powered down</strong> — not idling, not in a low-power governor state, off. The STM32 remains awake drawing microamps, watching the analogue microphone line.</p>
+        <p>The more interesting half is what happens when the robot isn't moving. Because the brainstem is genuinely separate silicon on its own rail, CatBot can enter a state where <strong>the Jetson and every motor ESC are fully powered down</strong> — not idling, not in a low-power governor state, off. The core STM32G0 remains awake drawing microamps, watching the analogue microphone line.</p>
         <p>A specific acoustic signature fires a hardware interrupt. That interrupt does two things at once: it whips the head gimbal onto the bearing of the sound — an acoustic spinal reflex, the same twitch a real cat's ears make before the rest of it has decided anything — and it begins booting the GPU. By the time the Jetson is up, the camera is already pointed at whatever made the noise.</p>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
@@ -206,7 +206,7 @@
         <p>CatBot is designed to report to an external coordinating system rather than operate as an island, over a deliberately redundant dual link:</p>
         <ul>
           <li><strong>Primary —</strong> an encrypted <strong>900 MHz Wi-Fi HaLow</strong> link. Sub-gigahertz buys range and building penetration that 2.4/5 GHz doesn't, at bandwidth that is still comfortably enough for control and compressed telemetry, entirely off-grid.</li>
-          <li><strong>Failover —</strong> if the primary drops, the system falls over automatically to a <strong>Tailscale</strong> tunnel across an onboard <strong>5G modem</strong> — a flat, authenticated network the robot can rejoin from anywhere with cellular coverage, enabling beyond-visual-line-of-sight operation without punching holes in anything.</li>
+          <li><strong>Failover —</strong> if the primary drops, the system falls over automatically to a <strong>Tailscale</strong> tunnel across an onboard <strong>5G modem</strong> — a flat, authenticated network the robot can rejoin from anywhere with cellular coverage, enabling beyond-visual-line-of-sight operation without punching holes in anything. And an NRF24-L01 for a robust last-ditch connection directly to the G0, if the jetson has failed in deployment.</li>
         </ul>
         <p>The split matters because the two links fail for uncorrelated reasons. HaLow dies to terrain and distance; cellular dies to coverage and congestion. Losing both simultaneously is a much rarer event than losing either.</p>
       </div>
