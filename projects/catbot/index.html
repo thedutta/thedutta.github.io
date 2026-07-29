@@ -44,7 +44,7 @@
     <div class="doc-hero reveal">
       <span class="kicker">Biomimetic Quadruped · Distributed Edge Node</span>
       <h1>CatBot</h1>
-      <p class="doc-sub">A 19-degree-of-freedom quadruped sized and massed like a real wildcat, built around a decentralised electronic nervous system — one compute node per joint, a Jetson doing the thinking, an STM32 holding the reflexes, and a sensory stack that emits nothing.</p>
+      <p class="doc-sub">A 19-degree-of-freedom quadruped sized and massed like a real wildcat, built around a decentralised electronic nervous system — one compute node per joint, a Jetson doing the thinking, STM32s holding the reflexes, and a sensory stack that emits nothing.</p>
       <div class="doc-meta">
         <span class="badge ongoing">In build</span>
         <span class="chip">19 DoF</span>
@@ -112,7 +112,7 @@
       <div class="prose">
         <p>The node itself is a custom PCB derived from the open-source <a href="https://github.com/mjbots/moteus" target="_blank" rel="noopener">mjbots <strong>moteus r4.11</strong></a> controller. The proven power stage, DRV8353S gate driver and STM32G4 core are kept intact; what's added is everything a <em>distributed</em> node needs and a bare motor controller doesn't.</p>
         <p>Each node fuses a BLDC driver running FOC with an onboard 6-axis IMU, a multizone time-of-flight ranger, a programmable I²C port for load cells or secondary encoders, a servo/aux output with its own 5 V current sense, and an onboard 5 V / 3 A supply. A solder bridge selects CAN termination. The result is genuinely copy-pasteable: the same board, the same firmware image, a different node ID.</p>
-        <p>At roughly <strong>$29 a board</strong>, putting one on every joint costs less than the connectors and harness it replaces.</p>
+        <p>At roughly <strong>$44 or ₹4000 a board</strong>, putting one on every joint costs less than the connectors and harness it replaces.</p>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
         <span style="display:block;aspect-ratio:1600/842;background:#0a0a0d">
