@@ -3,12 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>CatBot — Autonomous Quadruped · Aditya Dutta</title>
-  <meta name="description" content="CatBot — a lightweight, agile autonomous quadruped reconnaissance platform with bio-mimetic locomotion and vision-based perception." />
+  <title>CatBot — Biomimetic Quadruped &amp; Distributed Edge Node · Aditya Dutta</title>
+  <meta name="description" content="CatBot — a 19-DoF, 4.8 kg biomimetic quadruped built around a decentralised CAN-FD nervous system: one compute node per joint, a Jetson Orin Nano brain, an STM32 brainstem, and a strictly passive sensory stack." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐈</text></svg>" type="image/svg+xml" />
   <link rel="stylesheet" href="../../assets/theme.css" />
-  <meta property="og:title" content="CatBot — Autonomous Quadruped Reconnaissance Platform" />
+  <meta property="og:title" content="CatBot — Biomimetic Quadruped &amp; Distributed Edge Node" />
+  <meta property="og:description" content="19 actuated DoF, 4.8 kg, a CAN-FD spine with one FlexNode per joint, split-brain compute and a zero-emission passive sensory stack." />
   <meta property="og:type" content="article" />
+  <style>
+    /* page-scoped: mirror the FlexNode doc's list/code styling and offset
+       in-page anchors below the fixed topbar */
+    .doc-section[id] { scroll-margin-top: 72px; }
+    .prose ul, .prose ol { margin: 0.4rem 0 0.2rem 1.2rem; }
+    .prose li { color: rgba(255,255,255,0.82); margin-bottom: 0.5rem; font-weight: 300; line-height: 1.65; }
+    .prose code { font-family: ui-monospace, "SF Mono", Menlo, monospace; background: rgba(255,255,255,0.08); padding: 0.1em 0.4em; border-radius: 6px; font-size: 0.86em; overflow-wrap: anywhere; }
+    .cap { color: var(--text-faint); font-size: 0.78rem; line-height: 1.5; margin-top: 0.55rem; padding: 0 0.2rem; }
+  </style>
 </head>
 <body>
   <picture class="bg">
@@ -32,65 +42,266 @@
     <a class="back reveal" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> All projects</a>
 
     <div class="doc-hero reveal">
-      <span class="kicker">Autonomous Quadruped</span>
+      <span class="kicker">Biomimetic Quadruped · Distributed Edge Node</span>
       <h1>CatBot</h1>
-      <p class="doc-sub">A lightweight, highly agile autonomous quadruped reconnaissance platform — stealthy locomotion, navigation through constrained and unstructured environments, and real-time situational awareness without continuous human supervision.</p>
+      <p class="doc-sub">A 19-degree-of-freedom quadruped sized and massed like a real wildcat, built around a decentralised electronic nervous system — one compute node per joint, a Jetson doing the thinking, an STM32 holding the reflexes, and a sensory stack that emits nothing.</p>
       <div class="doc-meta">
-        <span class="badge ongoing">Ongoing</span>
-        <span class="chip">Bio-mimetic</span>
-        <span class="chip">Jetson + MCU</span>
-        <span class="chip">~2.2 kg</span>
+        <span class="badge ongoing">In build</span>
+        <span class="chip">19 DoF</span>
+        <span class="chip">4.8 kg</span>
+        <span class="chip">CAN-FD spine</span>
+        <span class="chip">Jetson Orin Nano Super</span>
       </div>
     </div>
 
     <div class="card reveal" style="padding:0;overflow:hidden">
-      <span style="display:block;aspect-ratio:16/10;background:#0a0a0d">
-        <img src="../../assets/img/catbot-hero.jpg" alt="CatBot quadruped held in hand" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+      <span style="display:block;aspect-ratio:1484/858;background:#0a0a0d">
+        <img src="../../assets/img/catbot-concept.jpg" alt="Concept artwork of a robotic cat with exposed mechanical spine, segmented tail and armoured limbs" style="width:100%;height:100%;object-fit:cover" loading="eager" />
       </span>
     </div>
+    <p class="cap">Concept art by <strong>Marek Madej</strong>, used here as a visual reference for the form CatBot is working toward — not a render of the build. The engineering below is mine; this image is not.</p>
+
+    <div class="card reveal" style="padding:0;overflow:hidden;margin-top:1.1rem">
+      <span style="display:block;aspect-ratio:1600/818;background:#0a0a0d">
+        <img src="../../assets/img/catbot-render.jpg" alt="CatBot torso assembly rendered in dark composite — shoulder and hip housings, the 8S2P cell pack, cooling fans and the stereo camera head" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+      </span>
+    </div>
+    <p class="cap">The actual machine — current CAD assembly: shoulder and hip housings, the 8S2P cell pack, directed cooling and the stereo head.</p>
 
     <section class="doc-section reveal">
-      <h2>Objective</h2>
+      <h2>Where it started</h2>
       <div class="prose">
-        <p>Design and develop a lightweight, highly agile autonomous quadruped robotic platform capable of stealthy locomotion, navigation in constrained and unstructured environments, and real-time situational awareness — operating without continuous human supervision.</p>
+        <p>During my JEE year a young orange cat used to work the tree outside my window. One afternoon it went up after a bird's nest — thirty seconds of route planning, a committed jump, four independent limbs solving the landing on the way down, and no visible hesitation at any point. That was a 4 kg animal running closed-loop dynamics I couldn't have written.</p>
+        <p>CatBot is the attempt to build that. Not a general-purpose quadruped scaled down, but a machine held to the actual physical envelope of the animal it copies: the footprint and all-up mass of a <em>Felis lybica</em>-class wildcat, under 5 kg, with the agility budget that implies. Every design decision downstream — distributed control, passive sensing, split-brain power — falls out of refusing to relax that constraint.</p>
+      </div>
+      <div class="gallery" style="margin-top:1rem">
+        <figure><img src="../../assets/img/catbot-sketch.jpg" alt="Early ruled-paper concept sketch of CatBot showing the internal actuator layout under a cat silhouette" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-limb.jpg" alt="CAD render of a CatBot limb and torso section showing the sagittal hip actuator housings and knee drive" loading="lazy" /></figure>
       </div>
     </section>
 
     <section class="doc-section reveal">
-      <h2>System overview</h2>
+      <h2>The problem with one brain</h2>
       <div class="prose">
-        <p>CatBot is a <strong>bio-mimetic quadruped</strong> inspired by large feline biomechanics, emphasising superior locomotion, low acoustic output, dynamic balance and rapid directional control. The platform integrates vision-based perception, inertial sensing and closed-loop motor control to enable terrain-aware locomotion and autonomous navigation.</p>
-        <p>High-level perception and planning run on an onboard <strong>NVIDIA Jetson-class compute module</strong>, while real-time control and sensor acquisition are delegated to <strong>embedded microcontrollers</strong>. The result is a compact, self-contained unit with a target gross mass of approximately <strong>2.2 kg</strong>.</p>
+        <p>The obvious way to build a quadruped is a central controller wired to every motor and sensor. It works, and it stops working the moment you care about mass, latency or wiring. Twenty-odd actuators fanning back to a single board is a rat's nest that weighs more than the parts it connects, and every sensor reading pays a round trip before anything can act on it.</p>
+        <p>CatBot inverts that. Control is pushed <strong>out to the joints</strong> and the spine carries messages, not motor phases. What runs down the body is a CAN-FD differential pair and power — nothing else. A joint that needs a load cell or a rangefinder plugs it into the node already bolted to that joint, and it appears on the bus. Adding a limb is adding nodes, not rewiring the robot.</p>
       </div>
     </section>
 
-    <section class="doc-section reveal">
-      <h2>Technical specifications</h2>
+    <section class="doc-section reveal" id="architecture">
+      <h2>Three tiers of compute</h2>
+      <div class="prose">
+        <p>The stack is split so that each processor does only what its physics suits it for — massive parallel compute, deterministic reflex, or local current control.</p>
+      </div>
       <div class="card">
         <dl class="specs">
-          <div><dt>Processor</dt><dd>NVIDIA Jetson Nano Super (high-level perception) · STM32 / ESP32-class MCUs (real-time control &amp; I/O)</dd></div>
-          <div><dt>Sensors</dt><dd>StereoLabs ZED X Mini stereo vision module, inertial sensing (IMU)</dd></div>
-          <div><dt>Actuation</dt><dd>Closed-loop motor control with feedback for dynamic balance &amp; directional control</dd></div>
-          <div><dt>Architecture</dt><dd>Distributed compute — perception/planning on Jetson, real-time loops on MCUs</dd></div>
-          <div><dt>Target mass</dt><dd>≈ 2.2 kg, compact self-contained unit</dd></div>
+          <div><dt>Cognitive brain</dt><dd><strong>Jetson Orin Nano Super</strong> — kinematic path planning, dynamic spatial navigation, stereo depth and VSLAM, and local vision-language reasoning. Non-real-time by design; it is allowed to be slow, and it is allowed to crash.</dd></div>
+          <div><dt>Brainstem</dt><dd><strong>Custom STM32 carrier board</strong> — power sequencing and distribution, spinal reflexes, watchdogs, and low-power master-node duty. It stays alive when the Jetson does not.</dd></div>
+          <div><dt>Reflex nodes</dt><dd><strong>FlexNode ×N</strong> — one per actuator. Field-oriented current control at tens of kHz, closed millimetres from the windings, plus local I²C sensing. Reports and takes commands over CAN-FD.</dd></div>
         </dl>
+      </div>
+      <div class="decisions" style="margin-top:1.1rem">
+        <div class="decision"><h3>The Jetson is not allowed to be a motor controller</h3><p>Perception and planning run on a general-purpose Linux box with a scheduler and a GPU. Nothing with a hard deadline is permitted to live there. If it freezes mid-stride, the brainstem still has authority to put the robot into a safe pose.</p></div>
+        <div class="decision"><h3>The STM32 is not allowed to do SLAM</h3><p>Its job is to be boringly predictable under stress: fixed-rate loops, hardware interrupts, no dynamic allocation. Every microsecond it spends on perception is a microsecond it isn't available to catch a fault.</p></div>
+        <div class="decision"><h3>Failure isolation is a wiring decision</h3><p>Splitting the CAN chain left/right means one bus fault takes down one side of the robot, not the whole machine. Termination is fitted only on the two leaf nodes — interior nodes stay unterminated.</p></div>
       </div>
     </section>
 
-    <section class="doc-section reveal">
-      <h2>Engineering emphasis</h2>
-      <div class="decisions">
-        <div class="decision"><h3>Bio-mimetic locomotion</h3><p>Feline-inspired biomechanics drive a gait optimised for agility, dynamic balance and low acoustic output rather than raw payload.</p></div>
-        <div class="decision"><h3>Split compute architecture</h3><p>Heavy perception and planning sit on a Jetson; hard real-time control and sensor acquisition are isolated on dedicated MCUs for deterministic timing.</p></div>
-        <div class="decision"><h3>Terrain-aware autonomy</h3><p>Stereo vision and inertial sensing fuse into closed-loop control so the platform stays balanced and oriented across unstructured terrain.</p></div>
+    <section class="doc-section reveal" id="flexnode">
+      <h2>FlexNode — the electronic nervous system</h2>
+      <div class="prose">
+        <p>The node itself is a custom PCB derived from the open-source <a href="https://github.com/mjbots/moteus" target="_blank" rel="noopener">mjbots <strong>moteus r4.11</strong></a> controller. The proven power stage, DRV8353S gate driver and STM32G4 core are kept intact; what's added is everything a <em>distributed</em> node needs and a bare motor controller doesn't.</p>
+        <p>Each node fuses a BLDC driver running FOC with an onboard 6-axis IMU, a multizone time-of-flight ranger, a programmable I²C port for load cells or secondary encoders, a servo/aux output with its own 5 V current sense, and an onboard 5 V / 3 A supply. A solder bridge selects CAN termination. The result is genuinely copy-pasteable: the same board, the same firmware image, a different node ID.</p>
+        <p>At roughly <strong>$29 a board</strong>, putting one on every joint costs less than the connectors and harness it replaces.</p>
       </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1600/842;background:#0a0a0d">
+          <img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board render — STM32G4, DRV8353S gate driver, six Infineon power FETs and the SHA/SHB/SHC phase pads, silkscreened dutta's CATBOT flex node" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+      <div class="prose" style="margin-top:1rem">
+        <p>v1.0 boards are <strong>fabricated and X-ray inspected</strong>; assembly and the firmware port are in progress. The full hardware architecture, pin map, power tree and firmware deltas live on their own page.</p>
+      </div>
+      <div class="actions" style="justify-content:flex-start;margin-top:0.9rem">
+        <a class="btn call" href="../flexnode/">FlexNode documentation
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn" href="https://github.com/thedutta/FlexNode" target="_blank" rel="noopener">GitHub repo</a>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1400/1028;background:#0a0a0d">
+          <img src="../../assets/img/catbot-xray.jpg" alt="X-ray inspection image of a fabricated FlexNode board showing internal copper routing, via structure and QFN solder voiding" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+      <p class="cap">X-ray inspection of a fabricated v1.0 board — internal layers, via structure and QFN void fraction, checked before assembly.</p>
+    </section>
+
+    <section class="doc-section reveal" id="actuation">
+      <h2>Actuation &amp; drivetrain</h2>
+      <div class="prose">
+        <p>Nineteen actuated degrees of freedom — seventeen in the body, two for head rotation — deliberately mixed rather than uniform. Torque density where the gait needs it, cheap mass where it doesn't.</p>
+      </div>
+      <div class="card">
+        <dl class="specs">
+          <div><dt>Sagittal hips</dt><dd>4 × <strong>GIM8108-8</strong> geared quasi-direct-drive actuators — the high-torque joints carrying stance and push-off</dd></div>
+          <div><dt>Knees</dt><dd>6 × <strong>5010 360 kV</strong> BLDC motors through a <strong>14:1 dual-stage S3M belt</strong> reduction — mass pulled up off the distal limb, backdrivability retained</dd></div>
+          <div><dt>Head</dt><dd>2 × gimbal motors — the pan/tilt pair that whips the optic and acoustic array onto a target</dd></div>
+          <div><dt>Everywhere else</dt><dd>7 × <strong>DS3235 / DS3230</strong> servos — spine, tail and auxiliary articulation</dd></div>
+          <div><dt>Total</dt><dd><strong>19 actuated DoF</strong>, one FlexNode per BLDC actuator, servos hung off node aux ports</dd></div>
+        </dl>
+      </div>
+      <div class="prose" style="margin-top:1rem">
+        <p>Belt-driving the knees rather than mounting motors at the joint is the single biggest agility decision in the machine. Distal mass is what a leg has to accelerate and decelerate every stride; moving six motors up toward the body cuts limb inertia sharply and buys back swing-phase bandwidth that no amount of controller tuning would recover.</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1600/818;background:#0a0a0d">
+          <img src="../../assets/img/catbot-field.jpg" alt="CatBot torso and head assembly rendered outdoors on grass at dawn" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="sensing">
+      <h2>A sensory stack that emits nothing</h2>
+      <div class="prose">
+        <p>Most cheap 3D perception cheats by projecting a structured-light or IR dot pattern and reading it back. That is fine for one robot in a room and useless the moment there are two — each unit's projector blinds the other's receiver, and both degrade. It is equally useless anywhere you'd rather not announce yourself with an infrared floodlight.</p>
+        <p>So CatBot's sensing is <strong>strictly passive</strong>. Nothing on the robot illuminates the scene.</p>
+      </div>
+      <div class="card">
+        <dl class="specs">
+          <div><dt>Optic nerve</dt><dd><strong>Luxonis OAK-D Lite</strong> running purely passive stereo — depth from parallax and scene texture alone, IR projector unused, so multiple units can work the same space without contaminating each other</dd></div>
+          <div><dt>Virtual whiskers</dt><dd>Distributed <strong>VL53L5CX</strong> multizone time-of-flight array covering the near-field blindspots stereo can't resolve; each FlexNode also carries its own VL53L7CX 8×8 ranger</dd></div>
+          <div><dt>Ears</dt><dd><strong>Knowles MEMS</strong> microphones sampling into the ultrasonic band — raw analogue into the STM32's analogue watchdog, and a 192 kHz digital I²S stream to the Jetson</dd></div>
+          <div><dt>Proprioception</dt><dd>On-axis magnetic rotor encoders and a 6-axis IMU per node, plus per-phase current sensing for torque estimation and stall detection</dd></div>
+        </dl>
+      </div>
+      <div class="decisions" style="margin-top:1.1rem">
+        <div class="decision"><h3>Whiskers fire before the brain knows</h3><p>The ToF array triggers a hardware interrupt straight into the STM32 — a spinal reflex. The limb has already begun retracting by the time the obstacle appears in a Jetson frame. Latency here is bounded by interrupt priority, not by a perception pipeline.</p></div>
+        <div class="decision"><h3>The same microphone feeds two consumers</h3><p>The analogue path exists so the STM32 can watch for an acoustic anomaly with the GPU completely powered down. The digital 192 kHz I²S path exists so the Jetson can do time-difference-of-arrival across the array and actually localise the source. One sensor, two very different duty cycles.</p></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1600/1175;background:#0a0a0d">
+          <img src="../../assets/img/catbot-head.jpg" alt="Rendered CatBot head shell — a smooth dark canopy housing the passive stereo camera and microphone array" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+      <p class="cap">Head shell — the canopy carries the passive stereo pair and the MEMS microphone array on a two-axis gimbal.</p>
+    </section>
+
+    <section class="doc-section reveal" id="power">
+      <h2>Power &amp; the zero-watt state</h2>
+      <div class="prose">
+        <p>Energy comes from an <strong>8S2P pack of Molicel INR21700-P45B</strong> cells — sixteen cells, ~29.6 V nominal, <strong>266 Wh</strong>. The P45B was chosen for discharge headroom rather than raw capacity: a legged robot's current profile is spiky, and pack sag during a push-off is what actually limits what the gait can do.</p>
+        <p>The more interesting half is what happens when the robot isn't moving. Because the brainstem is genuinely separate silicon on its own rail, CatBot can enter a state where <strong>the Jetson and every motor ESC are fully powered down</strong> — not idling, not in a low-power governor state, off. The STM32 remains awake drawing microamps, watching the analogue microphone line.</p>
+        <p>A specific acoustic signature fires a hardware interrupt. That interrupt does two things at once: it whips the head gimbal onto the bearing of the sound — an acoustic spinal reflex, the same twitch a real cat's ears make before the rest of it has decided anything — and it begins booting the GPU. By the time the Jetson is up, the camera is already pointed at whatever made the noise.</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1400/934;background:#0a0a0d">
+          <img src="../../assets/img/catbot-jetson.jpg" alt="Rendered CNC-style enclosure for the Jetson Orin Nano with voronoi ventilation cutouts and a top-mounted blower" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+      <p class="cap">Jetson Orin Nano enclosure — directed airflow over the module, sized to sit inside the thorax without becoming the thermal bottleneck.</p>
+    </section>
+
+    <section class="doc-section reveal" id="telemetry">
+      <h2>Telemetry &amp; hive integration</h2>
+      <div class="prose">
+        <p>CatBot is designed to report to an external coordinating system rather than operate as an island, over a deliberately redundant dual link:</p>
+        <ul>
+          <li><strong>Primary —</strong> an encrypted <strong>900 MHz Wi-Fi HaLow</strong> link. Sub-gigahertz buys range and building penetration that 2.4/5 GHz doesn't, at bandwidth that is still comfortably enough for control and compressed telemetry, entirely off-grid.</li>
+          <li><strong>Failover —</strong> if the primary drops, the system falls over automatically to a <strong>Tailscale</strong> tunnel across an onboard <strong>5G modem</strong> — a flat, authenticated network the robot can rejoin from anywhere with cellular coverage, enabling beyond-visual-line-of-sight operation without punching holes in anything.</li>
+        </ul>
+        <p>The split matters because the two links fail for uncorrelated reasons. HaLow dies to terrain and distance; cellular dies to coverage and congestion. Losing both simultaneously is a much rarer event than losing either.</p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="structure">
+      <h2>Structure &amp; materials</h2>
+      <div class="prose">
+        <p>The production shell is <strong>forged carbon fibre</strong> with <strong>titanium alloy</strong> fasteners and hardware — chosen for stiffness-to-mass and for surviving impacts that a printed shell would not. Forged composite in particular tolerates the complex, non-developable geometry an animal-shaped exoskeleton demands, where a laid-up sheet would need far more parts and joints.</p>
+        <p>Everything currently in hand is <strong>3D-printed</strong>, split across a primary structural material for shoulders, hips and hatches and a secondary material for bearing inserts and locks, plus CNC limb mounts. Printing is the iteration path, not the end state: it's how joint geometry gets validated before anything expensive gets committed.</p>
+        <p>The platform is <strong>not waterproof</strong>. That's a deliberate deferral, not an oversight — sealing a 19-joint machine is a whole project of its own, and it isn't this one yet.</p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="software">
+      <h2>Software stack</h2>
+      <div class="prose">
+        <p>The software architecture is specified and partly prototyped; it is <strong>not yet running on the robot</strong>. The intended stack:</p>
+        <ul>
+          <li><strong>ROS 2 Jazzy</strong> on JetPack as the integration layer — lifecycle nodes, tf2 frame tree, rosbag2 capture for every bring-up session.</li>
+          <li><strong>Isaac ROS</strong> for GPU-accelerated perception — stereo depth and visual-inertial SLAM from the passive pair, no LiDAR.</li>
+          <li><strong>Nav2</strong> with depth folded into the costmap as the obstacle layer, planning against the map VSLAM maintains.</li>
+          <li><strong>micro-ROS</strong> over the STM32 link, bridging the reflex layer into the ROS graph without pretending it's soft real-time.</li>
+          <li><strong>Isaac Sim</strong> for a surface-data → motion policy trained in simulation with domain randomisation, exported through ONNX and TensorRT for on-device inference.</li>
+        </ul>
+        <p>The ordering is deliberate and comes out of a self-study syllabus I wrote for the project: architecture, then middleware, then URDF and frames, then firmware, then actuator characterisation, then power, then calibration — perception and learned policy last. Most integration failures on robots this size are frame errors, timing errors or power droop wearing a costume, and they're cheapest to find in that order.</p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="deployment">
+      <h2>Where it's meant to go</h2>
+      <div class="prose">
+        <p>The capability set — small footprint, quiet passive sensing, dense proprioception, genuinely long dormancy — points at environments where a wheeled platform can't go and a person shouldn't:</p>
+        <ul>
+          <li><strong>Urban search &amp; rescue</strong> — collapsed structures and tight voids, where foot contact sensing and a small body matter more than payload.</li>
+          <li><strong>Confined-space inspection</strong> — ducts, shafts, turbines and hulls that reward contortion over wheels.</li>
+          <li><strong>Hazardous-environment monitoring</strong> — telemetry collection where the atmosphere is the reason no one is standing there.</li>
+          <li><strong>Persistent sentry &amp; reconnaissance</strong> — the zero-watt acoustic-wake mode is what makes a multi-day unattended watch arithmetically possible at 266 Wh; perimeter and forward-observation work follows directly from it.</li>
+          <li><strong>Research platform</strong> — sim-to-real transfer, distributed control, multi-agent passive sensing.</li>
+        </ul>
+        <p>That last-but-one item makes CatBot dual-use, and it's worth being direct about it. The platform is designed for <strong>sensing and standoff, not for weaponisation</strong> — there is no payload interface for one and there won't be. It's an instrument that reports what it sees to trained operators who make the decisions. Anything beyond that is a legal, ethical and export-control question, and not one an undergraduate project gets to answer for itself.</p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="status">
+      <h2>Status</h2>
+      <div class="prose">
+        <p>CatBot is an ongoing build. Honest state of play:</p>
+        <ul>
+          <li>✓ Full mechanical design complete in Fusion 360 — torso, limbs, head, enclosures</li>
+          <li>✓ Structural parts printed and CNC limb mounts machined</li>
+          <li>✓ Torso assembled in the flesh — bearing races seated, blowers fitted, hip and shoulder bores validated against the CAD</li>
+          <li>✓ FlexNode v1.0 designed, reviewed against the moteus reference, fabricated and X-ray inspected</li>
+          <li>✓ An earlier printed quadruped prototype built and walked — the predecessor this design learned from</li>
+          <li>◦ FlexNode assembly and power-on bring-up — <em>in progress</em></li>
+          <li>◦ Firmware port: <code>hw_version</code> hardcode, pin remaps, phase-order fix</li>
+          <li>◦ Multi-node CAN-FD choreography and time sync</li>
+          <li>◦ Jetson + STM32 stack integration — <em>specified, not yet running</em></li>
+          <li>◦ Isaac Sim policy training and sim-to-real transfer</li>
+        </ul>
+        <p>Nothing on this page describes hardware that has been validated end-to-end. Where something is designed rather than working, it says so.</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1600/887;background:#0a0a0d">
+          <img src="../../assets/img/catbot-build.jpg" alt="The printed CatBot torso on a workbench — shoulder and hip housings with bearing races seated, blower fans fitted and power leads run out" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+      <p class="cap">On the bench: the torso printed and assembled — bearing races seated in the shoulder and hip bores, blowers fitted, power leads run out. Structure before electronics.</p>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Concept &amp; process</h2>
+      <div class="prose">
+        <p>The design started from feline anatomy rather than from an existing robot: skeletal proportion, superficial musculature and where a cat actually carries its mass, worked back into a kinematic chain that a motor can drive.</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;background:#0a0a0d">
+          <img src="../../assets/img/catbot-poster.jpg" alt="CatBot concept poster — cat skeleton and superficial muscle anatomy references, hand-drawn block diagram of the compute stack, concept sketches and the preliminary CAD side elevation" style="width:100%;height:auto;display:block" loading="lazy" />
+        </span>
+      </div>
+      <p class="cap">Concept and preliminary CAD sheet — anatomy references, the original ink block diagram of the compute stack, and the side elevation the current assembly grew from.</p>
     </section>
 
     <section class="doc-section reveal">
       <h2>Gallery</h2>
       <div class="gallery">
-        <figure><img src="../../assets/img/catbot-2.jpg" alt="CatBot quadruped" loading="lazy" /></figure>
-        <figure class="tall"><img src="../../assets/img/catbot-pcb.jpg" alt="CatBot control PCB" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-build.jpg" alt="The printed CatBot torso on a workbench" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-render.jpg" alt="CatBot torso assembly render" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-field.jpg" alt="CatBot assembly rendered outdoors" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-limb.jpg" alt="CatBot limb and actuator housings" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-head.jpg" alt="CatBot head shell render" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-xray.jpg" alt="FlexNode X-ray inspection" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-jetson.jpg" alt="Jetson Orin Nano enclosure render" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-sketch.jpg" alt="Early CatBot concept sketch" loading="lazy" /></figure>
       </div>
     </section>
 
@@ -100,7 +311,7 @@
         <a class="foot-icon" href="https://github.com/thedutta" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.2 11.19.6.11.82-.25.82-.56v-2.2c-3.34.71-4.04-1.58-4.04-1.58-.55-1.36-1.33-1.73-1.33-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.22 1.84 1.22 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.84 0-1.29.47-2.34 1.23-3.17-.12-.3-.53-1.52.12-3.16 0 0 1-.32 3.3 1.21a11.6 11.6 0 0 1 3-.4c1.02 0 2.05.13 3 .4 2.28-1.53 3.29-1.21 3.29-1.21.65 1.64.24 2.86.12 3.16.77.83 1.23 1.88 1.23 3.17 0 4.54-2.81 5.53-5.49 5.83.43.37.81 1.1.81 2.22v3.29c0 .31.21.68.82.56A12.01 12.01 0 0 0 24 12.29C24 5.78 18.63.5 12 .5z"/></svg></a>
         <a class="foot-icon" href="https://www.linkedin.com/in/aditya-dutta-058808213" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.27c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.79 1.75 1.75-.78 1.76-1.75 1.76zm13.5 12.27h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96v5.7h-3v-11h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59v6.47z"/></svg></a>
       </div>
-      <div class="foot-note">© Aditya Dutta · CatBot is an ongoing project</div>
+      <div class="foot-note">© Aditya Dutta · CatBot is an ongoing project · joint control by <a href="../flexnode/">FlexNode</a>, built on <a href="https://github.com/mjbots/moteus" target="_blank" rel="noopener">moteus</a> (Apache-2.0)</div>
     </footer>
   </div>
 

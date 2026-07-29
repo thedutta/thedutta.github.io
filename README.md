@@ -9,7 +9,8 @@ Aditya Dutta — personal portfolio, project documentation and blog. Static, no 
 /portfolio/             The PDF as a site: bio, skills, tools, flagship work + download button
 /portfolio/PortfolioDutta.pdf
 /projects/              Project index
-/projects/catbot/       CatBot — autonomous quadruped (doc)
+/projects/catbot/       CatBot — biomimetic quadruped & distributed edge node (doc)
+/projects/flexnode/     FlexNode — distributed CAN-FD motor + sensor node (doc)
 /projects/sylvara/      Sylvara — ultra-low-power plant-care startup (doc)
 /projects/rovolt/       RoVolt — WHEG agri robot (doc)
 /blog/                  Blog index
