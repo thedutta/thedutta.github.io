@@ -124,7 +124,7 @@
           <p><strong>Bus voltage:</strong> up to ~44 V (10S LiPo). Bus ceramics are rated 50 V and the power FETs 60 V — sized for that rail, with no margin to spare above it.</p>
           <p><span style="color:#ffcc66;font-weight:600">⚠ Never hot-plug a FlexNode onto a live pack.</span> Cable inductance and the ceramic bus form an LC tank that can ring toward 2× and blow past the 60 V FETs. Always bring the bus up through the core board's <strong>pre-charge</strong> — or a current-limited supply on the bench.</p>
           <p><strong>Firmware note:</strong> the motor phase A/C outputs are swapped in copper relative to stock moteus. The FlexNode firmware compensates with a drive-side channel remap — verified pin-by-pin against both schematics and already implemented in <code>main</code>. <span style="color:#ffcc66;font-weight:600">Do not flash unmodified moteus</span> — it would close the current loop on the wrong winding.</p>
-          <p><strong>Status:</strong> v1.0 is fabricated but <strong>not yet hardware-validated</strong>. Everything here is subject to change until the first article is verified.</p>
+          <p><strong>Status:</strong> v1.0 is fabricated; first article in hand. Bring-up testing in progress — everything here remains subject to change until formal validation is complete.</p>
         </div>
       </div>
     </section>
@@ -220,6 +220,7 @@
     <section class="doc-section reveal">
       <h2>Gallery</h2>
       <div class="gallery">
+        <figure class="tall"><picture><source type="image/webp" srcset="../../assets/img/flexnode-hand.webp"><img src="../../assets/img/flexnode-hand.jpg" alt="FlexNode v1.0 first article in hand" loading="lazy" /></picture></figure>
         <figure><img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board, top view" loading="lazy" /></figure>
         <figure class="tall"><img src="../../assets/img/flexnode-actuator.jpg" alt="FlexNode integrated on a geared actuator" loading="lazy" /></figure>
       </div>
