@@ -63,10 +63,23 @@
 
     <div class="card reveal" style="padding:0;overflow:hidden;margin-top:1.1rem">
       <span style="display:block;aspect-ratio:1600/818;background:#0a0a0d">
-        <img src="../../assets/img/catbot-render.jpg" alt="CatBot torso assembly rendered in dark composite — shoulder and hip housings, the 8S2P cell pack, cooling fans and the stereo camera head" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+        <picture>
+          <source type="image/webp" srcset="../../assets/img/catbot-v44-front.webp" />
+          <img src="../../assets/img/catbot-v44-front.jpg" alt="CatBot standing under a single overhead light — the complete assembly seen from the front three-quarter, dark composite shells, illuminated visor strip across the face, tail raised" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+        </picture>
       </span>
     </div>
-    <p class="cap">The actual machine — current CAD assembly: shoulder and hip housings, the 8S2P cell pack, directed cooling and the stereo head.</p>
+    <p class="cap">The actual machine, standing. The full assembly as of now — head, spine, tail and all four limbs — against the concept above. This is the design the build is chasing, and it is essentially closed.</p>
+
+    <div class="card reveal" style="padding:0;overflow:hidden;margin-top:1.1rem">
+      <span style="display:block;aspect-ratio:1600/818;background:#0a0a0d">
+        <picture>
+          <source type="image/webp" srcset="../../assets/img/catbot-v44-rear.webp" />
+          <img src="../../assets/img/catbot-v44-rear.jpg" alt="CatBot from the rear three-quarter above — the Jetson enclosure and blower on the top deck, the cylindrical cell pack running the length of the spine, exposed electronics at the tail root" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </picture>
+      </span>
+    </div>
+    <p class="cap">The same assembly from behind and above, with the dorsal hatches off: the Jetson enclosure and its blower on the top deck, the cell pack running the length of the spine, and the rear electronics bay at the tail root.</p>
 
     <section class="doc-section reveal">
       <h2>Where it started</h2>
@@ -256,13 +269,14 @@
       <div class="prose">
         <p>CatBot is an ongoing build. Honest state of play:</p>
         <ul>
-          <li>✓ Full mechanical design complete in Fusion 360 — torso, limbs, head, enclosures</li>
+          <li>✓ Full mechanical design closed in Fusion 360 — torso, limbs, head, tail and enclosures, resolved as one assembly (renders at the top of this page)</li>
           <li>✓ Structural parts printed and CNC limb mounts machined</li>
           <li>✓ Torso assembled in the flesh — bearing races seated, blowers fitted, hip and shoulder bores validated against the CAD</li>
           <li>✓ FlexNode v1.0 designed, reviewed against the moteus reference, fabricated and X-ray inspected</li>
+          <li>✓ Firmware compatibility layer written and building green — board-identity hardcode, pin remaps, drive-side phase-order fix, bus-sense rescale — <em>not yet run on hardware</em></li>
           <li>✓ An earlier printed quadruped prototype built and walked — the predecessor this design learned from</li>
+          <li>◦ URDF export off the closed assembly, for frames and Isaac Sim — <em>days away</em></li>
           <li>◦ FlexNode assembly and power-on bring-up — <em>in progress</em></li>
-          <li>◦ Firmware port: <code>hw_version</code> hardcode, pin remaps, phase-order fix</li>
           <li>◦ Multi-node CAN-FD choreography and time sync</li>
           <li>◦ Jetson + STM32 stack integration — <em>specified, not yet running</em></li>
           <li>◦ Isaac Sim policy training and sim-to-real transfer</li>
@@ -293,6 +307,8 @@
     <section class="doc-section reveal">
       <h2>Gallery</h2>
       <div class="gallery">
+        <figure><picture><source type="image/webp" srcset="../../assets/img/catbot-v44-front.webp" /><img src="../../assets/img/catbot-v44-front.jpg" alt="CatBot complete assembly, front three-quarter, visor lit" loading="lazy" /></picture></figure>
+        <figure><picture><source type="image/webp" srcset="../../assets/img/catbot-v44-rear.webp" /><img src="../../assets/img/catbot-v44-rear.jpg" alt="CatBot complete assembly from the rear, dorsal hatches off" loading="lazy" /></picture></figure>
         <figure><img src="../../assets/img/catbot-build.jpg" alt="The printed CatBot torso on a workbench" loading="lazy" /></figure>
         <figure><img src="../../assets/img/catbot-render.jpg" alt="CatBot torso assembly render" loading="lazy" /></figure>
         <figure><img src="../../assets/img/catbot-field.jpg" alt="CatBot assembly rendered outdoors" loading="lazy" /></figure>
