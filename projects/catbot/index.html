@@ -133,8 +133,17 @@
         </span>
       </div>
       <div class="prose" style="margin-top:1rem">
-        <p>v1.0 boards are <strong>fabricated and X-ray inspected</strong>; bench testing and the firmware port are in progress. The full hardware architecture, pin map, power tree and firmware deltas live on their own page.</p>
+        <p>The first v1.0 board <strong>booted on 6 September 2026</strong> — powered, flashed with the CatBot firmware port, running its status LED off the board's own firmware. Motor and encoder bring-up come next. The full hardware architecture, pin map, power tree and firmware deltas live on their own page.</p>
       </div>
+      <div class="card" style="padding:0;overflow:hidden;margin:1rem auto 0.6rem;max-width:420px">
+        <span style="display:block;aspect-ratio:1125/1486;background:#0a0a0d">
+          <picture>
+            <source type="image/webp" srcset="../../assets/img/flexnode-firstlight.webp" />
+            <img src="../../assets/img/flexnode-firstlight.jpg" alt="FlexNode v1.0 board held in hand in a dark room, its onboard status LED glowing bright green-cyan, wired to an ST-Link programmer — first light" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+          </picture>
+        </span>
+      </div>
+      <p class="cap">First light, 6 Sep 2026 — a CatBot joint controller powered and talking over SWD, its status LED driven by the board's own firmware. One of these rides on every actuator.</p>
       <div class="actions" style="justify-content:flex-start;margin-top:0.9rem">
         <a class="btn call" href="../flexnode/">FlexNode documentation
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -273,10 +282,10 @@
           <li>✓ Structural parts printed and CNC limb mounts machined</li>
           <li>✓ Torso assembled in the flesh — bearing races seated, blowers fitted, hip and shoulder bores validated against the CAD</li>
           <li>✓ FlexNode v1.0 designed, reviewed against the moteus reference, fabricated and X-ray inspected</li>
-          <li>✓ Firmware compatibility layer written and building green — board-identity hardcode, pin remaps, drive-side phase-order fix, bus-sense rescale — <em>not yet run on hardware</em></li>
+          <li>✓ Firmware compatibility layer written, building green and <strong>running on the first article</strong> — board-identity hardcode, pin remaps, drive-side phase-order fix, bus-sense rescale, plus a WS2812 status-LED driver</li>
           <li>✓ An earlier printed quadruped prototype built and walked — the predecessor this design learned from</li>
           <li>◦ URDF export off the closed assembly, for frames and Isaac Sim — <em>days away</em></li>
-          <li>◦ FlexNode assembly and power-on bring-up — <em>in progress</em></li>
+          <li>◑ FlexNode bring-up — first board powered and flashed (<a href="../flexnode/#first-boot">first boot</a>); CAN enumeration, encoder and current-limited motor spin <em>next</em></li>
           <li>◦ Multi-node CAN-FD choreography and time sync</li>
           <li>◦ Jetson + STM32 stack integration — <em>specified, not yet running</em></li>
           <li>◦ Isaac Sim policy training and sim-to-real transfer</li>
@@ -309,15 +318,9 @@
       <div class="gallery">
         <figure><picture><source type="image/webp" srcset="../../assets/img/catbot-v44-front.webp" /><img src="../../assets/img/catbot-v44-front.jpg" alt="CatBot complete assembly, front three-quarter, visor lit" loading="lazy" /></picture></figure>
         <figure><picture><source type="image/webp" srcset="../../assets/img/catbot-v44-rear.webp" /><img src="../../assets/img/catbot-v44-rear.jpg" alt="CatBot complete assembly from the rear, dorsal hatches off" loading="lazy" /></picture></figure>
-        <figure><img src="../../assets/img/catbot-build.jpg" alt="The printed CatBot torso on a workbench" loading="lazy" /></figure>
         <figure><img src="../../assets/img/catbot-render.jpg" alt="CatBot torso assembly render" loading="lazy" /></figure>
-        <figure><img src="../../assets/img/catbot-field.jpg" alt="CatBot assembly rendered outdoors" loading="lazy" /></figure>
-        <figure><img src="../../assets/img/catbot-limb.jpg" alt="CatBot limb and actuator housings" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/catbot-build.jpg" alt="The printed CatBot torso on a workbench" loading="lazy" /></figure>
         <figure><img src="../../assets/img/catbot-head.jpg" alt="CatBot head shell render" loading="lazy" /></figure>
-        <figure><img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board" loading="lazy" /></figure>
-        <figure><img src="../../assets/img/catbot-xray.jpg" alt="FlexNode X-ray inspection" loading="lazy" /></figure>
-        <figure><img src="../../assets/img/catbot-jetson.jpg" alt="Jetson Orin Nano enclosure render" loading="lazy" /></figure>
-        <figure><img src="../../assets/img/catbot-sketch.jpg" alt="Early CatBot concept sketch" loading="lazy" /></figure>
       </div>
     </section>
 
