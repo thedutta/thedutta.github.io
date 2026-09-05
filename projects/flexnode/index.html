@@ -46,6 +46,7 @@
       <p class="doc-sub">A distributed compute node for mobile robots — high-current field-oriented motor control and sensor fusion, all over CAN-FD. One node per actuator, daisy-chained back to an onboard Jetson, so every joint gets local hard-real-time control while the host just plans. The goal: any sensor-fused robot reduces to <em>buy FlexNodes + actuators + sensors, wire power and CAN</em> — no electronics development.</p>
       <div class="doc-meta">
         <span class="badge ongoing">v1.0 · Bring-up</span>
+        <span class="chip">First boot 6 Sep 2026</span>
         <span class="chip">CAN-FD</span>
         <span class="chip">Field-oriented control</span>
         <span class="chip">STM32G4</span>
@@ -57,10 +58,11 @@
     <!-- Board-in-hand utility band -->
     <div class="card reveal">
       <h2 style="margin:0 0 0.5rem;font-size:1.15rem">You scanned a FlexNode.</h2>
-      <p class="prose" style="margin:0 0 1rem">This is a <strong>v1.0</strong> board — hardware is fabricated, and the firmware compatibility layer (board identity, pin remaps, the phase-order fix) is <strong>implemented and building</strong>. Here is the source, the specs, and how to power it without letting the magic smoke out. <em>Not yet hardware-validated — first article gates everything.</em></p>
+      <p class="prose" style="margin:0 0 1rem">This is a <strong>v1.0</strong> board. The first article <strong>booted on 6 September 2026</strong> — rails up, MCU running the FlexNode firmware, status LED live. Here is the source, the specs, and how to power it without letting the magic smoke out. <em>The power stage has not been energized yet: no motor, no encoder, no calibration.</em></p>
       <div class="actions" style="justify-content:flex-start">
         <a class="btn call" href="https://github.com/thedutta/FlexNode" target="_blank" rel="noopener">GitHub repo
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+        <a class="btn" href="#first-boot">First boot</a>
         <a class="btn" href="#specs">Specs</a>
         <a class="btn" href="#safety">Safety</a>
         <a class="btn" href="#firmware">Flash it</a>
@@ -88,7 +90,7 @@
       <h2>First article, in hand</h2>
       <div class="prose">
         <p>This is the first <strong>v1.0</strong> board back from fabrication and assembly — the design the render above describes, with solder on it. The six power FETs run along the front edge, the DRV8353S gate driver and the STM32G4 sit centre, and the gold-plated pads across the bottom are the three phase outputs (<code>SHA</code>, <code>SHB</code>, <code>SHC</code>) interleaved with the <code>V+</code>/<code>V−</code> pairs the pack feeds in on.</p>
-        <p>It has not been powered. Boards were X-ray inspected before assembly and the firmware compatibility layer builds green, but until a current-limited supply says otherwise every number on this page is a <em>design</em> number. Bring-up gates all of it.</p>
+        <p>Boards were X-ray inspected before assembly, and on <a href="#first-boot">6 September 2026</a> this one was powered and flashed for the first time. The logic side is real now; the drive side is not — until a current-limited supply spins a motor, every current, torque and thermal number on this page is still a <em>design</em> number.</p>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin-top:1rem;max-width:520px;margin-left:auto;margin-right:auto">
         <span style="display:block;aspect-ratio:1257/1255;background:#0a0a0d">
@@ -98,7 +100,31 @@
           </picture>
         </span>
       </div>
-      <p class="cap">FlexNode v1.0, first article — assembled, inspected, and not yet switched on.</p>
+      <p class="cap">FlexNode v1.0, first article — assembled, inspected, and since 6 Sep 2026, running.</p>
+    </section>
+
+    <section class="doc-section reveal" id="first-boot">
+      <span class="kicker" style="display:block;margin-bottom:0.45rem">Milestone · 6 September 2026</span>
+      <h2>First boot</h2>
+      <div class="prose">
+        <p>A v1.0 board came up on a <strong>13 V bench adapter</strong> — no motor and no encoder fitted, the AS5047 not yet soldered. The 5 V buck and the 3.3 V logic rail both measured stable, which is the whole point of a first power-on: prove the power tree before anything downstream of it gets a vote.</p>
+        <p>Debug went in over the <strong>SWD</strong> header with an ST-Link V2 (xPack OpenOCD on Windows, the probe bound to WinUSB with Zadig). The first session was deliberately <strong>read-only</strong> — identify the die and touch nothing. It answered <code>STM32G47x</code>, IDCODE <code>0x20036469</code>, 512 KiB dual-bank, factory option bytes, flash blank: exactly the part the design assumes.</p>
+        <p>Then one option byte changed. <code>nSWBOOT0</code> was cleared so the chip boots from flash rather than the ROM bootloader — on FlexNode <code>PB8</code> doubles as <code>BOOT0</code> and is held high by the I²C pull-up, so left alone the board would wake up in the bootloader forever.</p>
+        <p>First light came from a <strong>948-byte bare-metal program</strong> — GPIO and SysTick, nothing else — fading the onboard WS2812B on <code>PF0</code> from warm white to blue. First try. A small thing that proves a lot at once: clock tree, code executing from flash, GPIO, and the LED net.</p>
+        <p>Then the real image — the moteus → FlexNode port — was flashed, and it runs: a steady soft-blue status LED, servo reporting <em>stopped</em> mode.</p>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <dl class="specs">
+          <div><dt>Validated</dt><dd>Power tree (5 V buck + 3.3 V logic) · MCU boots from flash · SWD / flash toolchain end-to-end · <code>PF0</code> → WS2812B · moteus main loop running</dd></div>
+          <div><dt>Not yet done</dt><dd>CAN enumeration · bus-voltage telemetry checked against a DMM — that is what validates the as-built 1.2 kΩ divider compensation in firmware · encoder, still unsoldered · anything that energizes the gate driver</dd></div>
+          <div><dt>Still gated</dt><dd>Calibration and motor drive, behind current-limited phase-order validation</dd></div>
+          <div><dt>Image size</dt><dd>429,208 B application — ~25 KiB of headroom left below the config page at <code>0x0807f000</code></dd></div>
+        </dl>
+      </div>
+      <div class="prose" style="margin-top:1rem">
+        <p><strong>New in that image: the status &amp; lighting driver</strong> (<code>fw/ws2812_led.{h,cc}</code>). Pixel 0 is the node's own status LED and blinks fault codes — tens digit in amber, units in red — while pixels 1..N on the same data line are master-control RGB lighting for whatever the robot needs lit. <code>PF0</code> has no usable SPI or timer output on the G4, so the stream is bit-banged from the main loop against the DWT cycle counter, with interrupts masked only during each bit's high pulse (under a microsecond) — the 30 kHz FOC interrupt never waits on an LED. Behaviour is configuration, not code: <code>led.count</code>, <code>led.brightness</code>, <code>led.master_r/g/b</code>, <code>led.fault_override</code>.</p>
+        <p style="color:rgba(255,255,255,0.6)"><em>Bench photos of the first boot are still to come — this section is text-only for now.</em></p>
+      </div>
     </section>
 
     <section class="doc-section reveal">
@@ -141,7 +167,7 @@
           <p><strong>Bus voltage:</strong> up to ~44 V (10S LiPo). Bus ceramics are rated 50 V and the power FETs 60 V — sized for that rail, with no margin to spare above it.</p>
           <p><span style="color:#ffcc66;font-weight:600">⚠ Never hot-plug a FlexNode onto a live pack.</span> Cable inductance and the ceramic bus form an LC tank that can ring toward 2× and blow past the 60 V FETs. Always bring the bus up through the core board's <strong>pre-charge</strong> — or a current-limited supply on the bench.</p>
           <p><strong>Firmware note:</strong> the motor phase A/C outputs are swapped in copper relative to stock moteus. The FlexNode firmware compensates with a drive-side channel remap — verified pin-by-pin against both schematics and already implemented in <code>main</code>. <span style="color:#ffcc66;font-weight:600">Do not flash unmodified moteus</span> — it would close the current loop on the wrong winding.</p>
-          <p><strong>Status:</strong> v1.0 is fabricated; first article in hand. Bring-up testing in progress — everything here remains subject to change until formal validation is complete.</p>
+          <p><strong>Status:</strong> v1.0 first article booted 6 Sep 2026 — logic rails and firmware validated, <strong>power stage never energized</strong>. Bring-up is in progress; everything here remains subject to change until formal validation is complete.</p>
         </div>
       </div>
     </section>
@@ -149,7 +175,7 @@
     <section class="doc-section reveal" id="firmware">
       <h2>Firmware &amp; flashing</h2>
       <div class="prose">
-        <p>The firmware is a fork of moteus, keeping the FOC inner loop, FDCAN protocol and bootloader byte-for-byte. The <strong>compatibility layer is implemented and builds green</strong>: board ID hardcoded to <code>{family 0, hw_version 8}</code> with the strap-pin autodetection deleted outright, the AS5047 chip-select moved to <code>PC6</code>, and the <strong>phase-order fix</strong> — a two-line drive-side pin remap, netlist-verified, that re-pairs drive and sense without touching a single line of control code. Application image ≈ 408 KiB, leaving ~36 KiB for the sensor features.</p>
+        <p>The firmware is a fork of moteus, keeping the FOC inner loop, FDCAN protocol and bootloader byte-for-byte. The <strong>compatibility layer is implemented and builds green</strong>: board ID hardcoded to <code>{family 0, hw_version 8}</code> with the strap-pin autodetection deleted outright, the AS5047 chip-select moved to <code>PC6</code>, and the <strong>phase-order fix</strong> — a two-line drive-side pin remap, netlist-verified, that re-pairs drive and sense without touching a single line of control code. Since first boot it also carries the WS2812B status/lighting driver on <code>PF0</code>. Application image ≈ 419 KiB, leaving ~25 KiB for the remaining sensor features.</p>
         <p>Flash over the <strong>FLASH</strong> header (SWD — NRST · CLK · DIO · 3V3 · GND), or via the moteus bootloader over CAN.</p>
       </div>
       <div class="card" style="margin-top:1rem">
@@ -162,7 +188,7 @@
           <p><strong>2 · First flash</strong> — virgin board, over SWD: connect an ST-Link / J-Link to the <strong>FLASH</strong> header (NRST · CLK · DIO · 3V3 · GND) and write the combined bootloader + application image to <code>0x08000000</code> with STM32CubeProgrammer or OpenOCD.</p>
           <p><strong>3 · Updates</strong> — over CAN, once the bootloader is on: with an fdcanusb or pi3hat on the bus,<br><code>python3 -m moteus.moteus_tool -t &lt;id&gt; --flash &lt;firmware.elf&gt;</code></p>
           <p><strong>4 · Calibrate</strong> — <code>python3 -m moteus.moteus_tool -t &lt;id&gt; --calibrate</code> — first spin on a current-limited supply, and confirm calibration converges before allowing full current.</p>
-          <p style="color:rgba(255,255,255,0.6)"><em>Not hardware-validated yet — and stock moteus binaries will not run correctly on this board (repurposed strap pins, swapped phases). The living reference is <a href="https://github.com/thedutta/FlexNode/blob/main/docs/firmware.md" target="_blank" rel="noopener">docs/firmware.md</a>.</em></p>
+          <p style="color:rgba(255,255,255,0.6)"><em>Boot, flash and the status LED are hardware-validated; the drive side is not — and stock moteus binaries will not run correctly on this board (repurposed strap pins, swapped phases). The living reference is <a href="https://github.com/thedutta/FlexNode/blob/main/docs/firmware.md" target="_blank" rel="noopener">docs/firmware.md</a>.</em></p>
         </div>
       </div>
     </section>
@@ -227,8 +253,10 @@
           <li>✓ Schematic + layout complete — v1.0 fabricated; every BOM line datasheet-verified</li>
           <li>✓ Firmware compatibility layer: <code>hw_version</code> hardcode, CS remap, phase-order fix — implemented, builds green</li>
           <li>✓ Distributed CAN layer designed — register block, cadence, bus budget (<a href="https://github.com/thedutta/FlexNode/blob/main/docs/can-layer.md" target="_blank" rel="noopener">spec</a>)</li>
-          <li>◦ Board bring-up: power rails, comms, encoder, current-limited first spin — <em>next</em></li>
-          <li>◦ Sensor firmware: IMU, load cell, ToF-over-tunnel, NeoPixel, register handlers</li>
+          <li>✓ <strong>First boot, 6 Sep 2026</strong> — power tree, boot-from-flash, SWD/flash toolchain, WS2812B status LED, moteus main loop running (<a href="#first-boot">details</a>)</li>
+          <li>✓ Status &amp; master-control lighting driver — fault-code blink on pixel 0, <code>led.*</code> config</li>
+          <li>◦ Rest of bring-up: CAN enumeration, bus-voltage vs DMM, encoder (unsoldered), current-limited first spin — <em>next</em></li>
+          <li>◦ Sensor firmware: IMU, load cell, ToF-over-tunnel, register handlers</li>
           <li>◦ CatBot integration — four hip actuators + leg motors, core-board spinal bridge</li>
         </ul>
       </div>
