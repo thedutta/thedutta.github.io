@@ -51,7 +51,7 @@
         <span class="chip">CAN-FD</span>
         <span class="chip">Field-oriented control</span>
         <span class="chip">STM32G4</span>
-        <span class="chip">moteus-based</span>
+        <span class="chip">moteus-compatible</span>
         <span class="chip">One firmware · N configs</span>
       </div>
     </div>
@@ -83,7 +83,7 @@
       <div class="prose">
         <p>FlexNode fuses a <strong>field-oriented motor controller</strong> and a <strong>sensor-fusion front end</strong> onto a single compact PCB that hangs off a <strong>CAN-FD</strong> bus. Many nodes daisy-chain back to a host, so each limb or joint runs its own tens-of-kHz current loop locally while the host does high-level planning.</p>
         <p>It began as a fork of the <a href="https://github.com/mjbots/moteus" target="_blank" rel="noopener">mjbots <strong>moteus r4.11</strong></a> controller — the proven power stage, gate driver and STM32G4 core are kept intact — and adds the digital sensing and I/O a distributed robot node needs: a 6-axis IMU, optional multizone ranging, a servo/aux port with onboard current sensing, addressable status RGB, and everything reported over CAN-FD.</p>
-        <p>Crucially, the fleet runs <strong>one firmware image</strong>: node identity — CAN id, encoder sources, which peripherals are attached — is per-node <em>configuration</em>, not code. Thirteen joints means thirteen identical boards, two wires between them, and a config file each.</p>
+        <p>Crucially, the fleet runs <strong>one firmware image</strong>: node identity — CAN id, encoder sources, which peripherals are attached — is per-node <em>configuration</em>, not code. One board per BLDC actuator means identical boards, two wires between them, and a config file each.</p>
         <p>The design target is <a href="../catbot/"><strong>CatBot</strong></a>, a lightweight, highly agile jumping quadruped: FlexNode drives its geared hip actuators and lighter leg motors, one node per actuator, all chained to the onboard Jetson.</p>
       </div>
     </section>
@@ -239,7 +239,7 @@
         <div class="decision"><h3>One node per actuator</h3><p>The current loop closes millimetres from the windings, not across the robot. The Jetson only plans; each joint owns its own hard-real-time control. Splitting the bus per side buys fault isolation for free.</p></div>
         <div class="decision"><h3>Verified before fabricated</h3><p>The power stage, current limits and every BOM part number were independently checked against datasheets before committing copper — inductor sizing vs. the buck's current limit, cap voltage ratings, footprint/pinout matches, all 37 line items.</p></div>
         <div class="decision"><h3>A two-line topology fix</h3><p>The board's A/C phase swap is corrected in the firmware's pin table, not its control code — the PWM channel mapping follows the pins generically, so the entire FOC core stays byte-for-byte stock and calibration semantics survive. Verified against both netlists first; hardware confirmation waits on the encoder.</p></div>
-        <div class="decision"><h3>One image, thirteen configs</h3><p>Node identity lives in persistent config, not code. The whole fleet flashes the same binary over CAN; a config file makes a hip a hip and a knee a knee. No per-node builds, ever.</p></div>
+        <div class="decision"><h3>One image, N configs</h3><p>Node identity lives in persistent config, not code. The whole fleet flashes the same binary over CAN; a config file makes a hip a hip and a knee a knee. No per-node builds, ever.</p></div>
         <div class="decision"><h3>Flash spent where it counts</h3><p>The ToF sensor needs an ~84 KB init blob the MCU can't spare — so the host streams it over the CAN diagnostic tunnel at boot. Zero flash cost; foot-contact detection is thresholded on-node instead, so the loop-critical signal is a single byte.</p></div>
       </div>
     </section>
@@ -247,7 +247,7 @@
     <section class="doc-section reveal">
       <h2>Build your own</h2>
       <div class="prose">
-        <p>FlexNode is open hardware, inheriting moteus's Apache-2.0 license. Schematics, BOM and gerbers are in the repo.</p>
+        <p>FlexNode is open hardware, inheriting moteus's Apache-2.0 license; attribution lives in the repo's NOTICE file. Schematics, BOM and gerbers are in the repo. FlexNode is <strong>moteus-compatible</strong>: it speaks the moteus register protocol and works with moteus_tool and fdcanusb. “moteus” and “mjbots” are trademarks of mjbots Robotic Systems and FlexNode is not affiliated with or endorsed by mjbots.</p>
       </div>
       <div class="actions" style="justify-content:flex-start">
         <a class="btn call" href="https://github.com/thedutta/FlexNode" target="_blank" rel="noopener">Repository

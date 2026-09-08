@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>CatBot — Biomimetic Quadruped &amp; Distributed Edge Node · Aditya Dutta</title>
-  <meta name="description" content="CatBot — a 19-DoF, 4.8 kg biomimetic quadruped built around a decentralised CAN-FD nervous system: one compute node per joint, a Jetson Orin Nano brain, an STM32 brainstem, and a strictly passive sensory stack." />
+  <meta name="description" content="CatBot — a 21-DoF, 4.9 kg biomimetic quadruped built around a decentralised CAN-FD nervous system: one compute node per joint, a Jetson Orin Nano brain, an STM32 brainstem, and a strictly passive sensory stack." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐈</text></svg>" type="image/svg+xml" />
   <link rel="stylesheet" href="../../assets/theme.css" />
   <meta property="og:title" content="CatBot — Biomimetic Quadruped &amp; Distributed Edge Node" />
-  <meta property="og:description" content="19 actuated DoF, 4.8 kg, a CAN-FD spine with one FlexNode per joint, split-brain compute and a zero-emission passive sensory stack." />
+  <meta property="og:description" content="21 actuated DoF, 4.9 kg, a CAN-FD spine with one FlexNode per joint, split-brain compute and a zero-emission passive sensory stack." />
   <meta property="og:type" content="article" />
   <style>
     /* page-scoped: mirror the FlexNode doc's list/code styling and offset
@@ -44,11 +44,11 @@
     <div class="doc-hero reveal">
       <span class="kicker">Biomimetic Quadruped · Distributed Edge Node</span>
       <h1>CatBot</h1>
-      <p class="doc-sub">A 19-degree-of-freedom quadruped sized and massed like a real wildcat, built around a decentralised electronic nervous system — one compute node per joint, a Jetson doing the thinking, STM32s holding the reflexes, and a sensory stack that emits nothing.</p>
+      <p class="doc-sub">A 21-degree-of-freedom quadruped sized and massed like a real wildcat, built around a decentralised electronic nervous system — one compute node per joint, a Jetson doing the thinking, STM32s holding the reflexes, and a sensory stack that emits nothing.</p>
       <div class="doc-meta">
         <span class="badge ongoing">In build</span>
-        <span class="chip">19 DoF</span>
-        <span class="chip">4.8 kg</span>
+        <span class="chip">21 DoF</span>
+        <span class="chip">4.9 kg</span>
         <span class="chip">CAN-FD spine</span>
         <span class="chip">Jetson Orin Nano Super</span>
       </div>
@@ -168,7 +168,7 @@
           <div><dt>Knees</dt><dd>6 × <strong>5010 360 kV</strong> BLDC motors through a <strong>14:1 dual-stage S3M belt</strong> reduction — mass pulled up off the distal limb, backdrivability retained</dd></div>
           <div><dt>Head</dt><dd>2 × gimbal motors with a simpleFOC dual driver — the pan/tilt pair that whips the optic and acoustic array onto a target</dd></div>
           <div><dt>Everywhere else</dt><dd>7 × <strong>DS3235 / DS3230</strong> servos — spine, tail and auxiliary articulation</dd></div>
-          <div><dt>Total</dt><dd><strong>19 actuated DoF</strong>, one FlexNode per BLDC actuator, servos hung off node aux ports</dd></div>
+          <div><dt>Total</dt><dd><strong>21 actuated DoF</strong>, one FlexNode per BLDC actuator, servos hung off node aux ports</dd></div>
         </dl>
       </div>
       <div class="prose" style="margin-top:1rem">
@@ -211,7 +211,7 @@
       <h2>Power &amp; the zero-watt state</h2>
       <div class="prose">
         <p>Energy comes from an <strong>8S2P pack of Molicel INR21700-P45B</strong> cells — sixteen cells, ~29.6 V nominal, <strong>266 Wh</strong>. The P45B was chosen for discharge headroom rather than raw capacity: a legged robot's current profile is spiky, and pack sag during a push-off is what actually limits what the gait can do.</p>
-        <p>The more interesting half is what happens when the robot isn't moving. Because the brainstem is genuinely separate silicon on its own rail, CatBot can enter a state where <strong>the Jetson and every motor ESC are fully powered down</strong> — not idling, not in a low-power governor state, off. The core STM32G0 remains awake drawing microamps, watching the analogue microphone line.</p>
+        <p>The more interesting half is what happens when the robot isn't moving. Because the brainstem is genuinely separate silicon on its own rail, CatBot can enter a state where <strong>the Jetson and every motor ESC are fully powered down</strong> — not idling, not in a low-power governor state, off. The core STM32G4 remains awake drawing microamps, watching the analogue microphone line.</p>
         <p>A specific acoustic signature fires a hardware interrupt. That interrupt does two things at once: it whips the head gimbal onto the bearing of the sound — an acoustic spinal reflex, the same twitch a real cat's ears make before the rest of it has decided anything — and it begins booting the GPU. By the time the Jetson is up, the camera is already pointed at whatever made the noise.</p>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
@@ -228,7 +228,7 @@
         <p>CatBot is designed to report to an external coordinating system rather than operate as an island, over a deliberately redundant dual link:</p>
         <ul>
           <li><strong>Primary —</strong> an encrypted <strong>900 MHz Wi-Fi HaLow</strong> link. Sub-gigahertz buys range and building penetration that 2.4/5 GHz doesn't, at bandwidth that is still comfortably enough for control and compressed telemetry, entirely off-grid.</li>
-          <li><strong>Failover —</strong> if the primary drops, the system falls over automatically to a <strong>Tailscale</strong> tunnel across an onboard <strong>5G modem</strong> — a flat, authenticated network the robot can rejoin from anywhere with cellular coverage, enabling beyond-visual-line-of-sight operation without punching holes in anything. And an NRF24-L01 for a robust last-ditch connection directly to the G0, if the jetson has failed in deployment.</li>
+          <li><strong>Failover —</strong> if the primary drops, the system falls over automatically to a <strong>Tailscale</strong> tunnel across an onboard <strong>5G modem</strong> — a flat, authenticated network the robot can rejoin from anywhere with cellular coverage, enabling beyond-visual-line-of-sight operation without punching holes in anything. And an NRF24-L01 for a robust last-ditch connection directly to the G4, if the jetson has failed in deployment.</li>
         </ul>
         <p>The split matters because the two links fail for uncorrelated reasons. HaLow dies to terrain and distance; cellular dies to coverage and congestion. Losing both simultaneously is a much rarer event than losing either.</p>
       </div>
@@ -239,7 +239,7 @@
       <div class="prose">
         <p>The production shell is <strong>forged carbon fibre</strong> with <strong>titanium alloy</strong> fasteners and hardware — chosen for stiffness-to-mass and for surviving impacts that a printed shell would not. Forged composite in particular tolerates the complex, non-developable geometry an animal-shaped exoskeleton demands, where a laid-up sheet would need far more parts and joints.</p>
         <p>Everything currently in hand is <strong>3D-printed</strong>, split across a primary structural material for shoulders, hips and hatches and a secondary material for bearing inserts and locks, plus CNC limb mounts. Printing is the iteration path, not the end state: it's how joint geometry gets validated before anything expensive gets committed.</p>
-        <p>The platform is <strong>not waterproof</strong>. That's a deliberate deferral, not an oversight — sealing a 19-joint machine is a whole project of its own, and it isn't this one yet.</p>
+        <p>The platform is <strong>not waterproof</strong>. That's a deliberate deferral, not an oversight — sealing a 21-joint machine is a whole project of its own, and it isn't this one yet.</p>
       </div>
     </section>
 
