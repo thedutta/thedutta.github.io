@@ -83,7 +83,7 @@
       <div class="prose">
         <p>FlexNode fuses a <strong>field-oriented motor controller</strong> and a <strong>sensor-fusion front end</strong> onto a single compact PCB that hangs off a <strong>CAN-FD</strong> bus. Many nodes daisy-chain back to a host, so each limb or joint runs its own tens-of-kHz current loop locally while the host does high-level planning.</p>
         <p>It began as a fork of the <a href="https://github.com/mjbots/moteus" target="_blank" rel="noopener">mjbots <strong>moteus r4.11</strong></a> controller — the proven power stage, gate driver and STM32G4 core are kept intact — and adds the digital sensing and I/O a distributed robot node needs: a 6-axis IMU, optional multizone ranging, a servo/aux port with onboard current sensing, addressable status RGB, and everything reported over CAN-FD.</p>
-        <p>Crucially, the fleet runs <strong>one firmware image</strong>: node identity — CAN id, encoder sources, which peripherals are attached — is per-node <em>configuration</em>, not code. One board per BLDC actuator means identical boards, two wires between them, and a config file each.</p>
+        <p>Crucially, the fleet runs <strong>one firmware image</strong>: node identity — CAN id, encoder sources, which peripherals are attached — is per-node <em>configuration</em>, not code. Ten BLDC actuators means ten identical boards (twelve ordered, for attrition), two wires between them, and a config file each.</p>
         <p>The design target is <a href="../catbot/"><strong>CatBot</strong></a>, a lightweight, highly agile jumping quadruped: FlexNode drives its geared hip actuators and lighter leg motors, one node per actuator, all chained to the onboard Jetson.</p>
       </div>
     </section>
