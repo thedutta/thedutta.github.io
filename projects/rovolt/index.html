@@ -44,14 +44,11 @@
     </div>
 
     <div class="card reveal" style="padding:0;overflow:hidden">
-      <span style="display:block;aspect-ratio:16/9;background:#0a0a0d">
-        <picture>
-          <source type="image/webp" srcset="../../assets/img/rovolt-cover.webp" />
-          <img src="../../assets/img/rovolt-cover.jpg" alt="RoVolt render — a six-legged WHEG robot on a laser-cut aluminium spaceframe, the A logo on its back" style="width:100%;height:100%;object-fit:cover" loading="eager" />
-        </picture>
-      </span>
+      <video style="display:block;width:100%;aspect-ratio:16/9;background:#0a0a0d;object-fit:cover" controls playsinline muted loop autoplay preload="auto" poster="../../assets/img/rovolt-walking-poster.jpg">
+        <source src="../../assets/video/rovolt-walking.mp4" type="video/mp4" />
+      </video>
     </div>
-    <p class="cap">The design as modelled — six WHEGs on push-rod suspension, the battery slung beneath a spaceframe deck.</p>
+    <p class="cap">It stood up. Six WHEGs, encoder-fed DC motors, a Raspberry Pi, and a remote I had designed the week before — Class 11, 2023.</p>
 
     <section class="doc-section reveal">
       <h2>Why it exists</h2>
@@ -66,6 +63,15 @@
         <p>The locomotion is a WHEG — a wheel-leg hybrid, a rimless wheel whose spokes are legs. It rolls on flat ground and climbs on rough ground without a single controlled joint, which at seventeen with one motor driver per side was exactly the right amount of ambition. The first legs were <strong>v1: solid, shaped black PLA</strong>, rigid to the frame. They walked — and every rock they climbed went straight up into the chassis. So v2 put each WHEG on a <strong>3D-printed push-rod suspension</strong>, and the difference off-road was not incremental: the body stayed level while the legs hunted for the ground, and the machine stopped shaking itself apart.</p>
         <p>The suspension needed springs, and I had none. What I did have were the false-ceiling light fittings I had zip-tied to the top of the terrace so I could work after dark; their spring clips were the right rate, so I cut them out and the lights hung on by their cables. The pivots needed steel dowels cut to length, and I had no tools that could cut metal — but the refill from a ballpoint pen is a precise steel tube of exactly the diameter the printed bore needed, so the legs pivot on pen refills. None of this is in the CAD. All of it is why the robot exists: <strong>jugaad</strong> is not the absence of engineering, it is engineering when the parts bin is empty.</p>
       </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:16/9;background:#0a0a0d">
+          <picture>
+            <source type="image/webp" srcset="../../assets/img/rovolt-cover.webp" />
+            <img src="../../assets/img/rovolt-cover.jpg" alt="RoVolt render — a six-legged WHEG robot on a laser-cut aluminium spaceframe, the A logo on its back" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+          </picture>
+        </span>
+      </div>
+      <p class="cap">The v2 design as modelled — six WHEGs on push-rod suspension, the battery slung beneath a spaceframe deck.</p>
       <div class="gallery" style="margin-top:1rem">
         <figure><picture><source type="image/webp" srcset="../../assets/img/rovolt-remote.webp" /><img src="../../assets/img/rovolt-remote.jpg" alt="The NRF24 remote standing beside RoVolt on its v1 legs — solid black PLA, no suspension yet" loading="lazy" /></picture></figure>
         <figure class="tall"><picture><source type="image/webp" srcset="../../assets/img/rovolt-leg.webp" /><img src="../../assets/img/rovolt-leg.jpg" alt="The 3D-printed push-rod leg held in hand, its CAD model on the laptop behind it" loading="lazy" /></picture></figure>
@@ -101,13 +107,7 @@
     </section>
 
     <section class="doc-section reveal">
-      <h2>It walked</h2>
-      <div class="card" style="padding:0;overflow:hidden">
-        <video style="display:block;width:100%;aspect-ratio:16/9;background:#0a0a0d;object-fit:cover" controls playsinline muted loop autoplay preload="metadata" poster="../../assets/img/rovolt-walking-poster.jpg">
-          <source src="../../assets/video/rovolt-walking.mp4" type="video/mp4" />
-        </video>
-      </div>
-      <p class="cap">First walk — six WHEGs, encoder-fed DC motors, a Raspberry Pi and a remote I had designed the week before.</p>
+      <h2>Under the hatch</h2>
       <div class="prose">
         <p>Driven by DC motors with quadrature encoders through TB6612FNG drivers, under a Raspberry Pi 3 on a proto-board, over a radio link to an NRF24 remote of my own design. The encoders mattered more than I understood at the time: a machine that knows how far each wheel has turned is a machine you can hand a task to.</p>
       </div>
