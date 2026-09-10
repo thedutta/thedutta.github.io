@@ -81,6 +81,32 @@
     </div>
     <p class="cap">The same assembly from behind and above, with the dorsal hatches off: the Jetson enclosure and its blower on the top deck, the cell pack running the length of the spine, and the rear electronics bay at the tail root.</p>
 
+    <span class="kicker reveal" style="display:block;margin:1.1rem 0 0.45rem">Vitals</span>
+    <div class="card reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.7rem 1rem">
+      <div><span class="kicker" style="display:block;font-size:0.68rem">Mass</span><strong style="font-size:1.1rem">4.9 kg</strong></div>
+      <div><span class="kicker" style="display:block;font-size:0.68rem">Freedom</span><strong style="font-size:1.1rem">19 + 2 DoF</strong></div>
+      <div><span class="kicker" style="display:block;font-size:0.68rem">Peak power</span><strong style="font-size:1.1rem">2.5 kW</strong></div>
+      <div><span class="kicker" style="display:block;font-size:0.68rem">Battery</span><strong style="font-size:1.1rem">266 Wh</strong></div>
+      <div><span class="kicker" style="display:block;font-size:0.68rem">Max jump</span><strong style="font-size:1.1rem">1.4 m</strong></div>
+      <div><span class="kicker" style="display:block;font-size:0.68rem">Spine</span><strong style="font-size:1.1rem">CAN-FD 5 Mbit</strong></div>
+    </div>
+    <p class="cap">Nineteen actuated degrees of freedom, plus two optional in the tail.</p>
+
+    <section class="doc-section reveal" id="glance">
+      <h2>At a glance</h2>
+      <div class="card">
+        <dl class="specs">
+          <div><dt>Objective</dt><dd>A quadruped held to the physical envelope of the animal it copies — the footprint and all-up mass of a wildcat, under 5 kg — with enough onboard autonomy to work unsupervised where a wheeled platform cannot go</dd></div>
+          <div><dt>Compute</dt><dd>Jetson Orin Nano Super for perception and planning; Corenode STM32 brainstem for reflexes, power and watchdogs; one STM32G4 FlexNode per actuator</dd></div>
+          <div><dt>Actuation</dt><dd>4 × GIM8108-8 quasi-direct-drive hips, 6 × 5010 360 kV knees on 14:1 S3M belts, 2 × gimbal head motors, 7 × DS3235/DS3230 servos; two optional tail joints</dd></div>
+          <div><dt>Sensing</dt><dd>OAK-D Lite passive stereo, distributed VL53L5CX time-of-flight, Knowles MEMS mics into the ultrasonic band, per-node IMU and magnetic encoders</dd></div>
+          <div><dt>Power</dt><dd>8S2P Molicel INR21700-P45B, ~29.6 V nominal, 266 Wh</dd></div>
+          <div><dt>Structure</dt><dd>Forged carbon fibre and titanium as production intent; 3D-printed structure and CNC limb mounts in hand</dd></div>
+          <div><dt>Status</dt><dd>Design closed, torso assembled; the first FlexNode has driven a motor open-loop (September 2026). Closed-loop control, CAN and multi-node integration are not yet validated</dd></div>
+        </dl>
+      </div>
+    </section>
+
     <section class="doc-section reveal">
       <h2>Where it started</h2>
       <div class="prose">
@@ -136,14 +162,14 @@
         <p>The first v1.0 board <strong>booted on 6 September 2026</strong> and <strong>drove a motor on 8 September</strong> — a GIM 8108-8 turning open-loop from a current-limited supply, with phase-current sensing, bus sensing and FET thermals validated on the way. The encoder isn't fitted yet, so closed-loop control and CAN bring-up are the next gates. The full hardware architecture, pin map, power tree and firmware deltas live on their own page.</p>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin:1rem auto 0.6rem;max-width:420px">
-        <span style="display:block;aspect-ratio:1125/1486;background:#0a0a0d">
+        <span style="display:block;aspect-ratio:1035/1280;background:#0a0a0d">
           <picture>
-            <source type="image/webp" srcset="../../assets/img/flexnode-firstlight.webp" />
-            <img src="../../assets/img/flexnode-firstlight.jpg" alt="FlexNode v1.0 board held in hand in a dark room, its onboard status LED glowing bright green-cyan, wired to an ST-Link programmer — first light" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+            <source type="image/webp" srcset="../../assets/img/flexnode-bench.webp" />
+            <img src="../../assets/img/flexnode-bench.jpg" alt="FlexNode v1.0 mounted on a motor on the bench, status LED lit, power and debug leads attached" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
           </picture>
         </span>
       </div>
-      <p class="cap">First light, 6 Sep 2026 — a CatBot joint controller powered and talking over SWD, its status LED driven by the board's own firmware. One of these rides on every actuator.</p>
+      <p class="cap">A CatBot joint controller on its motor — electronics and thermals fully validated, September 2026. One of these rides on every actuator.</p>
       <div class="actions" style="justify-content:flex-start;margin-top:0.9rem">
         <a class="btn call" href="../flexnode/">FlexNode documentation
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -157,10 +183,21 @@
       <p class="cap">X-ray inspection of a fabricated v1.0 board — internal layers, via structure and QFN void fraction, checked before assembly.</p>
     </section>
 
+    <section class="doc-section reveal" id="corenode">
+      <h2>Corenode — the brainstem hat</h2>
+      <div class="prose">
+        <p>The custom board named in the compute stack above has a name and a specification of its own. <strong>Corenode</strong> is the hat that sits on the Jetson's carrier and carries the pack path across it: an 8S BMS that protects the cells with or without firmware, two synchronous rails behind eFuses, a supervisor that keeps authority when the Jetson is gone, and one CAN bus switched in the trunk so a destroyed limb takes its own branch down and nothing else. It is <strong>120 × 60 mm</strong>, it draws <strong>≈3.3 mW asleep</strong>, and it is in schematic capture at rev 11.1 after six revisions of adversarial review — including a net-level failure analysis of 339 net-by-mode rows.</p>
+      </div>
+      <div class="actions" style="justify-content:flex-start;margin-top:0.9rem">
+        <a class="btn call" href="corenode/">Corenode documentation
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </section>
+
     <section class="doc-section reveal" id="actuation">
       <h2>Actuation &amp; drivetrain</h2>
       <div class="prose">
-        <p>Nineteen actuated degrees of freedom — seventeen in the body, two for head rotation — deliberately mixed rather than uniform. Torque density where the gait needs it, cheap mass where it doesn't.</p>
+        <p>Nineteen actuated degrees of freedom — seventeen in the body, two for head rotation — plus two optional tail joints for twenty-one; deliberately mixed rather than uniform. Torque density where the gait needs it, cheap mass where it doesn't.</p>
       </div>
       <div class="card">
         <dl class="specs">
@@ -173,11 +210,6 @@
       </div>
       <div class="prose" style="margin-top:1rem">
         <p>Belt-driving the knees rather than mounting motors at the joint is the single biggest agility decision in the machine. Distal mass is what a leg has to accelerate and decelerate every stride; moving six motors up toward the body cuts limb inertia sharply and buys back swing-phase bandwidth that no amount of controller tuning would recover.</p>
-      </div>
-      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
-        <span style="display:block;aspect-ratio:1600/818;background:#0a0a0d">
-          <img src="../../assets/img/catbot-field.jpg" alt="CatBot torso and head assembly rendered outdoors on grass at dawn" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
-        </span>
       </div>
     </section>
 
@@ -214,12 +246,6 @@
         <p>The more interesting half is what happens when the robot isn't moving. Because the brainstem is genuinely separate silicon on its own rail, CatBot can enter a state where <strong>the Jetson and every motor ESC are fully powered down</strong> — not idling, not in a low-power governor state, off. The core STM32G4 remains awake drawing microamps, watching the analogue microphone line.</p>
         <p>A specific acoustic signature fires a hardware interrupt. That interrupt does two things at once: it whips the head gimbal onto the bearing of the sound — an acoustic spinal reflex, the same twitch a real cat's ears make before the rest of it has decided anything — and it begins booting the GPU. By the time the Jetson is up, the camera is already pointed at whatever made the noise.</p>
       </div>
-      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
-        <span style="display:block;aspect-ratio:1400/934;background:#0a0a0d">
-          <img src="../../assets/img/catbot-jetson.jpg" alt="Rendered CNC-style enclosure for the Jetson Orin Nano with voronoi ventilation cutouts and a top-mounted blower" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
-        </span>
-      </div>
-      <p class="cap">Jetson Orin Nano enclosure — directed airflow over the module, sized to sit inside the thorax without becoming the thermal bottleneck.</p>
     </section>
 
     <section class="doc-section reveal" id="telemetry">
@@ -318,7 +344,6 @@
       <div class="gallery">
         <figure><picture><source type="image/webp" srcset="../../assets/img/catbot-v44-front.webp" /><img src="../../assets/img/catbot-v44-front.jpg" alt="CatBot complete assembly, front three-quarter, visor lit" loading="lazy" /></picture></figure>
         <figure><picture><source type="image/webp" srcset="../../assets/img/catbot-v44-rear.webp" /><img src="../../assets/img/catbot-v44-rear.jpg" alt="CatBot complete assembly from the rear, dorsal hatches off" loading="lazy" /></picture></figure>
-        <figure><img src="../../assets/img/catbot-render.jpg" alt="CatBot torso assembly render" loading="lazy" /></figure>
         <figure><img src="../../assets/img/catbot-build.jpg" alt="The printed CatBot torso on a workbench" loading="lazy" /></figure>
         <figure><img src="../../assets/img/catbot-head.jpg" alt="CatBot head shell render" loading="lazy" /></figure>
       </div>

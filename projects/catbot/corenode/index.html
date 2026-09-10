@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Corenode — CatBot's Brainstem Hat: Power · Control · CANbus · Aditya Dutta</title>
+  <meta name="description" content="Corenode — the brainstem hat under CatBot's Jetson: an autonomous 8S BMS and power tree, an STM32G431 supervisor that outlives the brain, and one CAN bus switched in the trunk so any branch can be lost. Rev 11.1, schematic capture in progress." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>" type="image/svg+xml" />
+  <link rel="stylesheet" href="../../../assets/theme.css" />
+  <meta property="og:title" content="Corenode — CatBot's Brainstem Hat: Power · Control · CANbus" />
+  <meta property="og:description" content="An autonomous 8S BMS, two synchronous rails, a supervisor that survives the Jetson, and one CAN bus switched in the trunk. 120 × 60 mm, rev 11.1, in capture." />
+  <meta property="og:type" content="article" />
+  <style>
+    /* page-scoped: mirror the FlexNode doc's list/code styling for this doc,
+       and offset in-page anchors below the fixed topbar */
+    .doc-section[id], .prose p[id] { scroll-margin-top: 72px; }
+    .prose ul, .prose ol { margin: 0.4rem 0 0.2rem 1.2rem; }
+    .prose li { color: rgba(255,255,255,0.82); margin-bottom: 0.5rem; font-weight: 300; line-height: 1.65; }
+    .prose code { font-family: ui-monospace, "SF Mono", Menlo, monospace; background: rgba(255,255,255,0.08); padding: 0.1em 0.4em; border-radius: 6px; font-size: 0.86em; overflow-wrap: anywhere; }
+    .prose.lede p { font-size: 1.05rem; line-height: 1.72; }
+  </style>
+</head>
+<body>
+  <picture class="bg">
+    <source type="image/webp" sizes="100vw"
+      srcset="../../../assets/bg/bg-400.webp 400w, ../../../assets/bg/bg-600.webp 600w, ../../../assets/bg/bg-800.webp 800w, ../../../assets/bg/bg-1080.webp 1080w, ../../../assets/bg/bg-1440.webp 1440w, ../../../assets/bg/bg-1920.webp 1920w, ../../../assets/bg/bg-2400.webp 2400w" />
+    <img src="../../../assets/bg/bg-800.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high"
+      sizes="100vw"
+      srcset="../../../assets/bg/bg-400.jpg 400w, ../../../assets/bg/bg-600.jpg 600w, ../../../assets/bg/bg-800.jpg 800w, ../../../assets/bg/bg-1080.jpg 1080w, ../../../assets/bg/bg-1440.jpg 1440w, ../../../assets/bg/bg-1920.jpg 1920w, ../../../assets/bg/bg-2400.jpg 2400w" />
+  </picture>
+
+  <header class="topbar">
+    <a class="logo brand" href="../../../" aria-label="Dutta — home"><span class="l-d">Dutta</span></a>
+    <nav class="nav">
+      <a href="../../../portfolio/">Portfolio</a>
+      <a href="../../../projects/" class="active">Projects</a>
+      <a href="../../../blog/">Blog</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <a class="back reveal" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> CatBot</a>
+
+    <div class="doc-hero reveal">
+      <span class="kicker">Brainstem Hat · POWER · CONTROL · CANBUS</span>
+      <h1>Corenode</h1>
+      <p class="doc-sub">The board under the Jetson that owns the energy, the reflexes and the bus. It manages the pack and cuts it off safely under any unsafe state, it stays alive and in authority when the brain does not, and it routes one CAN network so the robot keeps operating after catastrophic damage to any branch.</p>
+      <div class="doc-meta">
+        <span class="badge ongoing">rev 11.3 · In capture</span>
+        <span class="chip">8S2P · 266 Wh</span>
+        <span class="chip">BQ76952 BMS</span>
+        <span class="chip">STM32G431 supervisor</span>
+        <span class="chip">Trunk-switched CAN</span>
+        <span class="chip">120 × 60 mm</span>
+      </div>
+    </div>
+
+    <!-- Utility band -->
+    <div class="card reveal">
+      <h2 style="margin:0 0 0.5rem;font-size:1.15rem">Corenode is CatBot's brainstem.</h2>
+      <p class="prose" style="margin:0 0 1rem">One hat, three subsystems, and a rule that runs through all of them: <strong>delete every dotted arrow — every line the STM32 drives — and the machine still powers up, precharges its limbs, charges at 65 W, protects its cells, keeps one intact CAN bus and stops on the e-stop button.</strong> The supervisor makes it clever; nothing safety-critical needs it.</p>
+      <div class="actions" style="justify-content:flex-start">
+        <a class="btn call" href="../">CatBot documentation
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn" href="#power">Power</a>
+        <a class="btn" href="#control">Control</a>
+        <a class="btn" href="#canbus">CANbus</a>
+        <a class="btn" href="#review">The review cycles</a>
+        <a class="btn" href="#status">Where it stands</a>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDER — board render / island-map figure goes here once one exists.
+         No image is referenced deliberately: nothing has been fabricated and no render has been
+         made, and this page does not ship a picture it does not have. Drop the file into
+         ../../../assets/img/ and mirror the FlexNode page's card figure block. -->
+
+    <section class="doc-section reveal" id="idea">
+      <h2>The idea</h2>
+      <div class="prose lede">
+        <p>CatBot's compute is split three ways: a Jetson that thinks, a fleet of <a href="../../flexnode/"><strong>FlexNodes</strong></a> that close current loops at the joints, and one board in between that has to be true when either of the others is wrong. That board is Corenode — a hat that sits on the Jetson's carrier and carries the whole pack path across it.</p>
+        <p>It is deliberately <strong>not</strong> three other things. Not a motor controller — there are ten FlexNodes for that, four on the front branch and six on the rear. Not a carrier board — the DevKit is the carrier, and Corenode copies the Antmicro Jetson Orin baseboard's outline so a later swap needs no respin. And not a CAN master by default: the Jetson masters the bus, and the STM32 only takes over when it has to.</p>
+      </div>
+      <div class="decisions" style="margin-top:1.2rem">
+        <div class="decision">
+          <h3>Objective 1 — POWER</h3>
+          <p>Manage energy in and out, and cut itself off safely, preserving the pack, under any unsafe state. Everything that can put current into or take current out of sixteen cells passes through one shunt, one fuse and one FET bank.</p>
+        </div>
+        <div class="decision">
+          <h3>Objective 2 — CONTROL</h3>
+          <p>House the Jetson and its sensors, and be the supervisor that stays alive when the Jetson doesn't. Put 33.6 V on a random STM32 pin and the MCU dies — while the Jetson keeps running and keeps talking to the FlexNodes through two isolators.</p>
+        </div>
+        <div class="decision">
+          <h3>Objective 3 — CANBUS</h3>
+          <p>Route one bus so the robot keeps operating after catastrophic damage to any branch. The bus is cut in the differential trunk at three points, and the switches are closed when nothing is driving them.</p>
+        </div>
+        <div class="decision">
+          <h3>The autonomy rule</h3>
+          <p>The BMS is configured once into OTP and then runs on its own silicon: overcharge, over-discharge, overcurrent, short-circuit, inrush — with or without firmware, with or without a flashed MCU. Firmware is allowed to be cleverer; it is never allowed to be load-bearing.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="power">
+      <h2>Power — the pack and everything that touches it</h2>
+      <div class="prose">
+        <p>Energy is an <strong>8S2P pack of Molicel INR21700-P45B</strong> — 20.0–33.6 V, 9 Ah, <strong>266 Wh</strong> at ≈55 mΩ. A <strong>BQ76952</strong> reads its nine taps and two thermistors and owns the only path into the cells: a high-side <strong>3p×2s bank of BSC016N06NS</strong> at <strong>1.07 mΩ</strong>, with a 150 A SMD fuse behind it as the one guard against a FET that fails shorted. Thresholds are burned to OTP — short-circuit 240 A at 150 µs, overcurrent 120 A and 96 A, charge overcurrent 24 A, cell under-voltage 2.53 V latched — and the part needs no host to enforce any of them.</p>
+        <p>Ten FlexNodes are ≈1.58 mF of ceramic on the far end of that bank. Closing the discharge FETs straight into them is an inductance-limited <strong>≈1.9 kA</strong>, which is above every short-circuit setting the BQ76952 offers: without precharge the board would trip on its own inrush at every power-up, forever. So the BMS's own <strong>PDSG</strong> driver goes first — a DMP6023 P-FET through 11 Ω, τ = 17.4 ms, an 87 ms ramp against a 250 ms predischarge timeout — and only then does DSG close.</p>
+        <p>Downstream of the shunt and both FET banks the pack path splits into <strong>two XT60PW-F limb outputs</strong>, one per CAN branch: FRONT feeds four FlexNodes, REAR feeds six. Power and CAN for a branch travel in one sleeve and are cut by one connector, which is what makes front/rear isolation mean anything. The load is <strong>40 % / 60 %</strong>, not half each — 25 A continuous and 90 A momentary in total. A third <strong>XT60 addon port</strong> hangs off an <strong>LTC4368</strong>, the only single part that is bidirectional, drives a back-to-back FET bank, breaks at ~200 A, blocks reverse current, soft-starts a hot plug and resets without a jumper.</p>
+        <p>Charging is <strong>USB-C at 65 W</strong>: a HUSB238A negotiating 20 V / 3.25 A in permanent GPIO mode — its I²C pins and its voltage/current strap pins are the same two pins, chosen once at power-up, so there is no runtime promotion path and assuming otherwise was one of the review's findings — into a <strong>BQ25756</strong> buck-boost that charges through the BMS's own CHG FET and nothing else.</p>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <dl class="specs">
+          <div><dt>Both rails synchronous</dt><dd>Two <strong>LM76003</strong>, no catch diodes. <strong>15 V for the Jetson on <code>PACK+</code></strong>, so a 35 W load stays behind the cells' own FETs; <strong>5.22 V for <code>5V_SYS</code> upstream at node A</strong>, so the modem can wake a sleeping robot. That split is the load-bearing decision in the power tree</dd></div>
+          <div><dt>eFuses everywhere</dt><dd>A <strong>TPS26631</strong> per rail, both latch-off, each with its own red fault LED — 18.36 V over-voltage trip on the 15 V rail, 6.03 V on the 5 V. A shorted buck cannot put 33.6 V on a 20 V module, or on the transceivers and everything 3.3 V behind them</dd></div>
+          <div><dt>The keep-alive island</dt><dd>A <strong>TPS2116</strong> priority mux, not a diode-OR: the AMS1117-3.3 on VIN1, the BQ76952's own 3.0 V REG1 on VIN2, switching over at 2.64 V. <code>3V3_AUTO</code> (MCU, IMU, wake sources) is always on; <code>3V3_SYS</code> (everything else) is awake-only</dd></div>
+          <div><dt>Node A absorber</dt><dd>An SMDJ40A clamping at 64.5 V plus 470 µF, built as ten 47 µF polymers and a fast 2.2 µF part — sized for the pack's own inductance ringing when the fuse clears, against the BQ76952's 74 V ceiling with its charge pump running</dd></div>
+          <div><dt>The e-stop</dt><dd>Digital, with a hardware backstop. The button drives <code>BOTHOFF</code> through one diode and the STM32 through another: either can assert, neither can block the other, and two 100 kΩ pull-downs keep the BMS autonomous with an unflashed MCU</dd></div>
+        </dl>
+      </div>
+      <div class="prose" style="margin-top:1rem">
+        <p>Sleep is two honest tiers rather than one optimistic number. <strong>DORMANT</strong> — Jetson off, discharge FETs open, both bucks off, STM32 in Stop 1 — is <strong>≈3.4 mW at the pack</strong>, which is 8.9 years typical and still ≥1.6 years on every datasheet maximum at once. <strong>REACHABLE</strong>, with the modem answering pages, is <strong>≈26 mW</strong>: 1.2 years nominal, about ten months on datasheet maxima. The binding limit in DORMANT is not the electronics but the cells, which self-discharge at ≈9 mW equivalent. <strong>The board is quieter than the pack it guards.</strong></p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="control">
+      <h2>Control — the supervisor, and the firewalls around it</h2>
+      <div class="prose">
+        <p>The supervisor is an <strong>STM32G431RBT6</strong> in LQFP-64, and the package is exactly full: <strong>49 of 51 usable pins committed, zero spare</strong>, two reserved. An NRF24 link, a second IMU interrupt and the eFuse power-good line were deleted to close the map, and the rule now is that any future signal costs an existing one.</p>
+        <p><strong>There is no crystal.</strong> HSI16 → PLL → 170 MHz SYSCLK and an 85 MHz FDCAN kernel clock, which is legal but not free: untrimmed, HSI16 is −1.85/+1.55 % and misses the bus's ±0.882 % budget by 2.1×. So a production trim and a temperature re-trim became firmware deliverables rather than stretch goals, and the escape hatch — DNP crystal pads on the two reserved pins — is the only route to 5 Mbit FD that costs no respin.</p>
+        <p>Between the supervisor and the Jetson sit two isolators and no USB at all: an <strong>ISO7721</strong> carrying the primary UART and an <strong>ISO1044B</strong> carrying the Jetson's CAN. They are fault firewalls, not conveniences — a signal wire at a lethal potential reaching a 40-pin GPIO stops at a barrier — and they only work because each part's Jetson-domain side is powered by the Jetson. Their side numbering is <em>inverted</em> relative to each other, which is exactly the kind of detail that survives a review only because someone wrote it on the sheet.</p>
+      </div>
+      <div class="card">
+        <dl class="specs">
+          <div><dt>Sensing</dt><dd>LSM6DSV16X IMU with wake-on-motion, MMC5983MA magnetometer, pack and spreader thermistors, rail and port ADC ladders</dd></div>
+          <div><dt>Comms off-board</dt><dd>EC200U-CN modem on a carrier board, socketed as Corenode's only mezzanine; wake on UART activity, not the modem's ring indicator</dd></div>
+          <div><dt>Debug</dt><dd>SWD, plus a bench-only USB-C on PA11/PA12 with VBUS bonded to nothing and “never plug into the Jetson” on the silk</dd></div>
+          <div><dt>Human interface</dt><dd>Two right-angle SMD buttons — power/wake and e-stop, deliberately separate — three red fault LEDs, and a WS2812B behind a TTL-threshold buffer</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="canbus">
+      <h2>CANbus — one network, cut in the trunk</h2>
+      <div class="prose">
+        <p>There is exactly one CAN-FD network. Transceivers sit only between the bus and a microcontroller; the bus itself is <strong>switched in the differential trunk</strong> at three rerouting points — FRONT, REAR and the addon segment — by <strong>seven TLP172AM photorelays</strong>, two per branch because opening a single line leaves a half-connected fault path, plus one for termination.</p>
+        <p>The switches are <strong>fail-closed</strong>: each relay's LED is lit from the awake 5 V branch and shunted by a FET to <em>open</em> a branch, so a dead, unflashed or resetting STM32 leaves every branch connected. Each branch also reads back through its own LED string, so a relay that did not close — or an LED that opened and silently fragmented a branch — is visible rather than mysterious. Termination is the mirror image and fail-<em>open</em>: 120 Ω at each far end, with the switchable core terminator dark until something drives it.</p>
+        <p>Connectors are 3-position JST-PH, <strong>pin-for-pin with the FlexNode</strong> — pin 1 GND, pin 2 CANH, pin 3 CANL, read off the FlexNode netlist rather than assumed, because the order that had been quoted verbally would have put ground on CANL in every crimped cable. The first walk runs <strong>1 Mbit classic</strong> with nominal bit-timing registers byte-identical to the FD profile, so moving the fleet to <strong>5 Mbit FD</strong> later changes no register the FlexNodes share. A documented 500 kbit fallback exists if the trimmed internal oscillator cannot hold its margin hot.</p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="review">
+      <h2>The review cycles — rev 10.1 to rev 11.3</h2>
+      <div class="prose">
+        <p>Corenode has never been fabricated, and the interesting part of it so far is what six revisions of adversarial review took out. Rev 10.1 was handed to a reviewer with minimal context and came back with eight blocking findings. Several of them, once run down against primary sources, were not the small things they looked like:</p>
+        <ul>
+          <li><strong>“The resistance budget is missing a connector.”</strong> The pack-to-motor path <em>had no load end at all</em> — no connector, no rating, no BOM line, no pin. The board could not have powered a leg.</li>
+          <li><strong>“Add a precharge resistor.”</strong> The board would never have started: ~2 mF of FlexNode ceramics into a hard turn-on is kiloamps, above every short-circuit threshold the BMS offers, so it would have tripped on its own inrush at every attempt.</li>
+          <li><strong>“Lower shunt, less heat.”</strong> A 0.1 mΩ shunt makes charge-overcurrent protection <em>impossible</em> — the protection floor lands at 40 A on a 3 A charger. It went back to 0.25 mΩ, and 0.16 W at 25 A is the price of a protection that works.</li>
+          <li><strong>“65 W when the MCU is dead, 100 W when it's alive.”</strong> Unbuildable: the HUSB238A's I²C and its configuration straps are the same two pins, latched at power-up, and GPIO mode caps at 20 V.</li>
+          <li><strong>The LTC4368's under/over-voltage thresholds are 0.500 V, not the 1.2 V assumed.</strong> The divider strings were wrong by 2.4×, and the addon port could never have turned on.</li>
+          <li><strong>The e-stop polarity was inverted.</strong> As drawn, a hung MCU could not be stopped by the button. It now asserts in hardware, through its own diode, past any firmware at all.</li>
+        </ul>
+        <p>Rev 11.0 then did three things the document had never had done to it. A <strong>net-level FMEA</strong> rebuilt the net list from the pin map and the island map, grouped it into 34 groups covering 246 nets, and put every group through eleven failure modes — shorts to ground and to the pack, shorts to plausible neighbours, opens, reversed connectors, 8 kV ESD wherever a human can reach, charger over-voltage, the part failing short and failing open, brown-out races, thermal runaway, <em>and behaviour with no firmware at all</em>. That is <strong>339 net-by-mode rows</strong>: 134 already protected by design, 36 accepted with a written reason, 32 protected only by procedure, and 59 unprotected — resolving to <strong>34 fixes, all applied, ≈$0.46 of parts a board, twenty of them free</strong>. The top-scoring finding was that the pack's own 90 A main leads had no specified termination whatsoever — no connector, no tab, no tie-down, no BOM line — and it scored maximum likelihood for the simplest possible reason: it was already true of the document as written.</p>
+        <p>Alongside it, a verified fee model turned “assemble six” into <strong>assemble two, fabricate five, and spend the difference on spares</strong>, deleted 23 reels through value merges that moved <em>no</em> protection threshold, and replaced a panel with self-drawn break-off rails. And the sixteen part numbers an earlier revision had taken from an API were re-fetched from the vendor's own pages one at a time — sixteen of sixteen correct, one real price error found, on the resistor that sets the pack's charge voltage. The rule that came out of FlexNode holds here: <strong>a part is not sourced until its datasheet and its live page have been read.</strong></p>
+        <p>The last piece is a bring-up rig rather than a fix. Before a 266 Wh pack that can deliver ~600 A into a bolted fault is anywhere near the board, the <strong>phantom pack</strong> — a bench supply, eight 1 kΩ resistors and a home-made millivolt source — brings the BMS up on the real silicon, the real shunt, the real FETs and the real copper, and verifies every overcurrent and short-circuit threshold by millivolt injection with no current in the room. It works because with both FET banks off the pack node is electrically absent, so the downstream board and the BMS island can be powered separately and never fight. It is the single highest-value hour in the plan, and the one-time OTP burn is gated on it.</p>
+        <p>After the FMEA came three more passes that only a datasheet could win. An <strong>adversarial review</strong> of the capture baseline found 48 things, then <strong>four validators read every manufacturer PDF against the design</strong> and found 54 hard errors, then <strong>four more with no memory of the first four</strong> found 63. The ones that mattered were quiet: a boot-option bit that does not exist on this microcontroller family, a PD sink whose enable pin was never connected, a 5 V gate that asked the 3.3 V rail for permission to make the 3.3 V rail — so a fresh board could never have booted — and six pin numbers wrong on the charger symbol. Every finding is adjudicated in writing and applied to the specification, the bill of materials and the capture document together; rev 11.3 is the result, and it is the baseline the schematic is being drawn from.</p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="specs">
+      <h2>Specifications</h2>
+      <div class="card">
+        <dl class="specs">
+          <div><dt>Supervisor</dt><dd>STM32G431RBT6 — LQFP-64, HSI16 → PLL → 170 MHz / 85 MHz FDCAN kernel, no crystal (DNP pads reserved)</dd></div>
+          <div><dt>Battery management</dt><dd>BQ76952, 3–16S AFE, OTP-configured and host-independent; 0.25 mΩ low-side pack shunt, Kelvin-tapped</dd></div>
+          <div><dt>Pack path</dt><dd>150 A SMD fuse · CHG + DSG high-side, 3p×2s BSC016N06NS at 1.07 mΩ · PDSG precharge, 11 Ω / 87 ms ramp</dd></div>
+          <div><dt>Pack</dt><dd>8S2P Molicel INR21700-P45B — 20.0–33.6 V, 9 Ah, 266 Wh, ≈55 mΩ</dd></div>
+          <div><dt>Rails</dt><dd>LM76003 ×2, synchronous — 15.0 V on <code>PACK+</code> for the Jetson, 5.22 V at node A for <code>5V_SYS</code>; a TPS26631 eFuse and a red fault LED on each</dd></div>
+          <div><dt>3.3 V island</dt><dd>TPS2116 priority mux — AMS1117-3.3, or the BMS's 3.0 V REG1 as keep-alive; <code>3V3_AUTO</code> always-on / <code>3V3_SYS</code> awake-only</dd></div>
+          <div><dt>Charging</dt><dd>USB-C, HUSB238A in permanent GPIO mode at 20 V / 3.25 A → BQ25756 buck-boost → CHG FET; 33.06 V float, 4.13 V per cell</dd></div>
+          <div><dt>Outputs</dt><dd>2 × XT60PW-F limb branches (FRONT 4 nodes / REAR 6, splitting 25 A continuous and 90 A momentary 40 %–60 %) · 1 × XT60 addon behind an LTC4368</dd></div>
+          <div><dt>CAN</dt><dd>One bus · 7 × TLP172AM trunk photorelays, fail-closed with readback · ISO1044B to the Jetson, TCAN1044AV to the STM32 · 3-position JST-PH in FlexNode pin order</dd></div>
+          <div><dt>Isolation</dt><dd>ISO7721 UART and ISO1044B CAN — the only electrical paths to the Jetson; no USB</dd></div>
+          <div><dt>Outline</dt><dd>120.0 × 60.0 mm — the Antmicro Jetson Orin baseboard profile, with all ten of its mounting holes copied at their exact coordinates; 4-layer, 1.6 mm, ENIG, 1 oz outer and inner</dd></div>
+          <div><dt>Stack</dt><dd>≤ 20 mm over the carrier; one mezzanine (the modem carrier) and a 2×5 stacking header to the 40-pin</dd></div>
+        </dl>
+      </div>
+      <div class="prose" style="margin-top:1rem"><p>The numbers the design is actually judged on:</p></div>
+      <div class="card">
+        <dl class="specs">
+          <div><dt>Loss at 25 A continuous</dt><dd><strong>1.41 W</strong> for the whole pack-to-motor path — a fuse, six dies, a shunt, two connectors and a pour — and <strong>≈3.7 W</strong> for the whole board, down from ≈6.7 W once both catch diodes were deleted</dd></div>
+          <div><dt>Sleep</dt><dd><strong>≈3.4 mW dormant</strong> — 8.9 years typical, ≥1.6 years on datasheet maxima · <strong>≈26 mW reachable</strong> with the modem paging, 1.2 years nominal and about ten months on maxima</dd></div>
+          <div><dt>Bill of materials</dt><dd><strong>450 placements across 99 unique lines</strong> — <strong>≈$113 of parts per board</strong> at quantity one, ≈$78 at a hundred. Five lines are half of it, and fifteen soft-termination capacitors across the pack node are the one deliberate extravagance</dd></div>
+          <div><dt>Production run</dt><dd><strong>5 fabricated / 2 assembled</strong>, double-sided — <strong>≈$486</strong> at the mid-band fab quote, or ≈$243 per assembled board; one assembled board is ≈$388. The bare-board fab line is the only estimate in the total, and the $450 target is now met only by the one-board fallback</dd></div>
+          <div><dt>Failure-mode coverage</dt><dd>34 net groups · 246 nets · <strong>339 net-by-mode rows</strong> · 34 fixes, all applied, ≈$0.46 a board</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="doc-section reveal" id="status">
+      <span class="kicker" style="display:block;margin-bottom:0.45rem">Capture · September 2026</span>
+      <h2>Where it stands</h2>
+      <div class="prose">
+        <p><strong>Schematic capture is in progress against the rev 11.3 baseline, as of 10 September 2026.</strong> Nothing has been fabricated and nothing has been measured on Corenode hardware; every number on this page is a derivation or a datasheet figure, not a bench result. What is finished is the architecture and the bill of materials — thirteen sheets, one per island group, with the capture-authority BOM as the single source of truth wherever it and the specification disagree.</p>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <dl class="specs">
+          <div><dt>Closed</dt><dd>Envelope and mounting · both rails synchronous · an eFuse per rail · the 3.3 V mux and split · the e-stop's two paths · both FET banks · the node-A absorber · the addon controller · clock and pin map · CAN connectors, termination and the 1 Mbit first walk · stackup — and the net-level FMEA's 34 fixes, all applied</dd></div>
+          <div><dt>Open, and not blocking capture</dt><dd>Twenty-five physical measurements that gate the OTP burn, the pack and the first walk · the bare-board fab quote, the one number that decides whether the build fits the budget · whether the assembly service accepts a board with self-drawn break-off rails · the FlexNodes' thermal envelope, which is what the internal-oscillator timing margin rests on</dd></div>
+          <div><dt>Next</dt><dd>Finish capture → layout against the copied hole pattern → build the phantom-pack rig → OTP burn on real silicon → fabricate five, assemble two</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Roadmap</h2>
+      <div class="prose">
+        <ul>
+          <li>✓ Architecture closed across eight revisions of adversarial review — rev 9 through rev 11.3, every revision frozen and never edited again</li>
+          <li>✓ Net-level FMEA — 339 net-by-mode rows, 34 fixes, all applied at ≈$0.46 of parts a board</li>
+          <li>✓ Bill of materials sourced datasheet-first — 450 placements, 99 unique lines, every part number re-fetched from the vendor's own page</li>
+          <li>✓ Production plan priced against a verified fee schedule — 5 fabricated / 2 assembled</li>
+          <li>✓ Phantom-pack bring-up procedure written, and the OTP burn gated on it</li>
+          <li>◑ <strong>Schematic capture — in progress, rev 11.3 baseline</strong></li>
+          <li>◦ Layout on the 120 × 60 mm Antmicro outline, ports on the two long edges — <em>next</em></li>
+          <li>◦ Fabrication, the hand-fitted fuse and pack tabs, and first power-up behind the phantom pack</li>
+          <li>◦ OTP burn, then the pack, then the first limb branch</li>
+          <li>◦ CatBot integration — ten FlexNodes on two branches behind one Corenode</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Drawings</h2>
+      <div class="prose">
+        <p>Two generated views of the design are published separately: a connection map of every net, and the island map — the fault-domain view that governs how the schematic is sheeted, where every arrow crossing an island boundary is a place a fault can propagate.</p>
+      </div>
+      <div class="actions" style="justify-content:flex-start">
+        <a class="btn" href="https://claude.ai/code/artifact/3ff30b5c-a6cd-4f63-9c98-322deb022c44" target="_blank" rel="noopener">Schematic map
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+        <a class="btn" href="https://claude.ai/code/artifact/0be5978c-5333-477f-a250-1993301649b2" target="_blank" rel="noopener">Island map
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+        <a class="btn" href="../../flexnode/">FlexNode documentation</a>
+      </div>
+    </section>
+
+    <footer class="site-footer reveal">
+      <div class="foot-links">
+        <a class="foot-icon" href="mailto:adityadutta2006@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></a>
+        <a class="foot-icon" href="https://github.com/thedutta" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.2 11.19.6.11.82-.25.82-.56v-2.2c-3.34.71-4.04-1.58-4.04-1.58-.55-1.36-1.33-1.73-1.33-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.22 1.84 1.22 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.84 0-1.29.47-2.34 1.23-3.17-.12-.3-.53-1.52.12-3.16 0 0 1-.32 3.3 1.21a11.6 11.6 0 0 1 3-.4c1.02 0 2.05.13 3 .4 2.28-1.53 3.29-1.21 3.29-1.21.65 1.64.24 2.86.12 3.16.77.83 1.23 1.88 1.23 3.17 0 4.54-2.81 5.53-5.49 5.83.43.37.81 1.1.81 2.22v3.29c0 .31.21.68.82.56A12.01 12.01 0 0 0 24 12.29C24 5.78 18.63.5 12 .5z"/></svg></a>
+        <a class="foot-icon" href="https://www.linkedin.com/in/aditya-dutta-058808213" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.27c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.79 1.75 1.75-.78 1.76-1.75 1.76zm13.5 12.27h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96v5.7h-3v-11h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59v6.47z"/></svg></a>
+      </div>
+      <div class="foot-note">© Aditya Dutta · Corenode is an ongoing project — the brainstem of <a href="../">CatBot</a>, upstream of every <a href="../../flexnode/">FlexNode</a></div>
+    </footer>
+  </div>
+
+  <script src="../../../assets/reveal.js"></script>
+  <script src="../../../assets/ui.js"></script>
+</body>
+</html>
