@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>RoVolt — WHEG Robot &amp; Agri Platform · Aditya Dutta</title>
-  <meta name="description" content="RoVolt — a terrain-adaptive WHEG (wheel-leg hybrid) robot on a hand-brazed aluminium chassis, later adapted into an award-winning smart agricultural platform." />
+  <title>RoVolt — The First Machine · Aditya Dutta</title>
+  <meta name="description" content="RoVolt — a WHEG robot built at seventeen to find out whether I could manufacture a real thing: 3D-printed push-rod legs, springs cut from ceiling lights, a hand-brazed 6061 aluminium spaceframe. It walked, then became a tractor." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚜</text></svg>" type="image/svg+xml" />
   <link rel="stylesheet" href="../../assets/theme.css" />
-  <meta property="og:title" content="RoVolt — WHEG-Based Robot &amp; Mobile Agricultural Platform" />
+  <meta property="og:title" content="RoVolt — the first machine" />
   <meta property="og:type" content="article" />
 </head>
 <body>
@@ -32,35 +32,125 @@
     <a class="back reveal" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> All projects</a>
 
     <div class="doc-hero reveal">
-      <span class="kicker">WHEG Robotics · Agricultural</span>
+      <span class="kicker">2023 · Class 11 · The first machine</span>
       <h1>RoVolt</h1>
-      <p class="doc-sub">A terrain-adaptive robotic platform built for reliable locomotion across uneven farmland, later extended into a smart agricultural system supporting soil interaction, sensing and basic farming operations.</p>
+      <p class="doc-sub">Built at seventeen to answer one question — could I manufacture a real thing? A wheel-leg robot on a hand-brazed aluminium spaceframe that walked, and then, because its frame was modular and its wheels knew where they were, turned into a tractor.</p>
       <div class="doc-meta">
         <span class="badge done">Completed</span>
         <span class="chip">WHEG locomotion</span>
-        <span class="chip">Laser-cut aluminium</span>
-        <span class="chip">Expo &amp; hackathon wins</span>
+        <span class="chip">6061 aluminium · hand-brazed</span>
+        <span class="chip">1st · Smart Bengal Hackathon</span>
       </div>
     </div>
 
     <div class="card reveal" style="padding:0;overflow:hidden">
       <span style="display:block;aspect-ratio:16/9;background:#0a0a0d">
-        <img src="../../assets/img/rovolt-field.jpg" alt="RoVolt platform in the field" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+        <picture>
+          <source type="image/webp" srcset="../../assets/img/rovolt-cover.webp" />
+          <img src="../../assets/img/rovolt-cover.jpg" alt="RoVolt render — a six-legged WHEG robot on a laser-cut aluminium spaceframe, the A logo on its back" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+        </picture>
       </span>
     </div>
+    <p class="cap">The design as modelled — six WHEGs on push-rod suspension, the battery slung beneath a spaceframe deck.</p>
 
     <section class="doc-section reveal">
-      <h2>Objective</h2>
-      <div class="prose">
-        <p>Design and build a terrain-adaptive robotic platform capable of reliable locomotion across uneven farmland, later extended into a smart agricultural system supporting soil interaction, sensing and basic farming operations.</p>
+      <h2>Why it exists</h2>
+      <div class="prose lede">
+        <p>RoVolt did not start as a competition entry or a syllabus project. It started because I had spent a year drawing things in CAD and wanted to know whether I could actually <em>make</em> one — cut metal, join it, put motors in it, and have it survive being switched on. Everything I have built since traces back to this frame: <a href="../sylvara/">Sylvara</a> is its agricultural branch grown into a company, and <a href="../catbot/">CatBot</a> is what happens when the legs get serious.</p>
       </div>
     </section>
 
     <section class="doc-section reveal">
-      <h2>System overview</h2>
+      <h2>Legs first</h2>
       <div class="prose">
-        <p>RoVolt originated as a Class&nbsp;11 robotics project focused on robust mobility using a <strong>WHEG (wheel-leg hybrid)</strong> locomotion system. The platform was fully CAD-modeled and fabricated from <strong>laser-cut aluminium components, manually brazed</strong> into a rigid yet serviceable chassis. Locomotion came from custom 3D-printed WHEGs with a push-rod suspension mechanism, driven by DC motors with encoder feedback and controlled by a Raspberry&nbsp;Pi-based system.</p>
-        <p>It demonstrated stable traversal across varied terrain, including loose soil and uneven surfaces. For demonstrations and competitions, the system was adapted into a smart agricultural unit — reconfiguring the original 2×3 WHEG layout into a three-wheel configuration and integrating a rear-mounted robotic arm with soil-moisture sensing, ploughing and seeding attachments. An IMU enhanced directional awareness while existing encoders were reused for motion feedback. A companion mobile app and backend enabled real-time monitoring; I led hardware integration and low-level firmware support.</p>
+        <p>The locomotion is a WHEG — a wheel-leg hybrid, a rimless wheel whose spokes are legs. It rolls on flat ground and climbs on rough ground without a single controlled joint, which at seventeen with one motor driver per side was exactly the right amount of ambition. The first legs were <strong>v1: solid, shaped black PLA</strong>, rigid to the frame. They walked — and every rock they climbed went straight up into the chassis. So v2 put each WHEG on a <strong>3D-printed push-rod suspension</strong>, and the difference off-road was not incremental: the body stayed level while the legs hunted for the ground, and the machine stopped shaking itself apart.</p>
+        <p>The suspension needed springs, and I had none. What I did have were the false-ceiling light fittings I had zip-tied to the top of the terrace so I could work after dark; their spring clips were the right rate, so I cut them out and the lights hung on by their cables. The pivots needed steel dowels cut to length, and I had no tools that could cut metal — but the refill from a ballpoint pen is a precise steel tube of exactly the diameter the printed bore needed, so the legs pivot on pen refills. None of this is in the CAD. All of it is why the robot exists: <strong>jugaad</strong> is not the absence of engineering, it is engineering when the parts bin is empty.</p>
+      </div>
+      <div class="gallery" style="margin-top:1rem">
+        <figure><picture><source type="image/webp" srcset="../../assets/img/rovolt-remote.webp" /><img src="../../assets/img/rovolt-remote.jpg" alt="The NRF24 remote standing beside RoVolt on its v1 legs — solid black PLA, no suspension yet" loading="lazy" /></picture></figure>
+        <figure class="tall"><picture><source type="image/webp" srcset="../../assets/img/rovolt-leg.webp" /><img src="../../assets/img/rovolt-leg.jpg" alt="The 3D-printed push-rod leg held in hand, its CAD model on the laptop behind it" loading="lazy" /></picture></figure>
+        <figure><img src="../../assets/img/rovolt-parts.jpg" alt="RoVolt mechanical components laid out" loading="lazy" /></figure>
+      </div>
+      <p class="cap">Left: the remote beside RoVolt on its v1 legs — solid PLA, no suspension. Right: the v2 push-rod leg in hand beside its model — printed links, ceiling-light springs, pen-refill pivots.</p>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>The remote</h2>
+      <div class="prose">
+        <p>The robot needed a controller, and I had just been given my first 3D printer — an Ender 3 Pro. I designed an <strong>NRF24 radio remote</strong> from scratch, two sticks and a handful of buttons around a microcontroller, and printed its shell in Class 11 the same week. Watching your own design come off the bed, layer by layer, at seventeen, is a particular kind of hooked. That printer has since made every prototype part on this site.</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <video style="display:block;width:100%;aspect-ratio:16/9;background:#0a0a0d;object-fit:cover" controls playsinline muted loop autoplay preload="metadata" poster="../../assets/img/rovolt-remote-print-poster.jpg">
+          <source src="../../assets/video/rovolt-remote-print.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <p class="cap">The remote's shell printing on the Ender 3 Pro — Class 11.</p>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Metal</h2>
+      <div class="prose">
+        <p>The chassis is a spaceframe in <strong>6061 aerospace aluminium</strong>, laser-cut from my drawings — the first time a part I had drawn came back from a machine as a thing I could hold. Joining it was the part I had to learn. Aluminium does not want to be brazed by a teenager with a hand torch; it wants to slump a few degrees before the filler flows. I brazed the frame by hand anyway, joint by joint, and it is still rigid enough to stand on. That frame is the reason the second half of this story was possible.</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <video style="display:block;width:100%;aspect-ratio:16/9;background:#0a0a0d;object-fit:cover" controls playsinline preload="metadata" poster="../../assets/img/rovolt-brazing-poster.jpg">
+          <source src="../../assets/video/rovolt-brazing.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <p class="cap">Brazing the laser-cut frame by hand.</p>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>It walked</h2>
+      <div class="card" style="padding:0;overflow:hidden">
+        <video style="display:block;width:100%;aspect-ratio:16/9;background:#0a0a0d;object-fit:cover" controls playsinline muted loop autoplay preload="metadata" poster="../../assets/img/rovolt-walking-poster.jpg">
+          <source src="../../assets/video/rovolt-walking.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <p class="cap">First walk — six WHEGs, encoder-fed DC motors, a Raspberry Pi and a remote I had designed the week before.</p>
+      <div class="prose">
+        <p>Driven by DC motors with quadrature encoders through TB6612FNG drivers, under a Raspberry Pi 3 on a proto-board, over a radio link to an NRF24 remote of my own design. The encoders mattered more than I understood at the time: a machine that knows how far each wheel has turned is a machine you can hand a task to.</p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Second life: the tractor</h2>
+      <div class="prose">
+        <p>Because the frame was modular and the wheels had encoders, RoVolt could be reconfigured rather than rebuilt. For the competitions it became an <strong>agricultural robot</strong>: the 2×3 WHEG layout collapsed to three wheels, an IMU joined the encoders for heading, and a rear-mounted arm carried a soil-moisture probe, a plough and a seeder. Behind it sat a working control backend and a companion app that showed the robot's readings live — moisture against position, where it had been, what it had planted.</p>
+        <p>The ambition was an <strong>automatic tractor</strong> for the small farm: drive a row, sense the soil, plough and seed where the moisture said to, turn, repeat, unattended. The full autonomous loop was never closed in the field — but the sensing, the actuation, the backend and the app all worked, and it was the first time I had built a system with a spine of software running over hardware I had made. Sylvara is what that backend became when the plants stopped needing a robot to visit them.</p>
+      </div>
+      <div class="gallery" style="margin-top:1rem">
+        <figure class="tall"><picture><source type="image/webp" srcset="../../assets/img/rovolt-agri-1.webp" /><img src="../../assets/img/rovolt-agri-1.jpg" alt="RoVolt in its three-wheel agricultural form on a table beside a tablet showing its CAD" loading="lazy" /></picture></figure>
+        <figure class="tall"><picture><source type="image/webp" srcset="../../assets/img/rovolt-agri-2.webp" /><img src="../../assets/img/rovolt-agri-2.jpg" alt="The expo table — the robot, its CAD on tablets, and the Smart Garden companion app on a laptop" loading="lazy" /></picture></figure>
+      </div>
+      <p class="cap">The agricultural form on the expo table, with its CAD and the companion app alongside.</p>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>The A</h2>
+      <div class="gallery">
+        <figure class="tall"><picture><source type="image/webp" srcset="../../assets/img/rovolt-glow.webp" /><img src="../../assets/img/rovolt-glow.jpg" alt="RoVolt at night with its service hatch off, status lights glowing and the A logo lit" loading="lazy" /></picture></figure>
+        <figure><img src="../../assets/img/rovolt-bench.jpg" alt="RoVolt on the workbench" loading="lazy" /></figure>
+      </div>
+      <p class="cap">Late at night, hatch off, lights on. The A on its back stands for Aditya — I was seventeen, and I had made a thing that stood up.</p>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>The people</h2>
+      <div class="prose lede">
+        <p>The part of RoVolt that mattered most is not in the CAD or the spec table. It is that I did not build it alone. The people who developed it with me, who stood beside it at every fest and presented it with me, are the same people I am building with now — they are the team behind <a href="../sylvara/">Sylvara</a>, and they are the team around <a href="../catbot/">CatBot</a>. A brazed aluminium frame in Class 11 is where we met, and every photograph on this page is from the place the whole journey started.</p>
+      </div>
+    </section>
+
+    <section class="doc-section reveal">
+      <h2>Where it went</h2>
+      <div class="prose">
+        <p>RoVolt took <strong>first place at the Smart Bengal Hackathon</strong>, and won at the science fests of Calcutta Boys' School, La Martiniere for Boys, Don Bosco and Modern High International, among others. It was shown at multiple expos and competitive hackathons, took top placements and awards, and was covered in the press. Live evaluations kept coming back to the same two things: it traversed real terrain reliably, and it could be reconfigured into something useful without being rebuilt.</p>
+      </div>
+      <div class="gallery" style="margin-top:1rem">
+        <figure class="tall"><img src="../../assets/img/rovolt-press.jpg" alt="Newspaper coverage of the project" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/rovolt-field.jpg" alt="RoVolt platform in the field" loading="lazy" /></figure>
+        <figure><img src="../../assets/img/rovolt-chassis.jpg" alt="Laser-cut aluminium WHEG chassis" loading="lazy" /></figure>
       </div>
     </section>
 
@@ -68,39 +158,23 @@
       <h2>Technical specifications</h2>
       <div class="card">
         <dl class="specs">
-          <div><dt>Microprocessor</dt><dd>Raspberry Pi 3 with proto-board</dd></div>
-          <div><dt>Control</dt><dd>TB6612FNG dual motor drivers with quadrature encoders</dd></div>
-          <div><dt>Locomotion</dt><dd>Custom 3D-printed WHEGs with push-rod suspension</dd></div>
-          <div><dt>Sensors</dt><dd>Wheel encoders, IMU, soil-moisture sensor, arm kinematics</dd></div>
-          <div><dt>Fabrication</dt><dd>Laser-cut aluminium chassis, manually brazed assembly; 3D-printed internal mounts &amp; WHEGs</dd></div>
+          <div><dt>Locomotion</dt><dd>Six custom 3D-printed WHEGs on push-rod suspension; three-wheel configuration for the agricultural form</dd></div>
+          <div><dt>Chassis</dt><dd>6061 aluminium spaceframe, laser-cut and hand-brazed; 3D-printed mounts</dd></div>
+          <div><dt>Drive</dt><dd>DC motors with quadrature encoders, TB6612FNG dual drivers</dd></div>
+          <div><dt>Compute &amp; control</dt><dd>Raspberry Pi 3 on a proto-board; NRF24 remote; control backend with companion app</dd></div>
+          <div><dt>Sensing</dt><dd>Wheel encoders, IMU, soil-moisture probe, arm kinematics</dd></div>
+          <div><dt>Tooling</dt><dd>Rear arm — soil-moisture sensing, ploughing and seeding attachments</dd></div>
         </dl>
       </div>
     </section>
 
     <section class="doc-section reveal">
-      <h2>Key engineering decisions</h2>
+      <h2>What it taught</h2>
       <div class="decisions">
-        <div class="decision"><h3>WHEG-based locomotion</h3><p>A wheel-leg hybrid design balances mechanical simplicity with terrain adaptability superior to conventional wheeled platforms.</p></div>
-        <div class="decision"><h3>Hands-on fabrication</h3><p>The chassis was designed, laser-cut and brazed manually to ensure structural integrity and rapid iteration without reliance on prefabricated frames.</p></div>
-        <div class="decision"><h3>Platform adaptability</h3><p>Reconfiguring the locomotion layout and adding a modular agricultural arm demonstrated functional versatility beyond mobility alone.</p></div>
-        <div class="decision"><h3>Sensor reuse &amp; expansion</h3><p>Existing encoders were leveraged while integrating inertial sensing to enhance directional stability and reduce system complexity.</p></div>
-      </div>
-    </section>
-
-    <section class="doc-section reveal">
-      <h2>Demonstrated impact</h2>
-      <div class="prose">
-        <p>RoVolt was successfully demonstrated at multiple expos and competitive hackathons, achieving top placements and awards. Live evaluations highlighted its reliable terrain traversal, modular reconfiguration and functional agricultural tooling — validating both the platform's robustness and its design versatility.</p>
-      </div>
-    </section>
-
-    <section class="doc-section reveal">
-      <h2>Gallery</h2>
-      <div class="gallery">
-        <figure><img src="../../assets/img/rovolt-chassis.jpg" alt="Laser-cut aluminium WHEG chassis" loading="lazy" /></figure>
-        <figure><img src="../../assets/img/rovolt-parts.jpg" alt="RoVolt mechanical components" loading="lazy" /></figure>
-        <figure><img src="../../assets/img/rovolt-bench.jpg" alt="RoVolt on the workbench" loading="lazy" /></figure>
-        <figure class="tall"><img src="../../assets/img/rovolt-press.jpg" alt="Newspaper coverage of the project" loading="lazy" /></figure>
+        <div class="decision"><h3>Make the part, don't buy the frame</h3><p>Designing, laser-cutting and brazing the chassis myself kept structural integrity and iteration speed in my own hands. Every project since has been built on that habit.</p></div>
+        <div class="decision"><h3>Constraint is a material</h3><p>Ceiling-light springs and pen-refill pivots were not compromises; they were the design meeting the parts bin. Knowing what a part <em>needs</em> to be lets you find it anywhere.</p></div>
+        <div class="decision"><h3>Modularity pays twice</h3><p>A spaceframe you can unbolt and wheels that know where they are turned a walking demo into a working agricultural platform in weeks, not months.</p></div>
+        <div class="decision"><h3>Sense it, then you can automate it</h3><p>Encoders, an IMU and a backend that remembered readings were the first autonomy stack I ever built — the same shape, scaled up, that CatBot runs today.</p></div>
       </div>
     </section>
 
@@ -110,7 +184,7 @@
         <a class="foot-icon" href="https://github.com/thedutta" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.2 11.19.6.11.82-.25.82-.56v-2.2c-3.34.71-4.04-1.58-4.04-1.58-.55-1.36-1.33-1.73-1.33-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.22 1.84 1.22 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.84 0-1.29.47-2.34 1.23-3.17-.12-.3-.53-1.52.12-3.16 0 0 1-.32 3.3 1.21a11.6 11.6 0 0 1 3-.4c1.02 0 2.05.13 3 .4 2.28-1.53 3.29-1.21 3.29-1.21.65 1.64.24 2.86.12 3.16.77.83 1.23 1.88 1.23 3.17 0 4.54-2.81 5.53-5.49 5.83.43.37.81 1.1.81 2.22v3.29c0 .31.21.68.82.56A12.01 12.01 0 0 0 24 12.29C24 5.78 18.63.5 12 .5z"/></svg></a>
         <a class="foot-icon" href="https://www.linkedin.com/in/aditya-dutta-058808213" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.27c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.79 1.75 1.75-.78 1.76-1.75 1.76zm13.5 12.27h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96v5.7h-3v-11h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59v6.47z"/></svg></a>
       </div>
-      <div class="foot-note">© Aditya Dutta · RoVolt — completed project</div>
+      <div class="foot-note">© Aditya Dutta · RoVolt — the first machine, 2023</div>
     </footer>
   </div>
 

@@ -122,14 +122,14 @@
       <span class="kicker" style="display:block;margin-bottom:0.45rem">Bring-up · September 2026</span>
       <h2>Where it stands</h2>
       <div class="card" style="padding:0;overflow:hidden;margin:0 auto 0.6rem;max-width:460px">
-        <span style="display:block;aspect-ratio:1125/1486;background:#0a0a0d">
+        <span style="display:block;aspect-ratio:1035/1280;background:#0a0a0d">
           <picture>
-            <source type="image/webp" srcset="../../assets/img/flexnode-firstlight.webp" />
-            <img src="../../assets/img/flexnode-firstlight.jpg" alt="FlexNode v1.0 board held in hand in a dark room, its onboard status LED glowing bright green-cyan, ribbon wires running to an ST-Link programmer — the first-light bring-up moment" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+            <source type="image/webp" srcset="../../assets/img/flexnode-bench.webp" />
+            <img src="../../assets/img/flexnode-bench.jpg" alt="FlexNode v1.0 mounted on a motor on the bench, status LED lit, power and debug leads attached" style="width:100%;height:100%;object-fit:cover" loading="eager" />
           </picture>
         </span>
       </div>
-      <p class="cap">First light: FlexNode booted and running its own firmware — 6 September 2026.</p>
+      <p class="cap">Electronics and thermals fully validated — September 2026.</p>
       <div class="prose">
         <p id="first-boot"><strong>First boot, 6 September 2026.</strong> A v1.0 board came up on a 13 V bench adapter with no motor and no encoder fitted. Both logic rails measured stable, the MCU boots from flash, and the moteus → FlexNode port runs: steady status LED, servo reporting <em>stopped</em>. Later the same day the onboard IMU answered over I²C and streamed samples — verified by tilting the board and watching the status LED shift hue, no CAN adapter needed.</p>
         <p id="first-spin"><strong>First spin, 8 September 2026.</strong> Two days later the power stage was energized for the first time and a <strong>GIM 8108-8 turned under FlexNode's own drive</strong>: open-loop voltage FOC, no encoder in the loop, from a supply that current-limits at ~1 A so the bench — not the winding — was the thing that could give out. The stage that mattered ran eight movement loops, ~140 s energized, zero faults, the FETs plateauing at 38.7 °C. Then a deliberate over-demand asked for more than the adapter could give: the bus collapsed, and the software abort caught it and de-energized cleanly. A protection path exercised for real rather than merely written.</p>
@@ -146,6 +146,16 @@
 
     <section class="doc-section reveal" id="specs">
       <h2>Specifications</h2>
+      <span class="kicker" style="display:block;margin:0 0 0.45rem">Power stage</span>
+      <div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.7rem 1rem;margin-bottom:0.6rem">
+        <div><span class="kicker" style="display:block;font-size:0.68rem">Input</span><strong style="font-size:1.1rem">10–44 V</strong></div>
+        <div><span class="kicker" style="display:block;font-size:0.68rem">Peak phase</span><strong style="font-size:1.1rem">100 A</strong></div>
+        <div><span class="kicker" style="display:block;font-size:0.68rem">Continuous</span><strong style="font-size:1.1rem">12 / 32 A</strong></div>
+        <div><span class="kicker" style="display:block;font-size:0.68rem">Peak power</span><strong style="font-size:1.1rem">900 W @ 30 V</strong></div>
+        <div><span class="kicker" style="display:block;font-size:0.68rem">PWM</span><strong style="font-size:1.1rem">15–60 kHz</strong></div>
+        <div><span class="kicker" style="display:block;font-size:0.68rem">Control loop</span><strong style="font-size:1.1rem">15–30 kHz</strong></div>
+      </div>
+      <p class="cap" style="margin-bottom:1rem">TI DRV8353S into six 60 V / 1.6 mΩ N-channel MOSFETs with per-phase current sensing; continuous current quoted without and with thermal management. These are the r4.11 reference ratings, inherited by keeping that topology, gate driver and FET selection unchanged — FlexNode's own stage is electrically and thermally validated, with characterisation at full rated load still to come.</p>
       <div class="card">
         <dl class="specs">
           <div><dt>Microcontroller</dt><dd>STM32G473CEU6 — Cortex-M4F @170 MHz, 512 KB flash, 5× ADC, 3× FDCAN, UFQFPN-48</dd></div>
