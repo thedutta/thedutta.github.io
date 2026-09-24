@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Keeping the TCAN334G on FlexNode · Dutta</title>
+  <meta name="description" content="Why I decided not to hand-rework the CAN-FD transceiver on twelve finished FlexNode boards from TI's TCAN334G to the newer TCAN3414, and the one risk I am accepting by not doing it." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>" type="image/svg+xml" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <meta property="og:title" content="Keeping the TCAN334G: why I'm not reworking FlexNode's CAN transceivers" />
+  <meta property="og:type" content="article" />
+  <style>
+    .article .prose .table-wrap { overflow-x: auto; margin: 0.6rem 0 1.1rem; -webkit-overflow-scrolling: touch; }
+    .article .prose table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 0.86rem; }
+    .article .prose th, .article .prose td { text-align: left; vertical-align: top; padding: 0.5rem 0.6rem; border-top: 1px solid rgba(255,255,255,0.09); font-weight: 300; color: rgba(255,255,255,0.82); line-height: 1.45; }
+    .article .prose th { color: var(--text-dim); font-weight: 500; }
+    .article .prose thead th { border-top: 0; color: #fff; }
+    .article .prose a { color: var(--blue-bright); }
+    .article .prose .src li { font-size: 0.82rem; color: var(--text-dim); }
+  </style>
+</head>
+<body>
+  <picture class="bg">
+    <source type="image/webp" sizes="100vw"
+      srcset="../../assets/bg/bg-400.webp 400w, ../../assets/bg/bg-600.webp 600w, ../../assets/bg/bg-800.webp 800w, ../../assets/bg/bg-1080.webp 1080w, ../../assets/bg/bg-1440.webp 1440w, ../../assets/bg/bg-1920.webp 1920w, ../../assets/bg/bg-2400.webp 2400w" />
+    <img src="../../assets/bg/bg-800.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high"
+      sizes="100vw"
+      srcset="../../assets/bg/bg-400.jpg 400w, ../../assets/bg/bg-600.jpg 600w, ../../assets/bg/bg-800.jpg 800w, ../../assets/bg/bg-1080.jpg 1080w, ../../assets/bg/bg-1440.jpg 1440w, ../../assets/bg/bg-1920.jpg 1920w, ../../assets/bg/bg-2400.jpg 2400w" />
+  </picture>
+
+  <header class="topbar">
+    <a class="logo brand" href="../../" aria-label="Dutta — home"><span class="l-d">Dutta</span></a>
+    <nav class="nav">
+      <a href="../../portfolio/">Portfolio</a>
+      <a href="../../projects/">Projects</a>
+      <a href="../../blog/" class="active">Blog</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <a class="back reveal" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> All posts</a>
+
+    <article class="article">
+      <header class="article-head reveal">
+        <time>24 September 2026 · Hardware · ~7 min read</time>
+        <h1>Keeping the TCAN334G: why I'm not reworking FlexNode's CAN transceivers</h1>
+        <div class="post-tags">
+          <span class="pill">CAN-FD</span>
+          <span class="pill">FlexNode</span>
+          <span class="pill">CatBot</span>
+        </div>
+      </header>
+
+      <div class="card reveal prose">
+        <p><a href="../../projects/flexnode/">FlexNode</a> is my hardware fork of the mjbots moteus r4.11 brushless controller, built to be the joint node on <a href="../../projects/catbot/">CatBot</a>, my quadruped. Twelve v1.0 boards came back from fab assembled. The first one booted on 6 September. On 8 September it spun a GIM 8108 open-loop on a current-limited bench supply. The gate driver came up, phase-current sensing checked out, and it ran eight loops, about 140 seconds energised, with zero faults.</p>
+        <p>After that I spent an evening deciding whether to take hot air to every board and replace the CAN-FD transceiver. The boards carry TI's TCAN334G, the part moteus r4.11 uses, and the candidate was TI's newer TCAN3414. I decided not to. The question was never which part I would design in today. The question was whether to rework twelve finished boards that work, and those two questions have different answers.</p>
+
+        <h2>What I was worried about</h2>
+        <p>Ten FlexNodes share one daisy-chained CAN-FD bus of roughly 45&nbsp;cm to the CoreNode. My fear was that one node fails badly and takes the other nine with it through the bus.</p>
+        <p>I started by searching, and most of what came back was Google's AI Mode rather than primary sources. Its list of how moteus r4.11 boards die was built from mjbots' own documentation:</p>
+        <ul>
+          <li>gate-driver faults (fault 33) from regenerative over-voltage on the supply</li>
+          <li>connector micro-arcing</li>
+          <li>inrush current with no pre-charge</li>
+          <li>a phase lead letting go under load</li>
+          <li>thermal overload</li>
+        </ul>
+        <p>Every one of those is a power-stage failure. None of them is the transceiver.</p>
+        <p>I have to be careful with that source. Depending on how I phrased the question, the same assistant argued for the swap, then against it, then for it, then against it again. It also put figures like &ldquo;less than 1 in 10,000&rdquo; on failure modes without citing anything, so I'm not using any of its probabilities. It called the TCAN3414 an &ldquo;identical drop-in&rdquo;, and the datasheet disagrees on one pin (more on that below). I also searched the mjbots blog for reports of r4.x transceivers dying and found none. That's an absence of evidence, and I'm not treating it as proof.</p>
+
+        <h2>What the datasheets say</h2>
+        <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th></th><th>TCAN334G (on FlexNode)</th><th>TCAN3414</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>Supply</th><td>3.0&ndash;3.6&nbsp;V single</td><td>3.0&ndash;3.6&nbsp;V single</td></tr>
+            <tr><th>Logic I/O</th><td>at V<sub>CC</sub> (3.3&nbsp;V)</td><td>at V<sub>CC</sub> (3.3&nbsp;V); only the TCAN3413 has a 1.7&ndash;3.6&nbsp;V V<sub>IO</sub> pin</td></tr>
+            <tr><th>Max data rate</th><td>5&nbsp;Mbps</td><td>5&nbsp;Mbps EMC-certified, 8&nbsp;Mbps &ldquo;in simpler networks&rdquo;</td></tr>
+            <tr><th>Loop delay, 60&nbsp;&Omega; / 100&nbsp;pF</th><td>100&nbsp;ns typ, <strong>135&nbsp;ns max</strong></td><td>95 / 120&nbsp;ns typ, <strong>180&nbsp;ns max</strong></td></tr>
+            <tr><th>Bus fault (abs max)</th><td><strong>&plusmn;14&nbsp;V</strong></td><td><strong>&plusmn;58&nbsp;V</strong></td></tr>
+            <tr><th>Common-mode range</th><td>&plusmn;12&nbsp;V</td><td>&plusmn;30&nbsp;V</td></tr>
+            <tr><th>ESD, bus pins</th><td>&plusmn;25&nbsp;kV HBM, &plusmn;12&nbsp;kV IEC contact</td><td>&plusmn;10&nbsp;kV HBM, &plusmn;10&nbsp;kV IEC</td></tr>
+            <tr><th>Package</th><td>SOIC-8 (D), SOT-23-8 (DCN). FlexNode uses <code>TCAN334GDCNT</code></td><td>SOIC-8 (D), VSON-8 (DRB), SOT-23-THIN-8 (DDF, 1.1&nbsp;mm max height)</td></tr>
+            <tr><th>Pin 8 (STB)</th><td>internal pull-down</td><td>internal <strong>pull-up</strong></td></tr>
+            <tr><th>LCSC price</th><td>$2.21 (1+), $1.94 (10+), TCAN334GDCNR</td><td>$1.01 (1+), TCAN3414DDFR, out of stock</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>Some of this surprised me:</p>
+        <ul>
+          <li><strong>Supply.</strong> Both are single-supply 3.3&nbsp;V parts, so the TCAN3414 has no supply advantage here.</li>
+          <li><strong>Loop delay.</strong> I assumed the newer part would be faster. At the same test load its typical figures are close, but its worst case is 45&nbsp;ns <em>longer</em>.</li>
+          <li><strong>ESD.</strong> The older part has the higher rating on paper.</li>
+          <li><strong>Bus fault range.</strong> Here the TCAN3414 is far better: &plusmn;58&nbsp;V against &plusmn;14&nbsp;V, and &plusmn;30&nbsp;V common mode against &plusmn;12&nbsp;V. mjbots made the same move themselves. The pi3hat r4.5 went to &plusmn;58&nbsp;V from &plusmn;12&nbsp;V, and their moteus-c1 comparison rates the n1 and c1 at 58&nbsp;V against the r4 at 12&nbsp;V. I'm not going to pretend that doesn't matter.</li>
+          <li><strong>Footprint.</strong> This isn't the blocker, and I'd rather say so than invent one. Both parts come in an 8-pin SOT-23 with the same pin order. The trap is pin 8. On the TCAN3414 a floating STB pin means standby, while on the TCAN334G it means normal mode. FlexNode's netlist ties pins 5 and 8 to ground, so the new part would start in normal mode. I haven't overlaid TI's DDF land pattern on my DCN footprint, so there's no promise from me that the solder fillets would be good.</li>
+        </ul>
+
+        <h2>Why I'm still not doing it</h2>
+        <p><strong>The documented failures aren't transceiver failures.</strong> Everything I found about r4.11 boards dying points at the supply, the gate driver, the wiring and heat. A better transceiver doesn't change any of those.</p>
+        <p><strong>5&nbsp;Mbit is the ceiling of this bus anyway.</strong> moteus runs arbitration at 1&nbsp;Mbit and data at 5&nbsp;Mbit. CoreNode's timing has exactly two profiles, 1&nbsp;Mbit classic and 5&nbsp;Mbit FD. Across 45&nbsp;cm, propagation is about 2.3&nbsp;ns each way. The 8&nbsp;Mbps headroom buys me nothing.</p>
+        <p>The one real 5&nbsp;Mbit risk I found was in the firmware, not the silicon. moteus disables transmitter delay compensation (TDC) for this hardware family because the TCAN334G has a &ldquo;very low loop delay&rdquo;. The firmware samples the data bit 141&nbsp;ns after it starts, and the datasheet's worst-case loop delay is 135&nbsp;ns. That leaves 6&nbsp;ns of margin on a well-terminated bus, and negative margin on a heavily loaded one (180&nbsp;ns max). The fix is to turn TDC on. It's a two-line change on a code path other moteus families already use, and it turns 6&nbsp;ns into about 150&nbsp;ns. The TCAN3414 wouldn't have saved me here, because at 180&nbsp;ns max it makes TDC mandatory rather than optional. Either way, the firmware change has to happen.</p>
+        <p><strong>Rework has costs of its own.</strong> Each swap means lifting a 0.65&nbsp;mm-pitch SOT-23-8 off a four-layer board that sinks heat. The part sits next to the common-mode choke and the TVS. Doing that twelve times is twelve chances to lift a pad or bridge a pin on a board that worked yesterday. It would also put a second, unproven transceiver into a layout whose whole value is that it stays compatible with moteus. Upstream firmware knows the TCAN334G by name. It has never met a TCAN3414 on this hardware family.</p>
+        <p><strong>The protection that matters sits outside the transceiver.</strong> Each FlexNode has an SZNUP2105 TVS across the pair and a common-mode choke, and only the two end nodes are terminated. The CoreNode's bus master is a TCAN1044AV rated to &plusmn;58&nbsp;V. Its branch photorelays fail closed, and each one has the same TVS on its connector side, so the master can cut off a branch with a DC fault and keep the rest of the bus alive. Every FlexNode also disarms when commands stop arriving.</p>
+
+        <h2>The risk I'm accepting</h2>
+        <p>There is one case where the TCAN3414 clearly wins, and I should state it plainly: a sustained short from the pack to the CAN pair, such as a harness pinched in a crash. The SZNUP2105 won't save a TCAN334G there. It has a 24&nbsp;V working voltage and breaks down at 26.2&ndash;32&nbsp;V, so it clamps transients and can't hold off a DC short. Anything above &plusmn;14&nbsp;V is outside the TCAN334G's absolute maximum. On a daisy chain that fault reaches every transceiver on the segment, and the relays can isolate the branch but can't save the parts already on it.</p>
+        <p>I'm accepting that risk on v1.0 and handling it mechanically. The CoreNode spec already routes CAN as twisted pair at least 5&nbsp;mm from the power pair and never bundles the two in parallel. The real fix belongs in the next FlexNode revision. There the TCAN3414 costs a BOM line instead of twelve rework jobs, and I can deal with the STB pull-up and the longer loop delay on the schematic first.</p>
+
+        <h2>What hasn't happened yet</h2>
+        <p>No CAN traffic has run on these boards. There's no CAN-FD adapter on my bench yet, and FlexNode's register block has never been read over the wire. Everything above comes from datasheet arithmetic and design review, not measurement. The next steps are an adapter, TDC turned on, and error counters at 5&nbsp;Mbit with TDC on and off over a million frames. If the bus misbehaves, I'll write that up too.</p>
+
+        <h3>Sources</h3>
+        <ul class="src">
+          <li>TI, <a href="https://www.ti.com/lit/ds/symlink/tcan334g.pdf" target="_blank" rel="noopener">TCAN33x datasheet, SLLSEQ7F (rev. May 2025)</a>: features, absolute maximum ratings, ESD, pin functions, t<sub>PROP(LOOP)</sub></li>
+          <li>TI, <a href="https://www.ti.com/lit/ds/symlink/tcan3414.pdf" target="_blank" rel="noopener">TCAN341x datasheet, SLLSFS8A (rev. Nov 2023)</a>: features, package table, absolute maximum ratings, ESD, pin functions, STB behaviour, t<sub>PROP(LOOP1/2)</sub>, DDF drawing</li>
+          <li>LCSC <a href="https://www.lcsc.com/product-detail/C191005.html" target="_blank" rel="noopener">C191005 (TCAN334GDCNR)</a> and <a href="https://www.lcsc.com/product-detail/C24836183.html" target="_blank" rel="noopener">C24836183 (TCAN3414DDFR)</a>, prices read 24 September 2026</li>
+          <li>mjbots: <a href="https://blog.mjbots.com/2023/02/28/pi3hat-r4-5/" target="_blank" rel="noopener">pi3hat r4.5</a>, <a href="https://blog.mjbots.com/2024/04/30/moteus-c1/" target="_blank" rel="noopener">moteus-c1</a> (CAN fault tolerance table), <a href="https://blog.mjbots.com/2022/05/11/moteus-r4-11/" target="_blank" rel="noopener">moteus r4.11</a></li>
+          <li>My own design notes: FlexNode CAN subsystem design (8 September 2026) &sect;2, the FlexNode bring-up log and hardware doc, and the CoreNode rev 10.3 CAN bus spec</li>
+        </ul>
+      </div>
+
+      <div class="actions reveal" style="justify-content:flex-start;margin-top:1.4rem">
+        <a class="btn" href="../../projects/flexnode/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span>Read the FlexNode documentation</span>
+        </a>
+      </div>
+    </article>
+
+    <footer class="site-footer reveal">
+      <div class="foot-links">
+        <a class="foot-icon" href="mailto:adityadutta2006@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></a>
+        <a class="foot-icon" href="https://github.com/thedutta" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.2 11.19.6.11.82-.25.82-.56v-2.2c-3.34.71-4.04-1.58-4.04-1.58-.55-1.36-1.33-1.73-1.33-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.22 1.84 1.22 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.84 0-1.29.47-2.34 1.23-3.17-.12-.3-.53-1.52.12-3.16 0 0 1-.32 3.3 1.21a11.6 11.6 0 0 1 3-.4c1.02 0 2.05.13 3 .4 2.28-1.53 3.29-1.21 3.29-1.21.65 1.64.24 2.86.12 3.16.77.83 1.23 1.88 1.23 3.17 0 4.54-2.81 5.53-5.49 5.83.43.37.81 1.1.81 2.22v3.29c0 .31.21.68.82.56A12.01 12.01 0 0 0 24 12.29C24 5.78 18.63.5 12 .5z"/></svg></a>
+        <a class="foot-icon" href="https://www.linkedin.com/in/aditya-dutta-058808213" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.27c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.79 1.75 1.75-.78 1.76-1.75 1.76zm13.5 12.27h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96v5.7h-3v-11h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59v6.47z"/></svg></a>
+      </div>
+      <div class="foot-note">© Aditya Dutta · Bengaluru, India</div>
+    </footer>
+  </div>
+
+  <script src="../../assets/reveal.js"></script>
+  <script src="../../assets/ui.js"></script>
+</body>
+</html>

@@ -15,6 +15,7 @@ Aditya Dutta — personal portfolio, project documentation and blog. Static, no 
 /projects/rovolt/       RoVolt — WHEG agri robot (doc)
 /blog/                  Blog index
 /blog/energy-first-sylvara/   Sample post (copy as a template for new posts)
+/blog/flexnode-keeping-tcan334g/   Post: why FlexNode keeps the TCAN334G (2026-09-24)
 /radar/                 RADAR Robotics Lab proposal (rebuilt in the glass theme)
 /CSEA/                  Academic hub (reskinned to the glass theme)
 ```
