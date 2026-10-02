@@ -60,8 +60,6 @@
       <h2 style="margin:0 0 0.5rem;font-size:1.15rem">You scanned a FlexNode.</h2>
       <p class="prose" style="margin:0 0 1rem">This is a <strong>v1.0</strong> board. It booted on 6 September 2026 and drove a motor two days later. Here is what it is for, what it can do today, and how to power it without letting the magic smoke out.</p>
       <div class="actions" style="justify-content:flex-start">
-        <a class="btn call" href="https://github.com/thedutta/FlexNode" target="_blank" rel="noopener">GitHub repo
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
         <a class="btn" href="#status">Where it stands</a>
         <a class="btn" href="#specs">Specs</a>
         <a class="btn" href="#safety">Safety</a>
@@ -200,9 +198,9 @@
     <section class="doc-section reveal" id="software">
       <h2>Firmware &amp; the CAN layer</h2>
       <div class="prose">
-        <p>The firmware is a fork of moteus that keeps the FOC inner loop, the FDCAN protocol and the bootloader byte-for-byte. FlexNode's changes are small and deliberately off the control path: a board-identity hardcode, an encoder chip-select remap, and a two-line drive-side pin remap that corrects the board's phase swap without touching a line of control code. On top of that sit the status and lighting driver, the IMU and the FlexNode register block. Flash a virgin board over the <strong>FLASH</strong> header with SWD; after that, updates go over CAN with <code>moteus_tool</code>, exactly as a moteus does. Step-by-step in <a href="https://github.com/thedutta/FlexNode/blob/main/docs/firmware.md" target="_blank" rel="noopener">docs/firmware.md</a>.</p>
+        <p>The firmware is a fork of moteus that keeps the FOC inner loop, the FDCAN protocol and the bootloader byte-for-byte. FlexNode's changes are small and deliberately off the control path: a board-identity hardcode, an encoder chip-select remap, and a two-line drive-side pin remap that corrects the board's phase swap without touching a line of control code. On top of that sit the status and lighting driver, the IMU and the FlexNode register block. Flash a virgin board over the <strong>FLASH</strong> header with SWD; after that, updates go over CAN with <code>moteus_tool</code>, exactly as a moteus does.</p>
         <p>The CAN layer <strong>extends</strong> the moteus register protocol rather than inventing one, so moteus_tool, tview and the CAN bootloader all keep working. A node presents as one axis plus a set of <strong>typed channel slots</strong> that the host reads at boot — supporting a new kind of peripheral adds an enum value rather than a register range, and one host driver covers every node in the fleet. Each query is composed per node: the host asks only for the hardware that node actually carries. Traffic is strictly poll-response on a schedule the master owns, so no node ever transmits unbidden; if the master goes quiet, the graded host-loss states take over. Ten nodes on one ~45 cm chain works out to roughly <strong>350 Hz</strong> at two-thirds bus occupancy.</p>
-        <p>None of the CAN work has been exercised over a real bus yet — there is no adapter on the bench, and the register block has never been read. The full spec is in <a href="https://github.com/thedutta/FlexNode/blob/main/docs/can-layer.md" target="_blank" rel="noopener">docs/can-layer.md</a>.</p>
+        <p>None of the CAN work has been exercised over a real bus yet — there is no adapter on the bench, and the register block has never been read.</p>
       </div>
     </section>
 
@@ -212,7 +210,7 @@
         <ul>
           <li>✓ Schematic + layout complete — v1.0 fabricated; every BOM line datasheet-verified before committing copper</li>
           <li>✓ Firmware compatibility layer implemented — board identity, CS remap, phase-order fix</li>
-          <li>✓ Distributed CAN layer designed, v2 — typed channel slots, build-time profiles, graded host-loss autonomy (<a href="https://github.com/thedutta/FlexNode/blob/main/docs/can-layer.md" target="_blank" rel="noopener">spec</a>)</li>
+          <li>✓ Distributed CAN layer designed, v2 — typed channel slots, build-time profiles, graded host-loss autonomy</li>
           <li>✓ <strong>First boot, 6 Sep 2026</strong> — power tree, boot-from-flash, status LED, IMU, moteus main loop</li>
           <li>✓ <strong>First spin, 8 Sep 2026</strong> — power stage, phase-current sensing, bus sense, FET thermals and the abort paths validated</li>
           <li>◦ Encoder → calibration → closed-loop FOC and the phase-order check — <em>next</em></li>
@@ -227,12 +225,6 @@
       <h2>Build your own</h2>
       <div class="prose">
         <p>FlexNode is open hardware, inheriting moteus's Apache-2.0 license; attribution lives in the repo's NOTICE file. Schematics, BOM and gerbers are all in the repo. FlexNode is <strong>moteus-compatible</strong> — it speaks the moteus register protocol and works with moteus_tool and fdcanusb. “moteus” and “mjbots” are trademarks of mjbots Robotic Systems; FlexNode is not affiliated with or endorsed by mjbots.</p>
-      </div>
-      <div class="actions" style="justify-content:flex-start">
-        <a class="btn call" href="https://github.com/thedutta/FlexNode" target="_blank" rel="noopener">Repository
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
-        <a class="btn" href="https://github.com/thedutta/FlexNode/tree/main/hardware" target="_blank" rel="noopener">Schematic &amp; BOM</a>
-        <a class="btn" href="https://github.com/thedutta/FlexNode/blob/main/docs/hardware.md" target="_blank" rel="noopener">Hardware docs</a>
       </div>
     </section>
 
