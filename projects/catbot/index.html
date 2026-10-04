@@ -102,7 +102,7 @@
           <div><dt>Sensing</dt><dd>OAK-D Lite passive stereo, distributed VL53L5CX time-of-flight, Knowles MEMS mics into the ultrasonic band, per-node IMU and magnetic encoders</dd></div>
           <div><dt>Power</dt><dd>8S2P Molicel INR21700-P45B, ~29.6 V nominal, 266 Wh</dd></div>
           <div><dt>Structure</dt><dd>Forged carbon fibre and titanium as production intent; 3D-printed structure and CNC limb mounts in hand</dd></div>
-          <div><dt>Status</dt><dd>Design closed, torso assembled; the first FlexNode has driven a motor open-loop (September 2026). Closed-loop control, CAN and multi-node integration are not yet validated</dd></div>
+          <div><dt>Status</dt><dd>Design closed, torso assembled; the first FlexNode has driven a motor under its own commutation at 24 V (October 2026). Closed-loop control, CAN and multi-node integration are not yet validated</dd></div>
         </dl>
       </div>
     </section>
@@ -310,12 +310,12 @@
           <li>✓ Firmware compatibility layer written, building green and <strong>running on the first article</strong> — board-identity hardcode, pin remaps, drive-side phase-order fix, bus-sense rescale, plus a WS2812 status-LED driver</li>
           <li>✓ An earlier printed quadruped prototype built and walked — the predecessor this design learned from</li>
           <li>◦ URDF export off the closed assembly, for frames and Isaac Sim — <em>days away</em></li>
-          <li>◑ FlexNode bring-up — first board booted 6 Sep (<a href="../flexnode/#first-boot">first boot</a>) and drove a motor open-loop 8 Sep (<a href="../flexnode/#first-spin">first spin</a>); encoder, closed-loop calibration and CAN enumeration <em>next</em></li>
+          <li>◑ FlexNode bring-up — first board booted 6 Sep (<a href="../flexnode/#first-boot">first boot</a>) and drove a motor open-loop 8 Sep (<a href="../flexnode/#first-spin">first spin</a>); encoder and commutation validated at 24 V on 4 Oct; closed-loop calibration and CAN enumeration <em>next</em></li>
           <li>◦ Multi-node CAN-FD choreography and time sync</li>
           <li>◦ Jetson + STM32 stack integration — <em>specified, not yet running</em></li>
           <li>◦ Isaac Sim policy training and sim-to-real transfer</li>
         </ul>
-        <p>Nothing on this page describes a robot that has been validated end-to-end. One FlexNode has driven a motor open-loop on the bench; closed-loop control, CAN and everything multi-node are designed, not yet working. Where something is designed rather than working, it says so.</p>
+        <p>Nothing on this page describes a robot that has been validated end-to-end. One FlexNode has driven a motor open-loop at 24 V on the bench; closed-loop control, CAN and everything multi-node are designed, not yet working. Where something is designed rather than working, it says so.</p>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
         <span style="display:block;aspect-ratio:1600/887;background:#0a0a0d">

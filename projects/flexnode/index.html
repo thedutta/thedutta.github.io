@@ -58,7 +58,7 @@
     <!-- Board-in-hand utility band -->
     <div class="card reveal">
       <h2 style="margin:0 0 0.5rem;font-size:1.15rem">You scanned a FlexNode.</h2>
-      <p class="prose" style="margin:0 0 1rem">This is a <strong>v1.0</strong> board. It booted on 6 September 2026 and drove a motor two days later. Here is what it is for, what it can do today, and how to power it without letting the magic smoke out.</p>
+      <p class="prose" style="margin:0 0 1rem">This is a <strong>v1.0</strong> board. It booted on 6 September 2026, drove a motor two days later, and has since run one at 24 V under its own commutation. Here is what it is for, what it can do today, and how to power it without letting the magic smoke out.</p>
       <div class="actions" style="justify-content:flex-start">
         <a class="btn" href="#status">Where it stands</a>
         <a class="btn" href="#specs">Specs</a>
@@ -117,7 +117,7 @@
     </section>
 
     <section class="doc-section reveal" id="status">
-      <span class="kicker" style="display:block;margin-bottom:0.45rem">Bring-up · September 2026</span>
+      <span class="kicker" style="display:block;margin-bottom:0.45rem">Bring-up · September–October 2026</span>
       <h2>Where it stands</h2>
       <div class="card" style="padding:0;overflow:hidden;margin:0 auto 0.6rem;max-width:460px">
         <span style="display:block;aspect-ratio:1035/1280;background:#0a0a0d">
@@ -127,17 +127,18 @@
           </picture>
         </span>
       </div>
-      <p class="cap">Electronics and thermals fully validated — September 2026.</p>
+      <p class="cap">Electronics, sensing and commutation validated — October 2026.</p>
       <div class="prose">
         <p id="first-boot"><strong>First boot, 6 September 2026.</strong> A v1.0 board came up on a 13 V bench adapter with no motor and no encoder fitted. Both logic rails measured stable, the MCU boots from flash, and the moteus → FlexNode port runs: steady status LED, servo reporting <em>stopped</em>. Later the same day the onboard IMU answered over I²C and streamed samples — verified by tilting the board and watching the status LED shift hue, no CAN adapter needed.</p>
         <p id="first-spin"><strong>First spin, 8 September 2026.</strong> Two days later the power stage was energized for the first time and a <strong>GIM 8108-8 turned under FlexNode's own drive</strong>: open-loop voltage FOC, no encoder in the loop, from a supply that current-limits at ~1 A so the bench — not the winding — was the thing that could give out. The stage that mattered ran eight movement loops, ~140 s energized, zero faults, the FETs plateauing at 38.7 °C. Then a deliberate over-demand asked for more than the adapter could give: the bus collapsed, and the software abort caught it and de-energized cleanly. A protection path exercised for real rather than merely written.</p>
-        <p>The sensing came out of it validated too. All three current-sense channels calibrated, and their phase currents sum to about zero — which checks the sense chain and the phase wiring together. Bus-voltage telemetry was confirmed against a meter and trimmed. <strong>The power stage and every sensing path on the board are now hardware-validated. The encoder isn't fitted yet, so nothing closed-loop has ever run, and CAN is untested for want of an adapter.</strong></p>
+        <p>The sensing came out of it validated too. All three current-sense channels calibrated, and their phase currents sum to about zero — which checks the sense chain and the phase wiring together. Bus-voltage telemetry was confirmed against a meter and trimmed. <strong>The power stage and every sensing path on the board came out of it hardware-validated.</strong></p>
+        <p><strong>Under its own commutation at 24 V, 4 October 2026.</strong> With the magnetic encoder fitted, the board ran the same GIM 8108-8 from a 24 V bench supply for <strong>36 rotor revolutions — 4.5 turns of the output at 15 rpm — holding 100.0 % tracking</strong> against the commanded field, peaking at 6.8 A with the FETs topping out at 41 °C and no abort. The encoder counted every one of those revolutions without dropping a single count; the motor's <strong>21 pole pairs</strong> fell out of the same data, matching its datasheet; and the phase-order correction that had only ever been checked against the schematic is now <strong>confirmed on real hardware</strong>. Commutation is validated. <strong>Closed-loop FOC still has not run</strong> — calibration needs a host link the bench does not have yet, and CAN remains untested for want of an adapter.</p>
       </div>
       <div class="card" style="margin-top:1rem">
         <dl class="specs">
-          <div><dt>Validated</dt><dd>Power tree · boot-from-flash and the SWD/flash toolchain · WS2812B status LED · moteus main loop · LSM6DS3TR-C IMU over I²C · DRV8353S and the six-FET power stage under load · all three phase-current channels · bus-voltage sense vs DMM · FET thermistor · open-loop commutation and speed tracking · the bus-sag abort path</dd></div>
-          <div><dt>Not yet</dt><dd>The AS5047P encoder is still unsoldered, so <strong>no closed-loop FOC, no calibration and no position control</strong> has run · the phase-order fix is netlist-verified but unconfirmed on hardware (open-loop drive is indifferent to it) · CAN-FD has never been exercised · servo output, 5 V rail sense, ToF · anything multi-node</dd></div>
-          <div><dt>Next</dt><dd>Solder the encoder → calibrate → closed-loop FOC and the phase-order check · get a CAN-FD adapter → enumeration, telemetry, config persistence</dd></div>
+          <div><dt>Validated</dt><dd>Power tree · boot-from-flash and the SWD/flash toolchain · WS2812B status LED · moteus main loop · LSM6DS3TR-C IMU over I²C · DRV8353S and the six-FET power stage under load at 24 V · all three phase-current channels · bus-voltage sense vs DMM · FET and motor thermistors · <strong>the magnetic encoder</strong> · <strong>21 pole pairs</strong> · <strong>the phase-order fix</strong> · open-loop commutation holding sync over 36 revolutions · the bus-sag abort path</dd></div>
+          <div><dt>Not yet</dt><dd><strong>No closed-loop FOC, no calibration and no position control</strong> has ever run · CAN-FD has never been exercised · config persistence · servo output, 5 V rail sense, ToF · anything multi-node. All of it waits on a host link to the board.</dd></div>
+          <div><dt>Next</dt><dd>A host link → calibration → closed-loop FOC and position control · a CAN-FD adapter → enumeration, telemetry, config persistence</dd></div>
         </dl>
       </div>
     </section>
@@ -190,7 +191,7 @@
           <p><strong>Bus voltage:</strong> up to ~44 V (10S LiPo). Bus ceramics are rated 50 V and the power FETs 60 V — sized for that rail, with no margin to spare above it.</p>
           <p><span style="color:#ffcc66;font-weight:600">⚠ Never hot-plug a FlexNode onto a live pack.</span> Cable inductance and the ceramic bus form an LC tank that can ring toward 2× and blow past the 60 V FETs. Always bring the bus up through the core board's <strong>pre-charge</strong> — or a current-limited supply on the bench.</p>
           <p><span style="color:#ffcc66;font-weight:600">⚠ Do not flash unmodified moteus.</span> The motor phase A/C outputs are swapped in copper relative to stock and the strap pins are repurposed. FlexNode's firmware compensates for both; stock firmware would close the current loop on the wrong winding.</p>
-          <p><strong>Status:</strong> v1.0 is in bring-up. The power stage and sensing are hardware-validated; closed-loop control and CAN are not. Everything here remains subject to change until formal validation is complete.</p>
+          <p><strong>Status:</strong> v1.0 is in bring-up. The power stage, sensing, the encoder and commutation are hardware-validated at 24 V; <strong>closed-loop control and CAN are not</strong>. Everything here remains subject to change until formal validation is complete.</p>
         </div>
       </div>
     </section>
@@ -198,7 +199,7 @@
     <section class="doc-section reveal" id="software">
       <h2>Firmware &amp; the CAN layer</h2>
       <div class="prose">
-        <p>The firmware is a fork of moteus that keeps the FOC inner loop, the FDCAN protocol and the bootloader byte-for-byte. FlexNode's changes are small and deliberately off the control path: a board-identity hardcode, an encoder chip-select remap, and a two-line drive-side pin remap that corrects the board's phase swap without touching a line of control code. On top of that sit the status and lighting driver, the IMU and the FlexNode register block. Flash a virgin board over the <strong>FLASH</strong> header with SWD; after that, updates go over CAN with <code>moteus_tool</code>, exactly as a moteus does.</p>
+        <p>The firmware is a fork of moteus that keeps the FOC inner loop, the FDCAN protocol and the bootloader byte-for-byte. FlexNode's changes are small and deliberately off the control path: a board-identity hardcode, an encoder chip-select remap, and a two-line drive-side pin remap that corrects the board's phase swap without touching a line of control code — confirmed correct on hardware in October 2026. On top of that sit the status and lighting driver, the IMU and the FlexNode register block. Flash a virgin board over the <strong>FLASH</strong> header with SWD; after that, updates go over CAN with <code>moteus_tool</code>, exactly as a moteus does.</p>
         <p>The CAN layer <strong>extends</strong> the moteus register protocol rather than inventing one, so moteus_tool, tview and the CAN bootloader all keep working. A node presents as one axis plus a set of <strong>typed channel slots</strong> that the host reads at boot — supporting a new kind of peripheral adds an enum value rather than a register range, and one host driver covers every node in the fleet. Each query is composed per node: the host asks only for the hardware that node actually carries. Traffic is strictly poll-response on a schedule the master owns, so no node ever transmits unbidden; if the master goes quiet, the graded host-loss states take over. Ten nodes on one ~45 cm chain works out to roughly <strong>350 Hz</strong> at two-thirds bus occupancy.</p>
         <p>None of the CAN work has been exercised over a real bus yet — there is no adapter on the bench, and the register block has never been read.</p>
       </div>
@@ -213,7 +214,8 @@
           <li>✓ Distributed CAN layer designed, v2 — typed channel slots, build-time profiles, graded host-loss autonomy</li>
           <li>✓ <strong>First boot, 6 Sep 2026</strong> — power tree, boot-from-flash, status LED, IMU, moteus main loop</li>
           <li>✓ <strong>First spin, 8 Sep 2026</strong> — power stage, phase-current sensing, bus sense, FET thermals and the abort paths validated</li>
-          <li>◦ Encoder → calibration → closed-loop FOC and the phase-order check — <em>next</em></li>
+          <li>✓ <strong>24 V bench, 4 Oct 2026</strong> — encoder, 21 pole pairs and the phase-order fix all confirmed on hardware; 36 rotor revolutions at 100.0 % tracking</li>
+          <li>◦ Host link → calibration → closed-loop FOC and position control — <em>next</em></li>
           <li>◦ CAN-FD adapter → enumeration, register block over the wire, config persistence — <em>next</em></li>
           <li>◦ Sensor firmware: load cell, ToF, servo, remaining register handlers</li>
           <li>◦ CatBot integration — ten nodes on one chain behind the corenode</li>
