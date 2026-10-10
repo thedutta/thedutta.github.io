@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Splitbaby ledger tests</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="../assets/theme.css" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    body { padding-top: 0; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 1.4rem 1rem 3rem; }
+    h1 { font-size: 1.3rem; font-weight: 300; letter-spacing: 0.02em; text-transform: uppercase; margin-bottom: 0.2rem; }
+    .sum { color: var(--text-dim); font-size: 0.82rem; margin-bottom: 1.1rem; }
+    .sum b { font-weight: 600; }
+    .t { display: flex; gap: 0.6rem; padding: 0.4rem 0; border-top: 1px solid rgba(255,255,255,0.07); font-size: 0.8rem; }
+    .t:first-of-type { border-top: 0; }
+    .m { flex: 0 0 1.1rem; font-weight: 700; }
+    .pass .m { color: #60f0b4; }
+    .fail .m { color: #ff6b6b; }
+    .fail .n { color: #ff9b9b; }
+    .msg { color: var(--text-faint); font-size: 0.74rem; margin-top: 0.15rem; font-family: ui-monospace, Menlo, monospace; }
+    .tot { margin-top: 1.2rem; font-size: 1rem; font-weight: 600; }
+    .tot.ok { color: #60f0b4; }
+    .tot.no { color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Splitbaby ledger tests</h1>
+    <p class="sum">Pure math only &mdash; no Firestore, no DOM. The invariant that matters:
+      <b>every balance set sums to exactly zero.</b></p>
+    <div id="out">Running&hellip;</div>
+  </div>
+
+  <script type="module">
+    import { run, count } from "./tests.js";
+
+    const results = run();
+    const failed = results.filter(r => !r.ok);
+    const out = document.getElementById("out");
+
+    out.innerHTML =
+      results.map(r =>
+        '<div class="t ' + (r.ok ? "pass" : "fail") + '">' +
+          '<span class="m">' + (r.ok ? "✓" : "✕") + '</span>' +
+          '<span class="n">' + r.name +
+            (r.ok ? "" : '<div class="msg">' + String(r.msg).replace(/</g, "&lt;") + "</div>") +
+          "</span>" +
+        "</div>"
+      ).join("") +
+      '<div class="tot ' + (failed.length ? "no" : "ok") + '">' +
+        (results.length - failed.length) + " / " + count() + " passed" +
+        (failed.length ? " — " + failed.length + " FAILED" : "") +
+      "</div>";
+
+    document.title = (failed.length ? "✕ " : "✓ ") + (results.length - failed.length) + "/" + count() + " — Splitbaby tests";
+  </script>
+</body>
+</html>

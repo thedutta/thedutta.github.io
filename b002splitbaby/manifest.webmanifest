@@ -1,0 +1,21 @@
+{
+  "name": "B002 Splitbaby",
+  "short_name": "B002",
+  "description": "Shared expenses for flat B002 — simplified debts, unlimited entries.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050506",
+  "theme_color": "#050506",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    { "src": "../splitbaby/icons/b002-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "../splitbaby/icons/b002-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "../splitbaby/icons/b002-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Add expense", "url": "./#/add", "short_name": "Add" },
+    { "name": "Settle up", "url": "./#/settle", "short_name": "Settle" }
+  ]
+}

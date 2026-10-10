@@ -1,0 +1,82 @@
+rules_version = '2';
+
+/* ============================================================
+   Splitbaby security rules
+
+   Access is intentionally OPEN: no sign-in, no passcode, because
+   the whole point is that adding an expense takes one tap. The
+   rules below are therefore not about who writes, but about
+   keeping an open door from becoming a lost ledger:
+
+     1. shape validation - a malformed or oversized write is
+        rejected, so the app can never be corrupted into not
+        loading by a stray client.
+     2. no hard deletes  - removal is a `deleted` flag, and every
+        change appends to the document history, so nothing ever
+        disappears irrecoverably.
+
+   Paste this into Firestore -> Rules -> Publish.
+   ============================================================ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function okMoney(v) {
+      return v is int && v > 0 && v <= 10000000;        // up to Rs 1,00,000
+    }
+
+    function okExpense(d) {
+      return d.keys().hasAll(['kind', 'amountPaise', 'paidBy', 'splits',
+                              'participants', 'flat', 'date', 'deleted'])
+        && d.kind in ['expense', 'settlement']
+        && okMoney(d.amountPaise)
+        && d.paidBy is string && d.paidBy.size() > 0 && d.paidBy.size() <= 40
+        && d.splits is map && d.splits.size() >= 1 && d.splits.size() <= 24
+        && d.participants is list && d.participants.size() >= 1 && d.participants.size() <= 24
+        && d.flat in ['b002', 'b603']
+        && d.date is string && d.date.size() == 10
+        && d.deleted is bool
+        && (!('title' in d) || (d.title is string && d.title.size() <= 80))
+        && (!('note' in d)  || (d.note is string  && d.note.size() <= 300))
+        && (!('history' in d) || (d.history is list && d.history.size() <= 20));
+    }
+
+    function okPerson(d) {
+      return d.keys().hasAll(['name', 'flat'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 40
+        && d.flat in ['b002', 'b603']
+        && (!('kind' in d) || d.kind in ['member', 'visitor'])
+        && (!('upi' in d)  || (d.upi is string && d.upi.size() <= 64))
+        && (!('active' in d) || d.active is bool);
+    }
+
+    function okPreset(d) {
+      return d.keys().hasAll(['label', 'amountPaise'])
+        && d.label is string && d.label.size() > 0 && d.label.size() <= 40
+        && okMoney(d.amountPaise);
+    }
+
+    match /expenses/{id} {
+      allow read: if true;
+      allow create, update: if okExpense(request.resource.data);
+      allow delete: if false;                 // soft delete only
+    }
+
+    match /people/{id} {
+      allow read: if true;
+      allow create, update: if okPerson(request.resource.data);
+      allow delete: if false;
+    }
+
+    match /presets/{id} {
+      allow read: if true;
+      allow create, update: if okPreset(request.resource.data);
+      allow delete: if false;
+    }
+
+    // anything not matched above is denied by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>B603 Splitbaby</title>
+  <meta name="description" content="Shared expenses for flat B603 — who owes whom, simplified, with no limit on how much you log." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#050506" />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="../splitbaby/icons/b603-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="../splitbaby/icons/b603-apple-180.png" />
+
+  <!-- iPhone home-screen app -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="B603" />
+
+  <!-- the Liquid Glass system from the main site, then this app's own layer -->
+  <link rel="stylesheet" href="../assets/theme.css" />
+  <link rel="stylesheet" href="../splitbaby/app.css" />
+</head>
+<body class="sb">
+  <picture class="bg">
+    <source type="image/webp" sizes="100vw"
+      srcset="../assets/bg/bg-400.webp 400w, ../assets/bg/bg-600.webp 600w, ../assets/bg/bg-800.webp 800w, ../assets/bg/bg-1080.webp 1080w, ../assets/bg/bg-1440.webp 1440w, ../assets/bg/bg-1920.webp 1920w" />
+    <img src="../assets/bg/bg-800.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high"
+      sizes="100vw"
+      srcset="../assets/bg/bg-400.jpg 400w, ../assets/bg/bg-600.jpg 600w, ../assets/bg/bg-800.jpg 800w, ../assets/bg/bg-1080.jpg 1080w, ../assets/bg/bg-1440.jpg 1440w, ../assets/bg/bg-1920.jpg 1920w" />
+  </picture>
+
+  <div id="app"></div>
+
+  <noscript>
+    <div class="container" style="padding-top:4rem">
+      <section class="card">
+        <h1 style="font-size:1rem;font-weight:600;margin-bottom:0.4rem">Splitbaby needs JavaScript</h1>
+        <p style="font-size:0.85rem;color:rgba(255,255,255,0.66)">
+          The whole ledger is computed in your browser, so there is nothing to show without it.
+        </p>
+      </section>
+    </div>
+  </noscript>
+
+  <script>window.SPLITBABY_FLAT = "b603";</script>
+  <script src="../splitbaby/ui-glue.js" defer></script>
+  <script type="module" src="../splitbaby/app.js"></script>
+
+  <script>
+  /* Service worker lives in THIS folder on purpose: GitHub Pages
+     cannot send Service-Worker-Allowed, so a worker under
+     /splitbaby/ could never take scope over /b603splitbaby/. */
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").then(function (reg) {
+        reg.addEventListener("updatefound", function () {
+          var sw = reg.installing;
+          if (!sw) return;
+          sw.addEventListener("statechange", function () {
+            if (sw.state === "installed" && navigator.serviceWorker.controller) {
+              var bar = document.createElement("div");
+              bar.className = "sb-toasts";
+              bar.innerHTML =
+                '<div class="sb-toast"><span class="t-msg">A new version is ready.</span>' +
+                '<button class="btn sb-btn tiny" type="button">Refresh</button></div>';
+              document.body.appendChild(bar);
+              bar.querySelector("button").addEventListener("click", function () {
+                if (reg.waiting) reg.waiting.postMessage("skip-waiting");
+                location.reload();
+              });
+            }
+          });
+        });
+      }).catch(function (e) { console.warn("[splitbaby] sw registration failed", e); });
+    });
+  }
+  </script>
+</body>
+</html>
