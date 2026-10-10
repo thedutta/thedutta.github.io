@@ -18,7 +18,7 @@
    ============================================================ */
 
 import { FIREBASE_CONFIG } from "./firebase-config.js";
-import { PEOPLE, SEED_PRESETS, registerPerson, slugify, personName } from "./config.js";
+import { PEOPLE, registerPerson, slugify, personName } from "./config.js";
 import { live, sumSplits, formatMoney, isSpend } from "./ledger.js";
 
 const SDK        = "https://www.gstatic.com/firebasejs/12.6.0/";
@@ -35,7 +35,6 @@ export const state = {
   mode: "demo",            /* "demo" | "live" */
   sync: "connecting",      /* connecting | live | cached | offline | demo | error */
   expenses: [],            /* newest first */
-  presets: [],
   error: null,
   fromMirror: false
 };
@@ -135,7 +134,7 @@ const demoBackend = {
   store: null,
 
   init: function () {
-    this.store = lsGet(DEMO_KEY) || { expenses: {}, people: {}, presets: {} };
+    this.store = lsGet(DEMO_KEY) || { expenses: {}, people: {} };
     return Promise.resolve();
   },
 
@@ -156,9 +155,6 @@ const demoBackend = {
       }, this),
       people: Object.keys(this.store.people).map(function (id) {
         return Object.assign({ id: id }, this.store.people[id]);
-      }, this),
-      presets: Object.keys(this.store.presets).map(function (id) {
-        return Object.assign({ id: id }, this.store.presets[id]);
       }, this),
       cached: false
     });
@@ -243,8 +239,8 @@ const firestoreBackend = {
 
   watch: function (cb) {
     var self = this, F = this.F;
-    var latest = { expenses: [], people: [], presets: [], cached: false };
-    var seen = { expenses: false, people: false, presets: false };
+    var latest = { expenses: [], people: [], cached: false };
+    var seen = { expenses: false, people: false };
 
     function fan(which, rows, cached) {
       latest[which] = rows;
@@ -272,7 +268,6 @@ const firestoreBackend = {
 
     sub("expenses", normalizeExpense);
     sub("people", function (id, d) { return Object.assign({ id: id }, d); });
-    sub("presets", function (id, d) { return Object.assign({ id: id }, d); });
   },
 
   create: function (coll, id, data) {
@@ -379,9 +374,6 @@ export function start(flat) {
       (snap.people || []).forEach(registerPerson);
 
       state.expenses = sortExpenses(flattenOrder(snap.expenses || []));
-      state.presets = (snap.presets || []).slice().sort(function (a, b) {
-        return String(a.label || "").localeCompare(String(b.label || ""));
-      });
       state.ready = true;
       state.fromMirror = false;
       state.error = null;
@@ -444,15 +436,6 @@ function seedIfEmpty(snap) {
       }
     };
   });
-
-  if (!(snap.presets || []).length) {
-    SEED_PRESETS.forEach(function (p) {
-      ops.push({
-        type: "create", coll: "presets", id: slugify(p.label),
-        data: { label: p.label, amountPaise: p.amountPaise, category: p.category, at: Date.now() }
-      });
-    });
-  }
 
   if (!ops.length) return;
   backend.batch(ops).catch(function (e) {
@@ -673,7 +656,7 @@ export function restoreExpense(id, by) {
 }
 
 /* ------------------------------------------------------------
-   People and presets
+   People
    ------------------------------------------------------------ */
 
 export function addGuest(name, flat, upi) {
@@ -702,20 +685,6 @@ export function addGuest(name, flat, upi) {
 export function setPersonActive(id, active) {
   registerPerson({ id: id, active: active });
   return backend.update("people", id, { active: !!active });
-}
-
-export function addPreset(label, amountPaise, category) {
-  var clean = String(label || "").trim().slice(0, 40);
-  if (!clean) return Promise.reject(new Error("A label is required"));
-  return backend.create("presets", slugify(clean) || null, {
-    label: clean, amountPaise: Math.round(amountPaise), category: category || "other", at: Date.now()
-  });
-}
-
-export function removePreset(id) {
-  /* presets are the one disposable collection, but rules forbid
-     hard deletes everywhere, so this hides rather than destroys */
-  return backend.update("presets", id, { hidden: true });
 }
 
 /* ------------------------------------------------------------

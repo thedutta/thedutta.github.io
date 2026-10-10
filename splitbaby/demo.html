@@ -38,10 +38,8 @@ const settle = ["s1", {
   history: [{ at: now - D, by: "nikhil", action: "settled", summary: "300" }]
 }];
 
-const store = { expenses: {}, people: {}, presets: {} };
+const store = { expenses: {}, people: {} };
 rows.concat([settle]).forEach(([id, d]) => { store.expenses[id] = d; });
-store.presets["water-can"] = { label: "Water can", amountPaise: 6000, category: "water", at: now };
-store.presets["milk"] = { label: "Milk", amountPaise: 3000, category: "groceries", at: now };
 localStorage.setItem("splitbaby.demo.v1", JSON.stringify(store));
 localStorage.setItem("splitbaby.pref.b002", JSON.stringify({ me: "dutta", graphMode: "owes", debtScope: "all", month: null, catMemory: {} }));
 localStorage.setItem("splitbaby.pref.b603", JSON.stringify({ me: "aryan", graphMode: "owes", debtScope: "all", month: null, catMemory: {} }));

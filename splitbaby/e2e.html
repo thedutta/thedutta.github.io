@@ -196,6 +196,38 @@ const t9b = [...D().querySelectorAll(".sb-toggle")].find(t => /Nikhil/.test(t.te
 ok(t9b && t9b.getAttribute("aria-pressed") === "false", "a sync mid-entry leaves the unselected person unselected");
 ok(D().querySelector(".sb-amount input").value === "777", "and leaves the typed amount alone");
 
+// ---------- 10. the graph must not be rebuilt when nothing changed ----------
+f.contentWindow.location.hash = "#/";
+await sleep(900);
+const svg1 = D().querySelector(".sb-graph");
+ok(!!svg1, "the graph renders");
+const img1 = D().querySelectorAll(".sb-graph image").length;
+// re-selecting the same person re-renders the page but changes nothing here
+const already = [...D().querySelectorAll(".sb-who")].find(b => b.getAttribute("aria-pressed") === "true");
+if (already) already.click();
+await sleep(700);
+const svg2 = D().querySelector(".sb-graph");
+ok(svg1 === svg2, "an identical re-render reuses the same svg, so faces cannot blink");
+ok(D().querySelectorAll(".sb-graph image").length === img1, "and the same image elements survive");
+// a real change must still redraw
+const other = [...D().querySelectorAll(".sb-who")].find(b => b.getAttribute("aria-pressed") === "false");
+if (other) other.click();
+await sleep(700);
+ok(D().querySelector(".sb-graph") !== svg1, "selecting someone else does redraw it");
+
+// ---------- 11. the open-access notice is visible ----------
+ok(/do not enter private information/i.test(D().body.textContent), "the footer warns there is no security on the page");
+
+// ---------- 12. the month bars must actually have width ----------
+f.contentWindow.location.hash = "#/";
+await sleep(800);
+const fills = [...D().querySelectorAll(".sb-bar-fill")];
+ok(fills.length > 0, "the month card draws per-person bars");
+if (fills.length) {
+  const widest = Math.max(...fills.map(el => el.getBoundingClientRect().width));
+  ok(widest > 10, "the biggest spender's bar is actually filled (" + Math.round(widest) + "px)");
+}
+
 const fails = log.filter(l => l.startsWith("FAIL")).length;
 document.getElementById("out").textContent =
   "E2E\n" + log.join("\n") + "\n\n" + (log.length - fails) + "/" + log.length + " passed\nENDE2E";

@@ -99,6 +99,43 @@ function avatar(id, size) {
   });
 }
 
+/* A person tile: their photo is the card, with the caption fading in
+   over the bottom of it. No photo yet means their tint and initial in
+   the same silhouette, so the row never goes ragged. */
+function whoTile(p, net, selected, onPick) {
+  var url = photoUrl(p.id);
+  var style = "--av:" + personColor(p.id) + (url ? ";background-image:url('" + url + "')" : "");
+
+  var kids = [];
+  if (!url) {
+    kids.push(h("span", { class: "w-tint", "aria-hidden": "true" }));
+    kids.push(h("span", { class: "w-init", "aria-hidden": "true", text: initial(p.id) }));
+  }
+
+  var netText, tone = "";
+  if (net == null) {
+    netText = p.kind === "visitor" ? "guest" : FLATS[p.flat].label;
+  } else if (net === 0) {
+    netText = "settled";
+  } else {
+    var rounded = Math.round(Math.abs(net) / 100) * 100;
+    netText = (net > 0 ? "+" : "−") + formatMoney(rounded);
+    tone = net > 0 ? " good" : " bad";
+  }
+
+  kids.push(h("span", { class: "w-cap" }, [
+    h("span", { class: "w-name", text: p.name }),
+    h("span", { class: "w-net" + tone, text: netText })
+  ]));
+
+  return h("button", {
+    class: "sb-who", type: "button", style: style,
+    "aria-pressed": selected ? "true" : "false",
+    "aria-label": p.name + ", " + netText,
+    onclick: onPick
+  }, kids);
+}
+
 function cluster(ids, max) {
   var cap = max || 5;
   var shown = ids.slice(0, cap);
@@ -500,7 +537,11 @@ function banner() {
 function footer() {
   return h("div", { class: "sb-foot" }, [
     h("div", { text: FLATS[FLAT].label + " · splitbaby" }),
-    h("div", { text: "Unlimited expenses. No spend limits, ever." })
+    h("div", { text: "Unlimited expenses. No spend limits, ever." }),
+    h("div", { class: "foot-warn" }, [
+      h("span", { text: "⚠" }),
+      h("span", { text: "No security on this page — do not enter private information." })
+    ])
   ]);
 }
 
@@ -530,19 +571,7 @@ function cardActAs(L) {
     ]),
 
     h("div", { class: "sb-whogrid" }, membersOf(FLAT).map(function (p) {
-      var pn = Math.round(L.balances[p.id] || 0);
-      return h("button", {
-        class: "sb-who", "aria-pressed": p.id === who ? "true" : "false",
-        onclick: function () { setMe(p.id); }
-      }, [
-        avatar(p.id),
-        h("span", { text: p.name }),
-        h("span", {
-          class: "sb-who-net num",
-          text: pn === 0 ? "—"
-            : (pn > 0 ? "+" : "−") + formatMoney(Math.round(Math.abs(pn) / 100) * 100, { bare: true })
-        })
-      ]);
+      return whoTile(p, Math.round(L.balances[p.id] || 0), p.id === who, function () { setMe(p.id); });
     })),
 
     h("div", { class: "sb-hero " + tone }, [
@@ -806,15 +835,12 @@ function openCover(t) {
   var options = membersOf(FLAT).filter(function (p) { return isActive(p.id); });
 
   var grid = h("div", { class: "sb-whogrid" }, options.map(function (p) {
-    return h("button", {
-      class: "sb-who", "aria-pressed": p.id === chosen ? "true" : "false",
-      onclick: function () {
-        chosen = p.id;
-        Array.prototype.forEach.call(grid.children, function (c, i) {
-          c.setAttribute("aria-pressed", options[i].id === chosen ? "true" : "false");
-        });
-      }
-    }, [avatar(p.id), h("span", { text: p.name })]);
+    return whoTile(p, null, p.id === chosen, function () {
+      chosen = p.id;
+      Array.prototype.forEach.call(grid.children, function (c, i) {
+        c.setAttribute("aria-pressed", options[i].id === chosen ? "true" : "false");
+      });
+    });
   }));
 
   var close = sheet({
@@ -1246,25 +1272,7 @@ function drawForm(host, params) {
   var dup = (!form.editing && paise > 0 && form.title.trim())
     ? data.findDuplicate(form.title, paise) : null;
 
-  var presets = data.state.presets.filter(function (p) { return !p.hidden; });
-
   host.appendChild(h("div", { class: "stack" }, [
-
-    /* ---- quick-add presets ---- */
-    presets.length ? h("section", { class: "card" }, [
-      h("span", { class: "sb-label", text: "Quick add" }),
-      h("div", { class: "sb-presets", style: "margin-top:0.4rem;margin-bottom:0" }, presets.map(function (p) {
-        return h("button", { type: "button", class: "sb-preset", onclick: function () {
-          form.amount = paiseToInput(p.amountPaise);
-          form.title = p.label;
-          form.category = p.category || DEFAULT_CATEGORY;
-          redraw();
-        } }, [
-          h("span", { text: category(p.category).icon + " " + p.label + " " }),
-          h("span", { class: "p-amt", text: formatMoney(p.amountPaise) })
-        ]);
-      }))
-    ]) : null,
 
     /* ---- what and how much ---- */
     h("section", { class: "card stack" }, [
@@ -1293,13 +1301,15 @@ function drawForm(host, params) {
       ]),
 
       h("div", { class: "sb-field" }, [
-        h("label", { text: "Category" }),
-        h("div", { class: "sb-catgrid" }, CATEGORIES.map(function (c) {
+        h("label", { text: "Expense icon" }),
+        h("div", { class: "sb-iconpicks" }, CATEGORIES.map(function (c) {
+          /* emoji only, but the label still has to reach a screen
+             reader, so it lives in title and aria-label */
           return h("button", {
-            type: "button", class: "sb-catbtn",
+            type: "button", class: "sb-iconpick", title: c.label, "aria-label": c.label,
             "aria-pressed": form.category === c.id ? "true" : "false",
             onclick: function () { form.category = c.id; redraw(); }
-          }, [h("span", { text: c.icon }), h("span", { text: c.label })]);
+          }, h("span", { "aria-hidden": "true", text: c.icon }));
         }))
       ]),
 
@@ -1917,10 +1927,7 @@ function screenSettings() {
       h("section", { class: "card" }, [
         h("span", { class: "sb-label", text: "You" }),
         h("div", { class: "sb-whogrid", style: "margin-top:0.45rem" }, membersOf(FLAT).map(function (p) {
-          return h("button", {
-            class: "sb-who", "aria-pressed": p.id === me() ? "true" : "false",
-            onclick: function () { setMe(p.id); }
-          }, [avatar(p.id), h("span", { text: p.name })]);
+          return whoTile(p, null, p.id === me(), function () { setMe(p.id); });
         }))
       ]),
 
@@ -1936,26 +1943,6 @@ function screenSettings() {
             h("span", { class: "sb-meta", text: p.upi || "no UPI" })
           ]);
         }))
-      ]),
-
-      h("section", { class: "card" }, [
-        h("span", { class: "sb-label", text: "Quick-add presets" }),
-        h("div", { class: "sb-presets", style: "margin-top:0.4rem" },
-          data.state.presets.filter(function (p) { return !p.hidden; }).map(function (p) {
-            return h("span", { class: "sb-preset" }, [
-              h("span", { text: category(p.category).icon + " " + p.label + " " }),
-              h("span", { class: "p-amt", text: formatMoney(p.amountPaise) }),
-              h("button", {
-                class: "sb-link", style: "margin-left:0.3rem", text: "×",
-                "aria-label": "Remove " + p.label,
-                onclick: function () { data.removePreset(p.id).then(function () { toast("Removed"); }, failed); }
-              })
-            ]);
-          })),
-        h("button", {
-          class: "btn sb-btn tiny", style: "margin-top:0.45rem", text: "Add a preset",
-          onclick: function () { openPresetSheet(); }
-        })
       ]),
 
       h("section", { class: "card" }, [
@@ -2000,42 +1987,6 @@ function screenSettings() {
   ]);
 
   return [topbar("Settings", "#/"), body];
-}
-
-function openPresetSheet() {
-  var label, amount, cat = DEFAULT_CATEGORY;
-  var close = sheet({
-    title: "New preset",
-    sub: "A one-tap shortcut for something you buy often.",
-    body: h("div", { class: "stack" }, [
-      h("div", { class: "sb-field" }, [
-        h("label", { text: "Label" }),
-        (label = h("input", { class: "sb-input", type: "text", maxlength: "40", placeholder: "Water can" }))
-      ]),
-      h("div", { class: "sb-field" }, [
-        h("label", { text: "Amount" }),
-        (amount = h("input", { class: "sb-input", type: "text", inputmode: "decimal", placeholder: "60" }))
-      ]),
-      h("div", { class: "sb-field" }, [
-        h("label", { text: "Category" }),
-        h("select", { class: "sb-select", onchange: function (e) { cat = e.target.value; } },
-          CATEGORIES.map(function (c) { return h("option", { value: c.id, text: c.icon + " " + c.label }); }))
-      ])
-    ]),
-    actions: [
-      h("button", {
-        class: "btn sb-btn primary", text: "Save",
-        onclick: function () {
-          var paise = parseAmount(amount.value);
-          if (!label.value.trim()) return toast("Give it a label", { kind: "bad" });
-          if (!(paise > 0)) return toast("Give it an amount", { kind: "bad" });
-          close();
-          data.addPreset(label.value, paise, cat).then(function () { toast("Preset saved"); }, failed);
-        }
-      }),
-      h("button", { class: "btn sb-btn", text: "Cancel", onclick: function () { close(); } })
-    ]
-  });
 }
 
 /* ============================================================

@@ -22,9 +22,10 @@ import { personColor, photoUrl } from "./config.js";
 
 const NS = "http://www.w3.org/2000/svg";
 
-const BOX_H    = 58;
+const BOX_H    = 84;
+const BAR_H    = 34;   /* caption fading in over the bottom of the photo */
 const GAP_X    = 8;
-const MIN_BOX  = 64;
+const MIN_BOX  = 62;
 const MAX_BOX  = 150;
 const PAD_TOP  = 6;
 const DIP      = 22;     /* first same-tier arc depth   */
@@ -142,6 +143,31 @@ function endAngle(c2, p3) {
    Render
    ------------------------------------------------------------ */
 
+/* Keeping the decoded images alive stops the browser dropping and
+   refetching them, which is what made every face blink at once. */
+var warm = {};
+function preload(url) {
+  if (!url || warm[url]) return;
+  var i = new Image();
+  i.src = url;
+  warm[url] = i;
+}
+
+/* The app rebuilds its whole DOM on every render, so this module
+   hands back the SAME <svg> when nothing about it has changed.
+   Re-creating <image> elements is what caused the flicker. */
+var cache = { sig: null, svg: null };
+var currentOnSelect = null;
+
+function signature(t1, t2, edges, selNode, width, plain) {
+  var parts = [width, selNode || "", plain ? "p" : "o"];
+  t1.concat(t2).forEach(function (n) {
+    parts.push(n.id + ":" + n.kind + ":" + n.net + ":" + n.label + ":" + n.sub);
+  });
+  edges.forEach(function (e) { parts.push(e.from + ">" + e.to + "=" + e.amountPaise); });
+  return parts.join("|");
+}
+
 export function renderGraph(host, opts) {
   var o = opts || {};
   var nodes = o.nodes || { tier1: [], tier2: [] };
@@ -158,6 +184,9 @@ export function renderGraph(host, opts) {
   var t1 = nodes.tier1 || [], t2 = nodes.tier2 || [];
   if (!t1.length && !t2.length) return null;
 
+  /* always point the cached handlers at the newest callback */
+  currentOnSelect = o.onSelect;
+
   var selNode = null;
   if (selected) {
     t1.concat(t2).forEach(function (n) {
@@ -170,6 +199,12 @@ export function renderGraph(host, opts) {
   t2.forEach(function (n) { tierOf[n.id] = 2; });
 
   var edges = allEdges.filter(function (e) { return tierOf[e.from] && tierOf[e.to]; });
+
+  var sig = signature(t1, t2, edges, selNode, width, !!o.plain);
+  if (cache.sig === sig && cache.svg) {
+    host.appendChild(cache.svg);
+    return { height: cache.height, selectedNode: selNode, reused: true };
+  }
 
   /* ---- horizontal placement ---- */
   var widest = Math.max(t1.length, t2.length, 1);
@@ -246,7 +281,7 @@ export function renderGraph(host, opts) {
 
   /* ---- vertical geometry ---- */
   var tier1Y = PAD_TOP;
-  var gap = Math.max(cross.length ? 88 : 30, maxDip1 + 30);
+  var gap = Math.max(cross.length ? 78 : 28, maxDip1 + 30);
   var tier2Y = tier1Y + BOX_H + gap;
   var bottom = maxDip2 ? maxDip2 + 16 : 6;
   var height = tier2Y + (t2.length ? BOX_H : 0) + bottom;
@@ -263,7 +298,17 @@ export function renderGraph(host, opts) {
     "aria-label": "Balances between " + (t1.length + t2.length) + " parties"
   }, host);
 
+  cache.sig = sig;
+  cache.svg = svg;
+  cache.height = height;
+
   var defs = el("defs", null, svg);
+
+  /* one gradient, reused by every caption bar */
+  var grad = el("linearGradient", { id: "sb-bar-fade", x1: "0", y1: "0", x2: "0", y2: "1" }, defs);
+  el("stop", { offset: "0", "stop-color": "#05060a", "stop-opacity": "0" }, grad);
+  el("stop", { offset: "0.45", "stop-color": "#05060a", "stop-opacity": "0.62" }, grad);
+  el("stop", { offset: "1", "stop-color": "#05060a", "stop-opacity": "0.92" }, grad);
   var gEdges = el("g", null, svg);
   var gLabels = el("g", null, svg);
   var gNodes = el("g", null, svg);
@@ -367,7 +412,7 @@ export function renderGraph(host, opts) {
     var isSel = selNode === n.id;
     var isGroup = n.kind === "group";
     var tone = o.plain ? "" : (n.net > 0 ? " good" : (n.net < 0 ? " bad" : " zero"));
-    var amtText = clip(o.plain ? plainAmount(n.net) : nodeAmount(n.net), p.w, 6.8);
+    var amtText = clip(o.plain ? plainAmount(n.net) : nodeAmount(n.net), p.w - 6, 6.4);
 
     var g = el("g", {
       class: "g-node" + (isGroup ? " group" : "") + (isSel ? " sel" : (selNode ? " dim" : "")),
@@ -376,48 +421,59 @@ export function renderGraph(host, opts) {
       "aria-label": n.label + ", " + (o.plain ? plainAmount(n.net) : nodeAmount(n.net))
     }, gNodes);
 
+    /* clip id keyed by node, so ids stay stable between renders
+       instead of shifting with a counter */
+    var cid = "sbclip-" + String(n.id).replace(/[^a-zA-Z0-9]/g, "_");
+    var cp = el("clipPath", { id: cid }, defs);
+    el("rect", { x: p.x, y: p.y, width: p.w, height: p.h, rx: 13 }, cp);
+    var clipTo = "url(#" + cid + ")";
+
+    var bodyH = p.h - BAR_H;
+    var cx = p.x + p.w / 2;
+    var url = isGroup ? null : photoUrl(n.id);
+
     el("rect", { class: "n-box", x: p.x, y: p.y, width: p.w, height: p.h, rx: 13 }, g);
 
-    var cx = p.x + p.w / 2;
-
-    if (!isGroup) {
-      /* their face if there is one, their initial if not */
-      var r = 11, cy = p.y + 16;
-      var url = photoUrl(n.id);
-      if (url) {
-        var cid = "sbclip" + (clipSeq++);
-        var cp = el("clipPath", { id: cid }, defs);
-        el("circle", { cx: cx, cy: cy, r: r }, cp);
-        el("image", {
-          href: url, x: cx - r, y: cy - r, width: r * 2, height: r * 2,
-          preserveAspectRatio: "xMidYMid slice", "clip-path": "url(#" + cid + ")"
-        }, g);
-        el("circle", {
-          cx: cx, cy: cy, r: r, fill: "none", "stroke-width": "1.5",
-          stroke: personColor(n.id), opacity: isSel ? "0.95" : "0.55"
-        }, g);
-      } else {
-        el("circle", {
-          cx: cx, cy: cy, r: r, fill: personColor(n.id), opacity: isSel ? "0.95" : "0.7"
-        }, g);
-        el("text", { class: "n-init", x: cx, y: cy + 0.5, "text-anchor": "middle" }, g)
-          .textContent = String(n.label || "?").charAt(0).toUpperCase();
-      }
-
-      el("text", { class: "n-name", x: cx, y: p.y + 37, "text-anchor": "middle" }, g)
-        .textContent = clip(n.label, p.w, 7.4);
-      el("text", { class: "n-amt" + tone, x: cx, y: p.y + 50, "text-anchor": "middle" }, g)
-        .textContent = amtText;
+    if (url) {
+      /* the photo is the card */
+      preload(url);
+      el("image", {
+        href: url, x: p.x, y: p.y, width: p.w, height: p.h,
+        preserveAspectRatio: "xMidYMid slice", "clip-path": clipTo
+      }, g);
+    } else if (!isGroup) {
+      /* no face yet: their tint and their initial, same silhouette */
+      el("rect", {
+        x: p.x, y: p.y, width: p.w, height: p.h, rx: 13,
+        fill: personColor(n.id), opacity: "0.20"
+      }, g);
+      el("text", {
+        class: "n-init", x: cx, y: p.y + bodyH / 2 + 2, "text-anchor": "middle",
+        fill: personColor(n.id)
+      }, g).textContent = String(n.label || "?").charAt(0).toUpperCase();
     } else {
-      el("text", { class: "n-name", x: cx, y: p.y + 21, "text-anchor": "middle" }, g)
-        .textContent = clip(n.label, p.w, 7.4);
-      el("text", { class: "n-sub", x: cx, y: p.y + 34, "text-anchor": "middle" }, g)
+      el("text", { class: "n-sub", x: cx, y: p.y + bodyH / 2 + 2, "text-anchor": "middle" }, g)
         .textContent = clip(n.sub, p.w, 5.0);
-      el("text", { class: "n-amt" + tone, x: cx, y: p.y + 49, "text-anchor": "middle" }, g)
-        .textContent = amtText;
     }
 
-    function pick() { if (o.onSelect) o.onSelect(n); }
+    /* caption bar, fading in so the face is never cut by a hard edge */
+    el("rect", {
+      x: p.x, y: p.y + p.h - BAR_H, width: p.w, height: BAR_H,
+      fill: "url(#sb-bar-fade)", "clip-path": clipTo
+    }, g);
+
+    el("text", {
+      class: "n-name", x: p.x + 6, y: p.y + p.h - BAR_H + 13, "text-anchor": "start"
+    }, g).textContent = clip(n.label, p.w - 6, 6.6);
+
+    el("text", {
+      class: "n-amt" + tone, x: p.x + 6, y: p.y + p.h - 11, "text-anchor": "start"
+    }, g).textContent = amtText;
+
+    /* frame last, above the photo, so the edge stays crisp */
+    el("rect", { class: "n-frame", x: p.x, y: p.y, width: p.w, height: p.h, rx: 13 }, g);
+
+    function pick() { if (currentOnSelect) currentOnSelect(n); }
     g.addEventListener("click", pick);
     g.addEventListener("keydown", function (ev) {
       if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(); }

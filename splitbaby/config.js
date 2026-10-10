@@ -64,16 +64,6 @@ export const DEFAULT_CATEGORY = "groceries";
 export const SETTLE_ICON = "⇄";       /* ⇄ */
 export const COVER_ICON  = "\u{1F91D}";    /* 🤝 */
 
-/* ------------------------------------------------------------
-   Quick-add presets seeded on first run. Users can add more,
-   which live in Firestore; these are just a useful starting set.
-   ------------------------------------------------------------ */
-export const SEED_PRESETS = [
-  { label: "Water can", amountPaise: 6000,   category: "water" },
-  { label: "Milk",      amountPaise: 3000,   category: "groceries" },
-  { label: "Gas",       amountPaise: 110000, category: "gas" }
-];
-
 /* Avatar tint per person — stable, derived from the id so a
    person keeps their colour everywhere (node, chip, bar). */
 const SWATCHES = [
