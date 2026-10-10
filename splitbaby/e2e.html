@@ -25,7 +25,7 @@ localStorage.setItem("splitbaby.demo.v1", JSON.stringify({ expenses:{}, people:{
 localStorage.setItem("splitbaby.pref.b002", JSON.stringify({ me:"dutta", graphMode:"owes", debtScope:"all", month:null, catMemory:{} }));
 
 const f = document.createElement("iframe");
-f.src = "/b002splitbaby/#/add?as=dutta";
+f.src = "/b002splitbaby/?demo=1#/add?as=dutta";
 document.body.appendChild(f);
 await new Promise(r => f.onload = r);
 await sleep(1200);

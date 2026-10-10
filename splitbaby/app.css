@@ -14,25 +14,25 @@
 
 body.sb {
   /* ---- the compact scale. Tune density from here. ---- */
-  --sb-fs:        0.8125rem;   /* 13px base            */
-  --sb-fs-lg:     0.9375rem;
-  --sb-fs-sm:     0.75rem;
-  --sb-fs-xs:     0.6875rem;
-  --sb-fs-xxs:    0.625rem;
-  --sb-fs-label:  0.62rem;
-  --sb-fs-num:    1.5rem;
+  --sb-fs:        0.875rem;    /* 14px base            */
+  --sb-fs-lg:     1.02rem;
+  --sb-fs-sm:     0.8125rem;
+  --sb-fs-xs:     0.75rem;
+  --sb-fs-xxs:    0.6875rem;
+  --sb-fs-label:  0.68rem;
+  --sb-fs-num:    1.75rem;
 
-  --sb-pad:       0.75rem;
-  --sb-gap:       0.45rem;
-  --sb-radius:    14px;
-  --sb-radius-sm: 9px;
+  --sb-pad:       0.95rem;
+  --sb-gap:       0.7rem;
+  --sb-radius:    17px;
+  --sb-radius-sm: 11px;
 
   --sb-good:      #60f0b4;
   --sb-bad:       #ff6b6b;
   --sb-warn:      #ffc46b;
   --sb-line:      rgba(255, 255, 255, 0.09);
 
-  --bar-h:        46px;
+  --bar-h:        50px;
   --radius:       var(--sb-radius);
   --radius-sm:    var(--sb-radius-sm);
 
@@ -43,7 +43,7 @@ body.sb {
   --glass-blur:   blur(22px) saturate(125%) brightness(0.95);
 
   font-size: var(--sb-fs);
-  line-height: 1.4;
+  line-height: 1.45;
   padding-top: calc(var(--bar-h) + env(safe-area-inset-top, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -93,7 +93,7 @@ body.sb {
   gap: 0.5rem; margin-bottom: 0.55rem;
 }
 .sb-head .sb-meta { font-size: var(--sb-fs-xxs); color: var(--text-faint); white-space: nowrap; }
-.sb-rule { height: 1px; background: var(--sb-line); margin: 0.6rem -0.75rem; }
+.sb-rule { height: 1px; background: var(--sb-line); margin: 0.75rem calc(-1 * var(--sb-pad)); }
 
 .sb-link {
   font-size: var(--sb-fs-xs); font-weight: 600; color: var(--blue-bright);
@@ -136,12 +136,15 @@ body.sb {
    ============================================================ */
 .sb-av {
   display: inline-grid; place-items: center; flex: 0 0 auto;
-  width: 1.45rem; height: 1.45rem; border-radius: 50%;
+  width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  background-size: cover; background-position: center;
   font-size: var(--sb-fs-xxs); font-weight: 700; letter-spacing: 0;
   color: #06070a; background: var(--av, var(--blue-bright));
 }
-.sb-av.lg { width: 2rem; height: 2rem; font-size: var(--sb-fs-sm); }
-.sb-av.sm { width: 1.1rem; height: 1.1rem; font-size: 0.55rem; }
+.sb-av.lg { width: 3.1rem; height: 3.1rem; font-size: 1.1rem; }
+.sb-av.sm { width: 1.25rem; height: 1.25rem; font-size: 0.6rem; }
+/* a real photo needs no initial behind it, and no tint bleeding through */
+.sb-av.photo { color: transparent; background-color: rgba(255,255,255,0.08); }
 
 /* overlapping cluster: who was in this expense, at a glance */
 .sb-cluster { display: inline-flex; align-items: center; }
@@ -210,14 +213,19 @@ body.sb {
   transition: fill 0.2s var(--ease), stroke 0.2s var(--ease), opacity 0.2s var(--ease);
 }
 .sb-graph .n-name {
-  font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
   text-transform: uppercase; fill: var(--text); dominant-baseline: middle;
 }
 .sb-graph .n-amt {
-  font-size: 11px; font-weight: 500; fill: var(--text-dim);
+  font-size: 12.5px; font-weight: 600; fill: var(--text-dim);
   font-variant-numeric: tabular-nums; dominant-baseline: middle;
 }
-.sb-graph .n-sub { font-size: 8px; font-weight: 500; fill: var(--text-faint); dominant-baseline: middle; }
+.sb-graph .n-sub { font-size: 9px; font-weight: 500; fill: var(--text-faint); dominant-baseline: middle; }
+.sb-graph .n-init {
+  font-size: 11px; font-weight: 700; fill: #06070a;
+  dominant-baseline: middle; pointer-events: none;
+}
+.sb-graph image { pointer-events: none; }
 .sb-graph .n-amt.good { fill: var(--sb-good); }
 .sb-graph .n-amt.bad  { fill: var(--sb-bad); }
 .sb-graph .n-amt.zero { fill: var(--text-faint); }
@@ -243,7 +251,7 @@ body.sb {
 /* the chip keeps an amount readable where connectors cross */
 .sb-graph .e-chip { fill: #0c0d12; stroke: rgba(255,255,255,0.12); stroke-width: 0.8; }
 .sb-graph .e-amt {
-  font-size: 8.5px; font-weight: 600; fill: var(--text-dim);
+  font-size: 9.5px; font-weight: 600; fill: var(--text-dim);
   font-variant-numeric: tabular-nums; text-anchor: middle; dominant-baseline: middle;
 }
 .sb-graph .e-lab.on .e-chip { stroke: rgba(74,163,255,0.5); }
@@ -273,8 +281,8 @@ body.sb {
    ============================================================ */
 .sb-debts { display: grid; }
 .sb-debt {
-  display: flex; align-items: center; gap: 0.4rem;
-  padding: 0.44rem 0; border-top: 1px solid var(--sb-line);
+  display: flex; align-items: center; gap: 0.45rem;
+  padding: 0.55rem 0; border-top: 1px solid var(--sb-line);
 }
 .sb-debt:first-child { border-top: 0; }
 .sb-debt .sb-flow { display: flex; align-items: center; gap: 0.3rem; min-width: 0; flex: 1; }
@@ -296,15 +304,15 @@ body.sb {
    Expense rows
    ============================================================ */
 .sb-exp {
-  display: grid; grid-template-columns: 1.6rem 1fr auto; gap: 0.1rem 0.45rem;
-  padding: 0.5rem 0; border-top: 1px solid var(--sb-line);
+  display: grid; grid-template-columns: 1.95rem 1fr auto; gap: 0.14rem 0.5rem;
+  padding: 0.62rem 0; border-top: 1px solid var(--sb-line);
   cursor: pointer; align-items: start;
 }
 .sb-exp:first-child { border-top: 0; }
 .sb-exp:hover { background: rgba(255,255,255,0.03); }
 .sb-exp .e-ico {
-  grid-row: span 2; width: 1.6rem; height: 1.6rem; border-radius: var(--sb-radius-sm);
-  display: grid; place-items: center; font-size: 0.82rem;
+  grid-row: span 2; width: 1.95rem; height: 1.95rem; border-radius: var(--sb-radius-sm);
+  display: grid; place-items: center; font-size: 0.95rem;
   background: rgba(255,255,255,0.06);
 }
 .sb-exp .e-title {
@@ -542,6 +550,24 @@ body.sb {
 }
 
 /* ============================================================
+   Pay chooser
+   ============================================================ */
+.sb-paygrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; }
+.sb-paybtn {
+  display: flex; align-items: center; gap: 0.5rem; min-width: 0;
+  padding: 0.6rem 0.7rem; border-radius: var(--sb-radius-sm);
+  font-size: var(--sb-fs-sm); font-weight: 600; color: var(--text);
+  background: rgba(255,255,255,0.07);
+  box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.28), inset 0 -1px 1px rgba(0,0,0,0.3);
+  transition: background 0.18s var(--ease), transform 0.18s var(--ease);
+}
+.sb-paybtn:hover { background: rgba(255,255,255,0.14); transform: translateY(-1px); }
+.sb-paybtn:active { transform: translateY(0) scale(0.98); }
+.sb-paybtn span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-brand { display: inline-grid; place-items: center; flex: 0 0 auto; width: 1.25rem; height: 1.25rem; }
+.sb-brand svg { width: 100%; height: 100%; display: block; }
+
+/* ============================================================
    States
    ============================================================ */
 .sb-empty { text-align: center; padding: 1.1rem 0.6rem; color: var(--text-faint); font-size: var(--sb-fs-sm); }
@@ -579,7 +605,7 @@ body.sb {
    Very narrow phones
    ============================================================ */
 @media (max-width: 360px) {
-  body.sb { --sb-fs: 0.78rem; --sb-pad: 0.62rem; }
+  body.sb { --sb-fs: 0.8125rem; --sb-pad: 0.78rem; --sb-gap: 0.55rem; }
   .sb-whogrid { gap: 0.22rem; }
   .sb-who { padding: 0.4rem 0.1rem; }
   .sb-splitrow { grid-template-columns: 1fr 4.4rem; }

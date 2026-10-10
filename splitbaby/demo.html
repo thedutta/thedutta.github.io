@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Splitbaby demo</title></head><body style="background:#050506;color:#9aa7b8;font:14px system-ui;padding:2rem">
+<!-- Loads a sample ledger into this browser and opens the app in demo
+     mode. Touches nothing on the real Firestore ledger. -->
+<script type="module">
+import { equalSplit } from "./ledger.js";
+const now = Date.now(), H = 3600000, D = 86400000;
+function iso(ms) {
+  const d = new Date(ms);
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function exp(id, title, cat, rupees, payer, people, agoMs, flat) {
+  const amt = Math.round(rupees * 100);
+  return [id, {
+    kind: "expense", coverFor: null, title, note: "", category: cat, amountPaise: amt,
+    paidBy: payer, splits: equalSplit(amt, people, payer), splitMode: "equal", shares: null,
+    participants: people, flat: flat || "b002", date: iso(now - agoMs), at: now - agoMs,
+    serverAt: now - agoMs, createdBy: payer, deleted: false,
+    history: [{ at: now - agoMs, by: payer, action: "created", summary: title }]
+  }];
+}
+const B = ["atharv", "dutta", "nikhil", "zaid"];
+const rows = [
+  exp("e1", "Groceries", "groceries", 1840, "dutta", B, 2 * H),
+  exp("e2", "Zomato dinner", "food", 1120, "zaid", ["dutta", "nikhil", "zaid"], 26 * H),
+  exp("e3", "Gas cylinder", "gas", 1100, "nikhil", B, 3 * D),
+  exp("e4", "Water cans", "water", 240, "atharv", B.concat(["jap"]), 4 * D),
+  exp("e5", "House party", "party", 4300, "dutta", B.concat(["jap", "vagmi", "aryan", "kunsh"]), 6 * D),
+  exp("e6", "Internet bill", "internet", 999, "zaid", B, 9 * D),
+  exp("e7", "Cab to airport", "travel", 860, "aryan", ["aryan", "dutta", "vidu"], 11 * D, "b603"),
+  exp("e8", "Cleaning supplies", "household", 430, "nikhil", B, 14 * D)
+];
+const settle = ["s1", {
+  kind: "settlement", coverFor: null, title: "Nikhil paid Dutta", note: "", category: null,
+  amountPaise: 30000, paidBy: "nikhil", splits: { dutta: 30000 }, splitMode: "exact", shares: null,
+  participants: ["nikhil", "dutta"], flat: "b002", date: iso(now - D), at: now - D,
+  serverAt: now - D, createdBy: "nikhil", deleted: false,
+  history: [{ at: now - D, by: "nikhil", action: "settled", summary: "300" }]
+}];
+
+const store = { expenses: {}, people: {}, presets: {} };
+rows.concat([settle]).forEach(([id, d]) => { store.expenses[id] = d; });
+store.presets["water-can"] = { label: "Water can", amountPaise: 6000, category: "water", at: now };
+store.presets["milk"] = { label: "Milk", amountPaise: 3000, category: "groceries", at: now };
+localStorage.setItem("splitbaby.demo.v1", JSON.stringify(store));
+localStorage.setItem("splitbaby.pref.b002", JSON.stringify({ me: "dutta", graphMode: "owes", debtScope: "all", month: null, catMemory: {} }));
+localStorage.setItem("splitbaby.pref.b603", JSON.stringify({ me: "aryan", graphMode: "owes", debtScope: "all", month: null, catMemory: {} }));
+document.body.textContent = "SEEDED " + Object.keys(store.expenses).length;
+if (new URLSearchParams(location.search).get("go") === "1") {
+  location.replace("../b002splitbaby/?demo=1");
+}
+</script></body></html>

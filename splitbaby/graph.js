@@ -1,65 +1,57 @@
 /* ============================================================
    Splitbaby — money-flow graph
 
-   A small flowchart: rectangular nodes, orthogonal connectors,
-   an amount chip on the edges that matter. Tier 1 is this
-   flat's members, individually. Tier 2 holds the guests and the
-   whole other flat as ONE entity, at equal priority, auto-
-   compacting into "Other guests" when the width cannot fit them.
+   A flowchart of who owes whom. Tier 1 is this flat's members,
+   individually. Tier 2 holds the guests and the whole other
+   flat as ONE entity, at equal priority, auto-compacting into
+   "Other guests" when the width cannot fit them.
 
-   Generated SVG rather than a chart library: crisp at any size,
-   themed from the CSS variables in app.css, no page weight.
+   Connectors are smooth cubic curves rather than right angles:
+   money moving between people reads better as a flow than as a
+   circuit diagram, and arcs of differing depth nest instead of
+   colliding. Cross-tier edges take an S; same-tier edges dip
+   into the gap, the widest span dipping deepest so the arcs
+   nest inside one another.
 
-   Routing: every node connects through its gap-facing edge
-   (tier 1 from the bottom, tier 2 from the top), down into a
-   horizontal lane, across, and into the target. Lanes are
-   PACKED — two edges whose horizontal runs do not overlap share
-   one lane — which is what keeps a busy ledger from turning
-   into a ladder.
+   Generated SVG, no chart library: crisp at any size, themed
+   from the CSS variables in app.css.
    ============================================================ */
 
 import { formatMoney } from "./ledger.js";
-import { personColor } from "./config.js";
+import { personColor, photoUrl } from "./config.js";
 
 const NS = "http://www.w3.org/2000/svg";
 
-const BOX_H      = 42;
-const GAP_X      = 7;
-const MIN_BOX    = 56;
-const MAX_BOX    = 118;
-const PAD_TOP    = 4;
-const LANE_STEP  = 12;
-const LANE_INSET = 15;
-const CORNER     = 4;
+const BOX_H    = 58;
+const GAP_X    = 8;
+const MIN_BOX  = 64;
+const MAX_BOX  = 150;
+const PAD_TOP  = 6;
+const DIP      = 22;     /* first same-tier arc depth   */
+const DIP_STEP = 15;     /* each nested arc goes deeper */
 
 /* How many tier-2 nodes the width can carry. Drives the
    auto-compaction decision in ledger.collapseGroups. */
 export function guestBudget(width) {
-  return Math.max(2, Math.min(5, Math.floor((width || 340) / 88)));
+  return Math.max(2, Math.min(5, Math.floor((width || 340) / 96)));
 }
 
 function el(name, attrs, parent) {
   var n = document.createElementNS(NS, name);
-  if (attrs) Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+  if (attrs) Object.keys(attrs).forEach(function (k) {
+    if (k === "href") n.setAttributeNS("http://www.w3.org/1999/xlink", "href", attrs[k]);
+    n.setAttribute(k, attrs[k]);
+  });
   if (parent) parent.appendChild(n);
   return n;
 }
 
-/* Compact forms so a big balance can never overflow a 56px box. */
-/* Thresholds are in PAISE, which is easy to get wrong by a factor
-   of a hundred: a lakh is 1e7 paise, not 1e5.
-
-   Two tiers of brevity. A node has a whole box to itself, so it
-   shows round rupees and stays exact into the lakhs. An edge chip
-   has to squeeze between connectors, so it compacts sooner. */
-
-function rupees(abs) {
-  return "₹" + Math.round(abs / 100).toLocaleString("en-IN");
-}
-
-function trim(v) {
-  return v >= 10 ? v.toFixed(0) : v.toFixed(1).replace(/\.0$/, "");
-}
+/* Thresholds are in PAISE, which is easy to get wrong by a
+   factor of a hundred: a lakh is 1e7 paise, not 1e5. A node has
+   a whole box to itself so it stays exact into the lakhs; an
+   edge chip squeezes between curves, so it compacts sooner. */
+function rupees(abs) { return "₹" + Math.round(abs / 100).toLocaleString("en-IN"); }
+function trim(v) { return v >= 10 ? v.toFixed(0) : v.toFixed(1).replace(/\.0$/, ""); }
 
 function nodeMoney(abs) {
   if (abs >= 1e9) return "₹" + trim(abs / 1e9) + "Cr";
@@ -90,7 +82,7 @@ function plainAmount(paise) {
 }
 
 function clip(text, boxW, perChar) {
-  var max = Math.max(3, Math.floor((boxW - 7) / perChar));
+  var max = Math.max(3, Math.floor((boxW - 8) / perChar));
   var s = String(text || "");
   return s.length <= max ? s : s.slice(0, max - 1) + "…";
 }
@@ -122,39 +114,28 @@ export function mapEdges(transfers, nodes) {
     .sort(function (x, y) { return y.amountPaise - x.amountPaise; });
 }
 
-/* Greedy interval packing: an edge takes the lowest lane whose
-   occupied span it does not touch. */
-function packLanes(list) {
-  var lanes = [];
-  list.forEach(function (e) {
-    var lo = Math.min(e._sx, e._tx) - 6;
-    var hi = Math.max(e._sx, e._tx) + 6;
-    for (var i = 0; i < lanes.length; i++) {
-      var clash = lanes[i].some(function (o) { return !(hi < o.lo || lo > o.hi); });
-      if (!clash) { lanes[i].push({ lo: lo, hi: hi }); e.lane = i; return; }
-    }
-    lanes.push([{ lo: lo, hi: hi }]);
-    e.lane = lanes.length - 1;
-  });
-  return lanes.length;
+/* ------------------------------------------------------------
+   Curves
+   ------------------------------------------------------------ */
+
+function cubic(p0, c1, c2, p3) {
+  return "M " + p0.x.toFixed(1) + " " + p0.y.toFixed(1) +
+         " C " + c1.x.toFixed(1) + " " + c1.y.toFixed(1) +
+         ", " + c2.x.toFixed(1) + " " + c2.y.toFixed(1) +
+         ", " + p3.x.toFixed(1) + " " + p3.y.toFixed(1);
 }
 
-/* Rounded orthogonal polyline. */
-function orthPath(pts) {
-  if (pts.length < 2) return "";
-  var d = "M " + pts[0].x + " " + pts[0].y;
-  for (var i = 1; i < pts.length - 1; i++) {
-    var p = pts[i], prev = pts[i - 1], next = pts[i + 1];
-    var inDx = Math.sign(p.x - prev.x), inDy = Math.sign(p.y - prev.y);
-    var outDx = Math.sign(next.x - p.x), outDy = Math.sign(next.y - p.y);
-    var rIn = (Math.abs(p.x - prev.x) + Math.abs(p.y - prev.y)) / 2;
-    var rOut = (Math.abs(next.x - p.x) + Math.abs(next.y - p.y)) / 2;
-    var r = Math.max(0, Math.min(CORNER, rIn, rOut));
-    d += " L " + (p.x - inDx * r) + " " + (p.y - inDy * r);
-    if (r > 0) d += " Q " + p.x + " " + p.y + " " + (p.x + outDx * r) + " " + (p.y + outDy * r);
-  }
-  var last = pts[pts.length - 1];
-  return d + " L " + last.x + " " + last.y;
+function cubicAt(p0, c1, c2, p3, t) {
+  var u = 1 - t;
+  return {
+    x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p3.x,
+    y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p3.y
+  };
+}
+
+/* tangent at the end, for pointing the arrowhead */
+function endAngle(c2, p3) {
+  return Math.atan2(p3.y - c2.y, p3.x - c2.x) * 180 / Math.PI;
 }
 
 /* ------------------------------------------------------------
@@ -177,7 +158,6 @@ export function renderGraph(host, opts) {
   var t1 = nodes.tier1 || [], t2 = nodes.tier2 || [];
   if (!t1.length && !t2.length) return null;
 
-  /* ---- which node is highlighted ---- */
   var selNode = null;
   if (selected) {
     t1.concat(t2).forEach(function (n) {
@@ -191,24 +171,27 @@ export function renderGraph(host, opts) {
 
   var edges = allEdges.filter(function (e) { return tierOf[e.from] && tierOf[e.to]; });
 
-  /* ---- horizontal placement (y comes once lanes are known) ---- */
+  /* ---- horizontal placement ---- */
   var widest = Math.max(t1.length, t2.length, 1);
   var boxW = Math.max(MIN_BOX, Math.min(MAX_BOX,
     Math.floor((width - (widest - 1) * GAP_X) / widest)));
 
   var placed = {};
-  function placeRow(list, y) {
+  function placeRow(list) {
     var total = list.length * boxW + (list.length - 1) * GAP_X;
     var x0 = Math.max(0, (width - total) / 2);
     list.forEach(function (n, i) {
-      placed[n.id] = { node: n, x: x0 + i * (boxW + GAP_X), y: y, w: boxW, h: BOX_H, tier: tierOf[n.id] };
+      placed[n.id] = {
+        node: n, x: x0 + i * (boxW + GAP_X), y: 0,
+        w: boxW, h: BOX_H, tier: tierOf[n.id]
+      };
     });
   }
-  placeRow(t1, 0);
-  placeRow(t2, 0);
+  placeRow(t1);
+  placeRow(t2);
 
-  /* ---- ports: spread each node's connections across its box so
-     two edges never share a vertical run ---- */
+  /* ---- ports: fan each node's connections across its width so
+     two curves never leave from the same point ---- */
   var touch = {};
   edges.forEach(function (e) {
     var key = e.from + ">" + e.to;
@@ -221,7 +204,7 @@ export function renderGraph(host, opts) {
     var p = placed[id];
     if (!p) return;
     var keys = touch[id].slice().sort();
-    var span = p.w * 0.62;
+    var span = p.w * 0.56;
     var start = p.x + p.w / 2 - span / 2;
     var map = {};
     keys.forEach(function (k, i) {
@@ -236,18 +219,37 @@ export function renderGraph(host, opts) {
     e._tx = (ports[e.to] && ports[e.to][key]) || (placed[e.to].x + boxW / 2);
   });
 
-  var mid = edges.filter(function (e) { return !(e.from && tierOf[e.from] === 2 && tierOf[e.to] === 2); });
-  var low = edges.filter(function (e) { return tierOf[e.from] === 2 && tierOf[e.to] === 2; });
+  /* ---- same-tier arc depth: the widest span dips deepest, so
+     arcs nest inside one another instead of crossing ---- */
+  function assignDips(list) {
+    list.sort(function (a, b) {
+      return Math.abs(a._sx - a._tx) - Math.abs(b._sx - b._tx);
+    });
+    list.forEach(function (e, i) { e.dip = DIP + i * DIP_STEP; });
+    return list.length ? list[list.length - 1].dip : 0;
+  }
 
-  var midLanes = packLanes(mid);
-  var lowLanes = packLanes(low);
+  var same1 = edges.filter(function (e) { return tierOf[e.from] === 1 && tierOf[e.to] === 1; });
+  var same2 = edges.filter(function (e) { return tierOf[e.from] === 2 && tierOf[e.to] === 2; });
+  var cross = edges.filter(function (e) { return tierOf[e.from] !== tierOf[e.to]; });
+
+  var maxDip1 = assignDips(same1);
+  var maxDip2 = assignDips(same2);
+
+  /* Chips all sat at t=0.5, which dropped them onto one horizontal
+     band and piled them up. Walk a repeating offset so neighbouring
+     curves label at different heights. */
+  var TS = [0.32, 0.46, 0.38, 0.52, 0.28, 0.42];
+  cross.slice()
+    .sort(function (a, b) { return (a._sx + a._tx) - (b._sx + b._tx); })
+    .forEach(function (e, i) { e.labelT = TS[i % TS.length]; });
 
   /* ---- vertical geometry ---- */
   var tier1Y = PAD_TOP;
-  var midGap = midLanes ? LANE_INSET * 2 + (midLanes - 1) * LANE_STEP : 22;
-  var tier2Y = tier1Y + BOX_H + midGap;
-  var lowGap = lowLanes ? LANE_INSET + (lowLanes - 1) * LANE_STEP : 4;
-  var height = tier2Y + (t2.length ? BOX_H : 0) + lowGap + 2;
+  var gap = Math.max(cross.length ? 88 : 30, maxDip1 + 30);
+  var tier2Y = tier1Y + BOX_H + gap;
+  var bottom = maxDip2 ? maxDip2 + 16 : 6;
+  var height = tier2Y + (t2.length ? BOX_H : 0) + bottom;
 
   t1.forEach(function (n) { placed[n.id].y = tier1Y; });
   t2.forEach(function (n) { placed[n.id].y = tier2Y; });
@@ -261,68 +263,111 @@ export function renderGraph(host, opts) {
     "aria-label": "Balances between " + (t1.length + t2.length) + " parties"
   }, host);
 
+  var defs = el("defs", null, svg);
   var gEdges = el("g", null, svg);
   var gLabels = el("g", null, svg);
   var gNodes = el("g", null, svg);
 
-  function drawEdge(e, region) {
+  var labelQueue = [];
+
+  function drawEdge(e) {
     var s = placed[e.from], t = placed[e.to];
     if (!s || !t) return;
 
-    var laneY, sy, ty;
-    if (region === "mid") {
-      laneY = tier1Y + BOX_H + LANE_INSET + e.lane * LANE_STEP;
-      sy = s.tier === 1 ? s.y + s.h : s.y;
-      ty = t.tier === 1 ? t.y + t.h : t.y;
-    } else {
-      laneY = tier2Y + BOX_H + 5 + e.lane * LANE_STEP;
-      sy = s.y + s.h;
-      ty = t.y + t.h;
-    }
+    var sx = e._sx, tx = e._tx, p0, c1, c2, p3;
 
-    var sx = e._sx, tx = e._tx;
-    var straight = Math.abs(sx - tx) < 0.5;
-    var pts = straight
-      ? [{ x: sx, y: sy }, { x: tx, y: ty }]
-      : [{ x: sx, y: sy }, { x: sx, y: laneY }, { x: tx, y: laneY }, { x: tx, y: ty }];
+    if (s.tier === t.tier) {
+      /* dip out of the gap-facing edge and back up again */
+      var baseY = s.y + s.h;
+      p0 = { x: sx, y: baseY };
+      p3 = { x: tx, y: baseY };
+      c1 = { x: sx, y: baseY + e.dip };
+      c2 = { x: tx, y: baseY + e.dip };
+    } else {
+      /* an S between the two tiers */
+      var sy = s.tier === 1 ? s.y + s.h : s.y;
+      var ty = t.tier === 1 ? t.y + t.h : t.y;
+      var k = (ty - sy) * 0.55;
+      p0 = { x: sx, y: sy };
+      p3 = { x: tx, y: ty };
+      c1 = { x: sx, y: sy + k };
+      c2 = { x: tx, y: ty - k };
+    }
 
     var on = !selNode || e.from === selNode || e.to === selNode;
     var mark = selNode ? (on ? " on" : " dim") : "";
 
-    el("path", { class: "g-edge" + mark, d: orthPath(pts) }, gEdges);
+    el("path", { class: "g-edge" + mark, d: cubic(p0, c1, c2, p3) }, gEdges);
 
-    /* arrowhead pointing into the target */
-    var dir = straight ? (ty > sy ? 1 : -1) : (ty < laneY ? -1 : 1);
-    var a = 3.6;
+    /* arrowhead rotated onto the curve's tangent */
+    var ang = endAngle(c2, p3);
     el("path", {
       class: "g-arrow" + mark,
-      d: "M " + tx + " " + ty +
-         " L " + (tx - a) + " " + (ty + dir * a * 1.5) +
-         " L " + (tx + a) + " " + (ty + dir * a * 1.5) + " Z"
+      d: "M 0 0 L -7 -3.4 L -7 3.4 Z",
+      transform: "translate(" + p3.x.toFixed(1) + "," + p3.y.toFixed(1) + ") rotate(" + ang.toFixed(1) + ")"
     }, gEdges);
 
     /* Only the selected party's edges get a price tag. Labelling
-       all of them is what turns a busy ledger into soup. */
+       every one is what turns a busy ledger into soup. Placement is
+       deferred so overlaps can be resolved once all curves exist. */
     if (!on) return;
-    var label = edgeAmount(e.amountPaise);
-    var cw = label.length * 4.7 + 8;
-    var cx = straight ? sx : (sx + tx) / 2;
-    var cy = straight ? (sy + ty) / 2 : laneY;
-    var g = el("g", { class: "e-lab" + (selNode ? " on" : "") }, gLabels);
-    el("rect", { class: "e-chip", x: cx - cw / 2, y: cy - 6, width: cw, height: 12, rx: 3 }, g);
-    el("text", { class: "e-amt", x: cx, y: cy + 0.5 }, g).textContent = label;
+    labelQueue.push({ e: e, p0: p0, c1: c1, c2: c2, p3: p3 });
   }
 
-  mid.forEach(function (e) { drawEdge(e, "mid"); });
-  low.forEach(function (e) { drawEdge(e, "low"); });
+  cross.forEach(drawEdge);
+  same1.forEach(drawEdge);
+  same2.forEach(drawEdge);
+
+  /* A fixed stagger is not enough on its own: two curves can still
+     meet at the same point. Walk each label along its own curve
+     until it stops overlapping the ones already placed. */
+  var placedLabels = [];
+  function hits(r) {
+    for (var i = 0; i < placedLabels.length; i++) {
+      var q = placedLabels[i];
+      if (!(r.x2 < q.x1 || r.x1 > q.x2 || r.y2 < q.y1 || r.y1 > q.y2)) return true;
+    }
+    return false;
+  }
+
+  labelQueue.forEach(function (L) {
+    var label = edgeAmount(L.e.amountPaise);
+    var cw = label.length * 5.4 + 11;
+    var base = L.e.labelT || 0.42;
+    /* Bias toward the SOURCE end. Edges converge on whoever is owed,
+       so near the target every chip lands in the same spot, while the
+       sources are spread across the row. */
+    var offsets = [0, -0.08, -0.16, 0.08, -0.24, 0.16, -0.32, 0.24, -0.40];
+    var best = null;
+
+    for (var i = 0; i < offsets.length; i++) {
+      var t = Math.min(0.88, Math.max(0.12, base + offsets[i]));
+      var m = cubicAt(L.p0, L.c1, L.c2, L.p3, t);
+      var r = { x1: m.x - cw / 2 - 2, x2: m.x + cw / 2 + 2, y1: m.y - 10, y2: m.y + 10, m: m };
+      if (!hits(r)) { best = r; break; }
+    }
+
+    /* Nowhere clear to put it: leave it off rather than stack two
+       amounts on top of each other. The list below is exact anyway. */
+    if (!best) return;
+
+    placedLabels.push(best);
+    var g = el("g", { class: "e-lab" + (selNode ? " on" : "") }, gLabels);
+    el("rect", { class: "e-chip", x: best.m.x - cw / 2, y: best.m.y - 8, width: cw, height: 16, rx: 8 }, g);
+    el("text", { class: "e-amt", x: best.m.x, y: best.m.y + 0.5 }, g).textContent = label;
+  });
 
   /* ---- nodes ---- */
+  var clipSeq = 0;
+
   function drawNode(n) {
     var p = placed[n.id];
     if (!p) return;
 
     var isSel = selNode === n.id;
     var isGroup = n.kind === "group";
+    var tone = o.plain ? "" : (n.net > 0 ? " good" : (n.net < 0 ? " bad" : " zero"));
+    var amtText = clip(o.plain ? plainAmount(n.net) : nodeAmount(n.net), p.w, 6.8);
 
     var g = el("g", {
       class: "g-node" + (isGroup ? " group" : "") + (isSel ? " sel" : (selNode ? " dim" : "")),
@@ -331,29 +376,45 @@ export function renderGraph(host, opts) {
       "aria-label": n.label + ", " + (o.plain ? plainAmount(n.net) : nodeAmount(n.net))
     }, gNodes);
 
-    el("rect", { class: "n-box", x: p.x, y: p.y, width: p.w, height: p.h, rx: 6 }, g);
+    el("rect", { class: "n-box", x: p.x, y: p.y, width: p.w, height: p.h, rx: 13 }, g);
 
     var cx = p.x + p.w / 2;
 
-    el("text", { class: "n-name", x: cx, y: p.y + (isGroup ? 12 : 15), "text-anchor": "middle" }, g)
-      .textContent = clip(n.label, p.w, 6.9);
-
-    if (isGroup) {
-      el("text", { class: "n-sub", x: cx, y: p.y + 22.5, "text-anchor": "middle" }, g)
-        .textContent = clip(n.sub, p.w, 4.6);
-    }
-
-    var tone = o.plain ? "" : (n.net > 0 ? " good" : (n.net < 0 ? " bad" : " zero"));
-    el("text", { class: "n-amt" + tone, x: cx, y: p.y + (isGroup ? 33 : 30), "text-anchor": "middle" }, g)
-      .textContent = clip(o.plain ? plainAmount(n.net) : nodeAmount(n.net), p.w, 6.2);
-
-    /* a person carries their tint as a shoulder, tying the graph
-       to the bars and avatars elsewhere */
     if (!isGroup) {
-      el("rect", {
-        x: cx - 8, y: p.y - 1, width: 16, height: 2, rx: 1,
-        fill: personColor(n.id), opacity: isSel ? "0.95" : "0.5"
-      }, g);
+      /* their face if there is one, their initial if not */
+      var r = 11, cy = p.y + 16;
+      var url = photoUrl(n.id);
+      if (url) {
+        var cid = "sbclip" + (clipSeq++);
+        var cp = el("clipPath", { id: cid }, defs);
+        el("circle", { cx: cx, cy: cy, r: r }, cp);
+        el("image", {
+          href: url, x: cx - r, y: cy - r, width: r * 2, height: r * 2,
+          preserveAspectRatio: "xMidYMid slice", "clip-path": "url(#" + cid + ")"
+        }, g);
+        el("circle", {
+          cx: cx, cy: cy, r: r, fill: "none", "stroke-width": "1.5",
+          stroke: personColor(n.id), opacity: isSel ? "0.95" : "0.55"
+        }, g);
+      } else {
+        el("circle", {
+          cx: cx, cy: cy, r: r, fill: personColor(n.id), opacity: isSel ? "0.95" : "0.7"
+        }, g);
+        el("text", { class: "n-init", x: cx, y: cy + 0.5, "text-anchor": "middle" }, g)
+          .textContent = String(n.label || "?").charAt(0).toUpperCase();
+      }
+
+      el("text", { class: "n-name", x: cx, y: p.y + 37, "text-anchor": "middle" }, g)
+        .textContent = clip(n.label, p.w, 7.4);
+      el("text", { class: "n-amt" + tone, x: cx, y: p.y + 50, "text-anchor": "middle" }, g)
+        .textContent = amtText;
+    } else {
+      el("text", { class: "n-name", x: cx, y: p.y + 21, "text-anchor": "middle" }, g)
+        .textContent = clip(n.label, p.w, 7.4);
+      el("text", { class: "n-sub", x: cx, y: p.y + 34, "text-anchor": "middle" }, g)
+        .textContent = clip(n.sub, p.w, 5.0);
+      el("text", { class: "n-amt" + tone, x: cx, y: p.y + 49, "text-anchor": "middle" }, g)
+        .textContent = amtText;
     }
 
     function pick() { if (o.onSelect) o.onSelect(n); }

@@ -330,6 +330,13 @@ let backend = demoBackend;
 let homeFlat = "b002";
 
 function isConfigured() {
+  /* ?demo=1 forces the localStorage backend even on a configured
+     build. The test suite runs on it, and it doubles as a safe
+     sandbox for trying the app without touching the real ledger. */
+  try {
+    if (new URLSearchParams(window.location.search).get("demo") === "1") return false;
+  } catch (e) { /* ancient browser: fall through to the real check */ }
+
   var c = FIREBASE_CONFIG;
   return !!(c && c.projectId && c.apiKey &&
     String(c.projectId).indexOf("PASTE") < 0 &&

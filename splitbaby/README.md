@@ -40,6 +40,7 @@ each site is a **lens** on it:
 | `firestore.rules` | Reference copy of the deployed rules. |
 | `test.html` / `tests.js` | Ledger unit suite (46 assertions). |
 | `e2e.html?run=1` | Drives the real UI in an iframe (28 assertions). Wipes the demo ledger, hence the guard. |
+| `demo.html?go=1` | Loads a sample ledger into this browser and opens the app in demo mode. Never touches Firestore. |
 
 Styling reuses the main site's Liquid Glass system by reference, not by copy —
 `theme.css` tokens, `.card`/`.option` glass, `.btn`, Geist, the background `<picture>`.
@@ -88,8 +89,13 @@ Setup, once:
 No Auth product is used. Offline comes from Firestore's `persistentLocalCache`: reads
 work offline and writes queue until the connection returns.
 
-Until the config is filled in, both sites run in **demo mode** on `localStorage` with a
-banner saying so, which is also how the test suites run.
+Both sites also accept **`?demo=1`**, which forces the localStorage backend even on a
+configured build. The test suites run on it, and it doubles as a safe sandbox for showing
+someone the app without touching the real ledger. With no config pasted at all, demo mode
+is the default.
+
+Live project: `splitbaby-b002-b603`, Firestore in `asia-south1` (Mumbai, ~30 ms from
+Bengaluru rather than ~250 ms from a US region).
 
 ## Scaling note
 
@@ -109,4 +115,9 @@ python -m http.server 8000          # from the repo root
 - `localhost:8000/b002splitbaby/` and `/b603splitbaby/` — both lenses
 
 Bump `CACHE_VERSION` in **both** `sw.js` files after changing any shell asset, or
-returning visitors keep the cached copy.
+returning visitors keep the cached copy. This bites during local testing too: use a fresh
+browser profile, or the service worker will hand you the previous build.
+
+`node --check` does **not** reliably catch syntax errors in these modules — it passed a
+file with a raw newline inside a string literal that the browser refused to parse. Trust
+`e2e.html`, which loads the real page, over any static check.

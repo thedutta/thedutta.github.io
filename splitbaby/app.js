@@ -10,7 +10,7 @@
 import {
   CURRENCY, FLATS, CATEGORIES, DEFAULT_CATEGORY, SETTLE_ICON, COVER_ICON,
   PEOPLE, person, personName, personColor, initial, membersOf, guestsOf,
-  peopleOf, otherFlat, category, isActive
+  peopleOf, otherFlat, category, isActive, photoUrl
 } from "./config.js";
 
 import {
@@ -83,6 +83,14 @@ function h(tag, attrs, kids) {
 }
 
 function avatar(id, size) {
+  var url = photoUrl(id);
+  if (url) {
+    return h("span", {
+      class: "sb-av photo" + (size ? " " + size : ""),
+      style: "--av:" + personColor(id) + ";background-image:url('" + url + "')",
+      "aria-hidden": "true", text: initial(id)
+    });
+  }
   return h("span", {
     class: "sb-av" + (size ? " " + size : ""),
     style: "--av:" + personColor(id),
@@ -109,6 +117,36 @@ function icon(path, cls) {
   if (cls) s.setAttribute("class", cls);
   s.innerHTML = path;
   return s;
+}
+
+/* Brand marks are drawn with their own fills rather than currentColor,
+   because a monochrome Google Pay mark is unrecognisable. */
+const BRAND = {
+  upi: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<path fill="#097939" d="M4 3l5 9-5 9 9-9z"/>' +
+    '<path fill="#ed752e" d="M10 3l5 9-5 9 9-9z"/>' +
+    '<path fill="currentColor" opacity=".55" d="M17.5 3h1.2l-3.4 18h-1.2z"/></svg>',
+
+  gpay: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.64v3.03h3.88c2.27-2.09 3.54-5.17 3.54-8.91z"/>' +
+    '<path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.01c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09A11.99 11.99 0 0 0 12 24z"/>' +
+    '<path fill="#FBBC05" d="M5.27 14.28a7.2 7.2 0 0 1 0-4.56V6.63H1.27a12 12 0 0 0 0 10.74l4-3.09z"/>' +
+    '<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.63l4 3.09C6.22 6.86 8.87 4.75 12 4.75z"/></svg>',
+
+  phonepe: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<circle cx="12" cy="12" r="11" fill="#5F259F"/>' +
+    '<path fill="#fff" d="M16.2 8.1c0-.4-.3-.7-.7-.7h-1.3l-.3-1c-.1-.3-.4-.5-.7-.4l-1 .3c-.2.1-.3.3-.2.5l.2.6H8.5c-.4 0-.7.3-.7.7v.6c0 .4.3.7.7.7h.9v2.9c0 1.9 1 3 2.7 3 .5 0 .9-.1 1.4-.3v1.9c0 .3.2.5.5.5h1.1c.3 0 .5-.2.5-.5V8.8h.6v-.7zm-2.7 5.4c-.3.1-.6.2-.9.2-.7 0-1.1-.4-1.1-1.2V9.4h2v4.1z"/></svg>',
+
+  whatsapp: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<path fill="#25D366" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.25-1.38a9.87 9.87 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm0 18.15a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.11.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.25-4.37c0-4.54 3.69-8.23 8.23-8.23 2.2 0 4.26.86 5.82 2.41a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23z"/>' +
+    '<path fill="#25D366" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35z"/></svg>'
+};
+
+function brandIcon(name) {
+  var span = document.createElement("span");
+  span.className = "sb-brand";
+  span.innerHTML = BRAND[name] || "";
+  return span;
 }
 
 const ICONS = {
@@ -241,13 +279,81 @@ function sheet(opts) {
    Convenience: UPI, WhatsApp, clipboard, CSV
    ------------------------------------------------------------ */
 
-function upiLink(payeeId, paise, note) {
+/* UPI deep links. The generic upi:// scheme makes the phone show its
+   own payment-app chooser; the per-app schemes jump straight into one.
+   tez:// is Google Pay India's registered scheme on both Android and
+   iOS. WhatsApp deliberately has no entry here: WhatsApp Pay exposes
+   no public deep link for paying an arbitrary VPA, so pretending
+   otherwise would just open a dead link. It gets a share action
+   instead, which is the thing that actually works. */
+const UPI_APPS = [
+  { id: "upi",     label: "Any UPI app", scheme: "upi://pay" },
+  { id: "gpay",    label: "Google Pay",  scheme: "tez://upi/pay" },
+  { id: "phonepe", label: "PhonePe",     scheme: "phonepe://pay" },
+  { id: "paytm",   label: "Paytm",       scheme: "paytmmp://pay" }
+];
+
+function upiQuery(payeeId, paise, note) {
   var p = person(payeeId);
   if (!p || !p.upi) return null;
-  return "upi://pay?pa=" + encodeURIComponent(p.upi) +
+  return "?pa=" + encodeURIComponent(p.upi) +
          "&pn=" + encodeURIComponent(p.name) +
          "&am=" + (paise / 100).toFixed(2) +
          "&cu=INR&tn=" + encodeURIComponent(note || "Splitbaby");
+}
+
+function upiLink(payeeId, paise, note, app) {
+  var q = upiQuery(payeeId, paise, note);
+  if (!q) return null;
+  var scheme = "upi://pay";
+  for (var i = 0; i < UPI_APPS.length; i++) {
+    if (UPI_APPS[i].id === app) { scheme = UPI_APPS[i].scheme; break; }
+  }
+  return scheme + q;
+}
+
+/* Sends the payment details as a WhatsApp message. The VPA goes in as
+   plain text so the recipient can long-press and copy it straight into
+   their payment app. */
+function upiWhatsAppLink(fromId, payeeId, paise) {
+  var p = person(payeeId);
+  if (!p) return null;
+  var text = formatMoney(paise) + " to " + p.name +
+    (p.upi ? "\nUPI: " + p.upi : "") +
+    "\n\n(" + personName(fromId) + " → " + p.name + ", via Splitbaby)";
+  return "https://wa.me/?text=" + encodeURIComponent(text);
+}
+
+/* The pay chooser: a tile per payment app, plus WhatsApp to send the
+   details on. Only shown when the payee actually has a UPI ID. */
+function payChooser(fromId, payeeId, paise) {
+  var p = person(payeeId);
+  if (!p || !p.upi) {
+    return h("div", { class: "sb-note" }, [
+      h("span", { text: "⚠" }),
+      h("span", { text: personName(payeeId) + " has no UPI ID saved, so there is nothing to open. Add one in Settings." })
+    ]);
+  }
+
+  var tiles = UPI_APPS.map(function (app) {
+    return h("a", {
+      class: "sb-paybtn", href: upiLink(payeeId, paise, "Splitbaby", app.id)
+    }, [brandIcon(app.id === "upi" ? "upi" : app.id), h("span", { text: app.label })]);
+  });
+
+  tiles.push(h("a", {
+    class: "sb-paybtn", target: "_blank", rel: "noopener",
+    href: upiWhatsAppLink(fromId, payeeId, paise)
+  }, [brandIcon("whatsapp"), h("span", { text: "WhatsApp" })]));
+
+  return h("div", {}, [
+    h("div", { class: "sb-paygrid" }, tiles),
+    h("button", {
+      class: "sb-link", style: "margin-top:0.45rem",
+      text: "Copy " + p.name + "’s UPI ID",
+      onclick: function () { copyText(p.upi, "Copied " + p.upi); }
+    })
+  ]);
 }
 
 function nudgeLink(fromId, toId, paise) {
@@ -614,15 +720,7 @@ function debtRow(t, who) {
    ============================================================ */
 
 function openDebt(t, who) {
-  var link = upiLink(t.to, t.amountPaise, "Splitbaby");
   var acts = [];
-
-  if (link) {
-    acts.push(h("a", {
-      class: "btn sb-btn tiny primary", href: link,
-      text: "Pay " + formatMoney(t.amountPaise) + " by UPI"
-    }));
-  }
   acts.push(h("button", {
     class: "btn sb-btn tiny", text: "Mark paid",
     onclick: function () { close(); markPaid(t); }
@@ -643,10 +741,14 @@ function openDebt(t, who) {
 
   var close = sheet({
     title: personName(t.from) + " → " + personName(t.to),
-    sub: formatMoney(t.amountPaise) + " after simplifying. " +
-         (person(t.to) && person(t.to).upi ? personName(t.to) + ": " + person(t.to).upi : "No UPI ID on file."),
-    body: h("div", { class: "sb-note info", style: "margin-top:0.5rem" },
-      h("span", { text: "Paying by UPI only opens your payment app. Recording it here is the separate “Mark paid” step, so a cancelled payment never clears a debt." })),
+    sub: formatMoney(t.amountPaise) + " after simplifying.",
+    body: h("div", { class: "stack" }, [
+      h("span", { class: "sb-label", text: "Pay " + formatMoney(t.amountPaise) + " to " + personName(t.to) }),
+      payChooser(t.from, t.to, t.amountPaise),
+      h("div", { class: "sb-note info" }, h("span", {
+        text: "Opening a payment app does not clear the debt — come back and tap “Mark paid”. That way a cancelled payment never settles anything."
+      }))
+    ]),
     actions: acts
   });
 }
@@ -667,10 +769,8 @@ function openSettle(t) {
           }))
         ])
       ]),
-      upiLink(t.to, t.amountPaise) ? h("a", {
-        class: "btn sb-btn", href: upiLink(t.to, t.amountPaise),
-        text: "Open UPI for " + formatMoney(t.amountPaise)
-      }) : null
+      h("span", { class: "sb-label", text: "Open a payment app" }),
+      payChooser(t.from, t.to, t.amountPaise)
     ]),
     actions: [
       h("button", {
@@ -1696,8 +1796,9 @@ function screenPerson(id) {
           h("div", {}, [h("dt", { text: "Expenses" }), h("dd", { text: String(s.count) })])
         ]),
 
-        p.upi && s.net < 0 ? h("div", { class: "sb-detail-acts" }, [
-          h("a", { class: "btn sb-btn tiny", href: upiLink(id, -s.net) || "#", text: "UPI " + formatMoney(-s.net) })
+        p.upi && s.net < 0 ? h("div", { style: "margin-top:0.6rem" }, [
+          h("span", { class: "sb-label", text: "Pay " + p.name + " " + formatMoney(-s.net) }),
+          h("div", { style: "margin-top:0.35rem" }, payChooser(me(), id, -s.net))
         ]) : null
       ]),
 
