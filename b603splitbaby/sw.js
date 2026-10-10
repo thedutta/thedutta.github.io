@@ -13,7 +13,7 @@
    Bump CACHE_VERSION on any shell change.
    ============================================================ */
 
-const CACHE_VERSION = "splitbaby-b603-v2";
+const CACHE_VERSION = "splitbaby-b603-v3";
 
 const SHELL = [
   "./",

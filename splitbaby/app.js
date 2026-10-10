@@ -26,6 +26,7 @@ import { renderGraph, mapEdges, guestBudget } from "./graph.js";
 const FLAT  = window.SPLITBABY_FLAT === "b603" ? "b603" : "b002";
 const AWAY  = otherFlat(FLAT);
 const PREF_KEY = "splitbaby.pref." + FLAT;
+const NEW_PAYER = "__new__";
 
 /* ------------------------------------------------------------
    Preferences — who you are, and how you like the dashboard
@@ -1132,6 +1133,20 @@ function screenHome() {
 let form = null;
 
 function screenAdd(params) {
+  var key = "add|" + (params.edit || "") + "|" + (params.repeat || "") + "|" + (params.as || "");
+
+  /* Reuse the in-flight form when the route has not changed. A
+     background sync from another phone re-renders this screen, and
+     rebuilding from params would quietly throw away whatever the
+     user had already chosen. */
+  if (form && form.key === key) {
+    var reuseBody = h("div", { class: "container" });
+    var reuseHost = h("div");
+    reuseBody.appendChild(reuseHost);
+    drawForm(reuseHost, params);
+    return [topbar(form.editing ? "Edit" : "Add expense", "#/"), reuseBody];
+  }
+
   var editing = params.edit ? data.expenseById(params.edit) : null;
   var repeat = params.repeat ? data.expenseById(params.repeat) : null;
   var src = editing || repeat;
@@ -1148,6 +1163,7 @@ function screenAdd(params) {
   }
 
   form = {
+    key: key,
     editing: editing,
     amount: src ? paiseToInput(src.amountPaise) : "",
     title: src ? (repeat ? src.title : src.title) : "",
@@ -1299,10 +1315,26 @@ function drawForm(host, params) {
           h("label", { text: "Paid by" }),
           h("select", {
             class: "sb-select",
-            onchange: function (e) { form.payer = e.target.value; redraw(); }
+            onchange: function (e) {
+              if (e.target.value !== NEW_PAYER) { form.payer = e.target.value; redraw(); return; }
+              /* hold the old payer until the guest actually exists, so
+                 cancelling the sheet cannot leave the field on a
+                 placeholder that is not a person */
+              e.target.value = form.payer;
+              newGuestSheet(function (id) {
+                form.payer = id;
+                form.chosen[id] = true;
+                render();
+              });
+            }
           }, PEOPLE.filter(function (p) { return isActive(p.id); }).map(function (p) {
-            return h("option", { value: p.id, selected: p.id === form.payer ? "selected" : false, text: p.name });
-          }))
+            return h("option", {
+              value: p.id, selected: p.id === form.payer ? "selected" : false,
+              text: p.name + (p.kind === "visitor" ? " · guest" : "")
+            });
+          }).concat([
+            h("option", { value: NEW_PAYER, text: "＋ New guest…" })
+          ]))
         ])
       ]),
 
@@ -1480,6 +1512,55 @@ function previewText(paise, ids, splits) {
   return out;
 }
 
+/* One guest-creation path, two front ends: the folded form inside
+   the visitors section, and the sheet the "Paid by" dropdown opens.
+   Duplicates resolve to the existing person rather than erroring. */
+function createGuest(name, upi, onAdded) {
+  var clean = String(name || "").trim();
+  if (!clean) { toast("Give them a name", { kind: "bad" }); return; }
+  data.addGuest(clean, FLAT, String(upi || "").trim()).then(function (id) {
+    toast(clean + " added");
+    onAdded(id);
+  }, function (err) {
+    if (err && err.code === "duplicate") {
+      toast(err.person.name + " already exists — using them");
+      onAdded(err.person.id);
+    } else failed(err);
+  });
+}
+
+/* Someone outside the flat picked up the bill. Same creation path as
+   the visitors section, reached from the payer dropdown. */
+function newGuestSheet(onAdded) {
+  var nameInput, upiInput;
+  var close = sheet({
+    title: "New guest",
+    sub: "Added as a common visitor of " + FLATS[FLAT].label + ", so they are offered next time too.",
+    body: h("div", { class: "stack" }, [
+      h("div", { class: "sb-field" }, [
+        h("label", { text: "Name" }),
+        (nameInput = h("input", { class: "sb-input", type: "text", maxlength: "40", placeholder: "Who paid?" }))
+      ]),
+      h("div", { class: "sb-field" }, [
+        h("label", { text: "UPI ID (optional)" }),
+        (upiInput = h("input", {
+          class: "sb-input", type: "text", maxlength: "64",
+          placeholder: "name@okbank — lets you settle with them"
+        }))
+      ])
+    ]),
+    actions: [
+      h("button", {
+        class: "btn sb-btn primary", text: "Add guest",
+        onclick: function () {
+          createGuest(nameInput.value, upiInput.value, function (id) { close(); onAdded(id); });
+        }
+      }),
+      h("button", { class: "btn sb-btn", text: "Cancel", onclick: function () { close(); } })
+    ]
+  });
+}
+
 /* The new-guest form, folded inside the visitors section, with
    an optional UPI ID so settling with them works right away. */
 function newGuestForm(redraw) {
@@ -1501,18 +1582,9 @@ function newGuestForm(redraw) {
       h("button", {
         type: "button", class: "btn sb-btn tiny", text: "Add as common visitor",
         onclick: function () {
-          var name = nameInput.value.trim();
-          if (!name) return toast("Give them a name", { kind: "bad" });
-          data.addGuest(name, FLAT, upiInput.value.trim()).then(function (id) {
+          createGuest(nameInput.value, upiInput.value, function (id) {
             form.chosen[id] = true;
-            toast(name + " added and selected");
-            redraw();
-          }, function (err) {
-            if (err && err.code === "duplicate") {
-              form.chosen[err.person.id] = true;
-              toast(err.person.name + " already exists — selected them instead");
-              redraw();
-            } else failed(err);
+            render();
           });
         }
       })

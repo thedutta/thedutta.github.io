@@ -139,12 +139,15 @@ body.sb {
   width: 1.6rem; height: 1.6rem; border-radius: 50%;
   background-size: cover; background-position: center;
   font-size: var(--sb-fs-xxs); font-weight: 700; letter-spacing: 0;
-  color: #06070a; background: var(--av, var(--blue-bright));
+  color: #06070a; background-color: var(--av, var(--blue-bright));
 }
 .sb-av.lg { width: 3.1rem; height: 3.1rem; font-size: 1.1rem; }
 .sb-av.sm { width: 1.25rem; height: 1.25rem; font-size: 0.6rem; }
 /* a real photo needs no initial behind it, and no tint bleeding through */
-.sb-av.photo { color: transparent; background-color: rgba(255,255,255,0.08); }
+.sb-av.photo {
+  color: transparent; background-color: rgba(255,255,255,0.08);
+  background-size: cover; background-position: center top;
+}
 
 /* overlapping cluster: who was in this expense, at a glance */
 .sb-cluster { display: inline-flex; align-items: center; }

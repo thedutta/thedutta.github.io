@@ -150,6 +150,52 @@ const anyDeleted = Object.values(s.expenses).some(x => x.deleted === true);
 ok(anyDeleted, "delete is a soft flag, the document survives");
 ok(Object.values(s.expenses).every(x => Array.isArray(x.history) && x.history.length), "history is recorded on every expense");
 
+// ---------- 8. a guest paid: created straight from the payer dropdown ----------
+f.contentWindow.location.hash = "#/add?as=dutta";
+await sleep(800);
+const paySel = [...D().querySelectorAll("select")].find(x => [...x.options].some(op => /New guest/.test(op.text)));
+ok(!!paySel, "the payer dropdown offers a new guest");
+if (paySel) {
+  const prev = paySel.value;
+  paySel.value = "__new__";
+  paySel.dispatchEvent(new Event("change", { bubbles: true }));
+  await sleep(400);
+  ok(paySel.value === prev, "the dropdown holds the old payer until the guest exists");
+  const sh = D().querySelector(".sb-sheet");
+  ok(!!sh, "the new-guest sheet opens");
+  if (sh) {
+    const ins = sh.querySelectorAll("input");
+    setType(ins[0], "Rohan");
+    setType(ins[1], "rohan@okaxis");
+    [...sh.querySelectorAll("button")].find(b => /Add guest/.test(b.textContent)).click();
+    await sleep(1100);
+    const sel2 = [...D().querySelectorAll("select")].find(x => [...x.options].some(op => /New guest/.test(op.text)));
+    ok(sel2 && sel2.value === "rohan", "the new guest becomes the payer");
+    const tog = [...D().querySelectorAll(".sb-toggle")].find(t => /Rohan/.test(t.textContent));
+    ok(!!tog && tog.getAttribute("aria-pressed") === "true", "and is selected in the split");
+    ok(!!store().people.rohan && store().people.rohan.upi === "rohan@okaxis", "saved with their UPI id");
+  }
+}
+
+// ---------- 9. a background sync must not wipe what is half-filled ----------
+f.contentWindow.location.hash = "#/add?as=dutta";
+await sleep(700);
+const t9 = [...D().querySelectorAll(".sb-toggle")].find(t => /Nikhil/.test(t.textContent));
+t9.click();
+await sleep(200);
+setType(D().querySelector(".sb-amount input"), "777");
+await sleep(150);
+// simulate another device writing while this form is open
+const mod = store();
+mod.expenses["other-device"] = JSON.parse(JSON.stringify(Object.values(mod.expenses)[0]));
+mod.expenses["other-device"].title = "From another phone";
+localStorage.setItem("splitbaby.demo.v1", JSON.stringify(mod));
+window.dispatchEvent(new StorageEvent("storage", { key: "splitbaby.demo.v1" }));
+await sleep(900);
+const t9b = [...D().querySelectorAll(".sb-toggle")].find(t => /Nikhil/.test(t.textContent));
+ok(t9b && t9b.getAttribute("aria-pressed") === "false", "a sync mid-entry leaves the unselected person unselected");
+ok(D().querySelector(".sb-amount input").value === "777", "and leaves the typed amount alone");
+
 const fails = log.filter(l => l.startsWith("FAIL")).length;
 document.getElementById("out").textContent =
   "E2E\n" + log.join("\n") + "\n\n" + (log.length - fails) + "/" + log.length + " passed\nENDE2E";

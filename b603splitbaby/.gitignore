@@ -1,0 +1,5 @@
+# Source photos, kept local on purpose.
+# splitbaby/avatars/ holds the 480x480 crops the app actually uses;
+# publishing the full-resolution originals as well would put
+# everyone's camera-roll pictures on a public URL for no benefit.
+DPs/

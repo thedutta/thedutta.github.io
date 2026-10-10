@@ -39,7 +39,7 @@ each site is a **lens** on it:
 | `firebase-config.js` | Paste the project config here. Placeholders ⇒ demo mode. |
 | `firestore.rules` | Reference copy of the deployed rules. |
 | `test.html` / `tests.js` | Ledger unit suite (46 assertions). |
-| `e2e.html?run=1` | Drives the real UI in an iframe (28 assertions). Wipes the demo ledger, hence the guard. |
+| `e2e.html?run=1` | Drives the real UI in an iframe (36 assertions). Wipes the demo ledger, hence the guard. |
 | `demo.html?go=1` | Loads a sample ledger into this browser and opens the app in demo mode. Never touches Firestore. |
 
 Styling reuses the main site's Liquid Glass system by reference, not by copy —

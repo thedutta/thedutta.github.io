@@ -187,7 +187,7 @@ export function slugify(name) {
    ------------------------------------------------------------ */
 export const AVATAR_DIR = "../splitbaby/avatars/";
 
-export const PHOTOS = [];
+export const PHOTOS = ["atharv", "dutta", "jap", "kunsh", "nikhil", "vidu", "zaid"];
 
 const PHOTO_SET = new Set(PHOTOS);
 
