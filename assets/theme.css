@@ -24,10 +24,13 @@
 
   --radius:      24px;
   --radius-sm:   15px;
+  --radius-btn:  12px;
   --radius-pill: 999px;
   --bar-h:       56px;
 
   --ease:        cubic-bezier(0.22, 1, 0.36, 1);
+  /* stronger ease-out for entrances and interaction */
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
 
   /* ---- glass ---- */
   --glass-fill:  linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
@@ -131,7 +134,7 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 
 @media (hover: hover) and (pointer: fine) {
   .card:hover, .option:hover {
-    box-shadow: var(--glass-vol), 0 0 40px rgba(120,170,255,0.16);
+    box-shadow: var(--glass-vol), 0 14px 34px -12px rgba(0,0,0,0.6);
   }
   .card:hover::before, .option:hover::before { opacity: 1; }
   .card:hover::after, .option:hover::after { opacity: 1; }
@@ -163,12 +166,9 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.06), 0 8px 30px rgba(0,0,0,0.4);
 }
 .logo { display: inline-flex; flex-direction: column; line-height: 0.9; font-weight: 600; font-size: 1.08rem; letter-spacing: -0.02em; }
-.logo .l-d {
-  background: linear-gradient(135deg, var(--blue-pale), #fff);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.logo .l-r { color: #fff; }
-.logo.hero { font-size: clamp(2.7rem, 13vw, 4.6rem); letter-spacing: -0.045em; line-height: 0.85; font-weight: 600; }
+.logo .l-d { color: #fff; }
+.logo .l-r { color: var(--text-dim); font-weight: 500; }
+.logo.hero { font-size: clamp(2.7rem, 13vw, 4.6rem); letter-spacing: -0.04em; line-height: 0.85; font-weight: 600; }
 
 /* ============================================================
    Layout
@@ -228,26 +228,45 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 .btn {
   position: relative; isolation: isolate; overflow: hidden;
   display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
-  font-family: var(--font); font-weight: 600; font-size: 0.95rem;
-  border-radius: var(--radius-pill); color: var(--text);
-  background: rgba(255,255,255,0.08);
-  box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.4), inset 0 -1px 1px rgba(0,0,0,0.35), 0 4px 14px rgba(0,0,0,0.35);
+  font-family: var(--font); font-weight: 500; font-size: 0.95rem; letter-spacing: -0.006em;
+  border-radius: var(--radius-btn); color: var(--text);
+  background: rgba(255,255,255,0.085);
+  /* a hairline edge and a shadow that actually falls downward, instead of a
+     plastic specular rim pretending a 40px control is carved from glass */
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 1px 2px rgba(0,0,0,0.30),
+    0 6px 16px -6px rgba(0,0,0,0.45);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  padding: 0.74rem 1.15rem; cursor: pointer;
-  transition: transform 0.18s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
+  padding: 0.7rem 1.5rem; min-height: 44px; cursor: pointer;
+  transition: background 180ms var(--ease-out), box-shadow 180ms var(--ease-out), transform 140ms var(--ease-out);
 }
 .btn svg { width: 1.05em; height: 1.05em; }
-.btn.icon { padding: 0.74rem; width: 2.85rem; height: 2.85rem; }
-.btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.14); }
-.btn:active { transform: translateY(0) scale(0.95); }
+.btn.icon { padding: 0; width: 44px; height: 44px; }
+/* no hover lift — buttons don't levitate. Brightness and edge carry the
+   state, and the hover is gated so a tap on a phone can't leave it stuck. */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    background: rgba(255,255,255,0.145);
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.14),
+      inset 0 1px 0 rgba(255,255,255,0.20),
+      0 1px 2px rgba(0,0,0,0.30),
+      0 8px 20px -6px rgba(0,0,0,0.50);
+  }
+}
+.btn:active { transform: scale(0.97); transition-duration: 100ms; }
 .btn.call {
   background: linear-gradient(135deg, var(--blue-pale), #ffffff);
   color: #000000;
   box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.85), inset 0 -1px 1px rgba(11,92,255,0.20), 0 6px 18px rgba(11,92,255,0.22);
 }
-.btn.call:hover { background: linear-gradient(135deg, #b9d6ff, #ffffff); }
-.btn.wa { background: rgba(37,211,102,0.18); color: #5cf09a; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.35), inset 0 -1px 1px rgba(0,0,0,0.3), 0 4px 14px rgba(0,0,0,0.35); }
-.btn.wa:hover { background: rgba(37,211,102,0.28); }
+.btn.wa { background: rgba(37,211,102,0.18); color: #5cf09a; box-shadow: inset 0 0 0 1px rgba(92,240,154,0.18), inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 2px rgba(0,0,0,0.30), 0 6px 16px -6px rgba(0,0,0,0.45); }
+@media (hover: hover) and (pointer: fine) {
+  .btn.call:hover { background: linear-gradient(135deg, #b9d6ff, #ffffff); }
+  .btn.wa:hover { background: rgba(37,211,102,0.28); }
+}
 
 .footer { text-align: center; color: var(--text-faint); font-size: 0.85rem; margin-top: 2.8rem; text-shadow: 0 1px 8px rgba(0,0,0,0.5); }
 
@@ -258,17 +277,18 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 .lang-btn {
   display: inline-flex; align-items: center; gap: 0.45rem;
   font-family: var(--font); font-size: 0.85rem; font-weight: 600; color: var(--text);
-  padding: 0.44rem 0.72rem; border-radius: var(--radius-pill);
+  padding: 0.5rem 0.78rem; border-radius: var(--radius-btn); min-height: 36px;
   background: rgba(255,255,255,0.09);
   box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.4), inset 0 -1px 1px rgba(0,0,0,0.3);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
   cursor: pointer; transition: background 0.2s var(--ease);
 }
-.lang-btn:hover { background: rgba(255,255,255,0.15); }
+@media (hover: hover) and (pointer: fine) {
+  .lang-btn:hover { background: rgba(255,255,255,0.15); }
+}
 .lang-glyph {
-  font-weight: 700; font-size: 1.02rem; letter-spacing: -0.04em; line-height: 1;
-  background: linear-gradient(135deg, var(--blue-pale), #fff);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 600; font-size: 1.02rem; letter-spacing: -0.04em; line-height: 1;
+  color: var(--blue-pale);
 }
 .lang-current { color: var(--text-dim); font-weight: 600; }
 .lang-caret { width: 0.85em; height: 0.85em; opacity: 0.5; }
@@ -298,8 +318,8 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 /* ============================================================
    Entrance animation (hidden state added by JS — never blank)
    ============================================================ */
-.reveal { transition: opacity 0.65s var(--ease), transform 0.65s var(--ease); }
-.reveal.pre { opacity: 0; transform: translateY(20px); }
+.reveal { transition: opacity 420ms var(--ease-out), transform 420ms var(--ease-out); }
+.reveal.pre { opacity: 0; transform: translateY(12px); }
 .reveal.in { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -323,12 +343,9 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 /* ---- brand wordmark: single "Dutta", a touch more blue than the
    residence mark (blue-bright → pale → barely-white) ---- */
 .logo.brand { flex-direction: row; font-size: 1.18rem; font-weight: 600; letter-spacing: -0.025em; }
-.logo.brand .l-d {
-  background: linear-gradient(135deg, var(--blue-bright) 0%, var(--blue-pale) 52%, #eaf2ff 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
+.logo.brand .l-d { color: #fff; }
 .logo.brand.hero {
-  font-size: clamp(3.1rem, 17vw, 6.2rem); letter-spacing: -0.05em;
+  font-size: clamp(3.1rem, 17vw, 6.2rem); letter-spacing: -0.04em;
   line-height: 0.86; font-weight: 600;
 }
 
@@ -348,7 +365,9 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
   display: inline-grid; place-items: center; width: 2.1rem; height: 2.1rem;
   border-radius: 50%; color: var(--text-dim); transition: color 0.2s var(--ease), background 0.2s var(--ease);
 }
-.bar-link:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+@media (hover: hover) and (pointer: fine) {
+  .bar-link:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+}
 .bar-link svg { width: 1.15rem; height: 1.15rem; }
 
 /* ---- wider container for grids ---- */
@@ -466,7 +485,7 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 
 /* engineering decisions */
 .decisions { display: grid; gap: 0.95rem; }
-.decision { padding-left: 1rem; border-left: 2px solid rgba(74,163,255,0.45); }
+.decision { padding-left: 1rem; border-left: 1px solid rgba(74,163,255,0.42); }
 .decision h3 { font-size: 0.98rem; font-weight: 500; margin-bottom: 0.3rem; color: #fff; }
 .decision p { color: var(--text-dim); font-size: 0.88rem; line-height: 1.55; font-weight: 300; }
 
@@ -524,8 +543,10 @@ body.lb-lock { overflow: hidden; }
               0 8px 22px rgba(0,0,0,0.5);
   transition: transform 0.25s var(--ease), background 0.25s var(--ease);
 }
-.lb-ctrl:hover { transform: scale(1.08); background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08)); }
-.lb-ctrl:active { transform: scale(0.95); }
+@media (hover: hover) and (pointer: fine) {
+  .lb-ctrl:hover { transform: scale(1.06); background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08)); }
+}
+.lb-ctrl:active { transform: scale(0.96); }
 .lb-ctrl:focus-visible { outline: 2px solid var(--blue-bright); outline-offset: 3px; }
 .lb-ctrl svg { width: 19px; height: 19px; }
 .lb-ctrl[hidden] { display: none; }
@@ -579,7 +600,9 @@ body.lb-lock { overflow: hidden; }
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   transition: transform 0.2s var(--ease), color 0.2s var(--ease), background 0.2s var(--ease);
 }
-.foot-icon:hover { transform: translateY(-2px); color: var(--text); background: rgba(255,255,255,0.12); }
+@media (hover: hover) and (pointer: fine) {
+  .foot-icon:hover { color: var(--text); background: rgba(255,255,255,0.14); }
+}
 .foot-icon svg { width: 1.2rem; height: 1.2rem; }
 .foot-note { color: var(--text-faint); font-size: 0.8rem; text-shadow: 0 1px 8px rgba(0,0,0,0.5); }
 
@@ -610,3 +633,61 @@ body.lb-lock { overflow: hidden; }
 .fund-total { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .fund-total .amt { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 200; letter-spacing: 0.01em; }
 .fund-total .amt b { font-weight: 500; }
+
+/* ============================================================
+   Browser surfaces
+   The parts of a page nobody draws still carry the design:
+   selection, caret, scrollbar, focus ring, link underlines,
+   numerals. Left at browser defaults they belong to no design
+   system at all, and that is what reads as unfinished.
+   ============================================================ */
+
+::selection      { background: rgba(74,163,255,0.34); color: #fff; text-shadow: none; }
+::-moz-selection { background: rgba(74,163,255,0.34); color: #fff; text-shadow: none; }
+
+html { scrollbar-color: rgba(255,255,255,0.22) transparent; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.18); border-radius: var(--radius-pill);
+  border: 3px solid transparent; background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.32); background-clip: content-box; }
+
+input, textarea, select { caret-color: var(--blue-bright); }
+
+/* one focus ring for the whole site — keyboard only, never on mouse click */
+:focus-visible { outline: 2px solid var(--blue-bright); outline-offset: 3px; }
+.btn:focus-visible, .lang-btn:focus-visible { outline-offset: 2px; }
+.nav a:focus-visible, .back:focus-visible, .read:focus-visible,
+.logo:focus-visible { outline-offset: 4px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* pressable things shouldn't flash blue or select their own label on a
+   long press — the two tells that a web page is not an app */
+.btn, .lang-btn, .lb-ctrl, .bar-link, .foot-icon, .option, .lang-menu button {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; user-select: none;
+}
+
+/* the top-bar icon is 34px drawn; give it a 44px touch target without
+   changing a pixel of the layout */
+.bar-link::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 44px; height: 44px; transform: translate(-50%, -50%);
+}
+
+/* links inside prose should look like links */
+.prose a {
+  color: var(--blue-bright);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: rgba(74,163,255,0.45);
+  transition: color 160ms var(--ease-out), text-decoration-color 160ms var(--ease-out);
+}
+.prose a:hover { color: var(--blue-pale); text-decoration-color: currentColor; }
+
+/* numerals line up in anything that is actually data */
+.specs dd, .fund-total .amt, .lb-count, .post-row time,
+.article-head time, .contact-num { font-variant-numeric: tabular-nums; }
