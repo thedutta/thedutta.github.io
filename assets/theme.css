@@ -739,9 +739,19 @@ body.lb-lock { overflow: hidden; }
 
 /* ---- desktop: the two-column rail ---- */
 @media (min-width: 1024px) {
-  .container.rail-host {
+  /* :has() means any container holding a rail widens itself, so a new
+     doc page cannot be railed and left at the 720px reading width --
+     which squeezes the media pane to a sliver. .rail-host is kept as
+     the explicit fallback for engines without :has(). */
+  .container.rail-host,
+  .container:has(> .rail) {
     max-width: 1340px;
     padding-left: var(--gutter); padding-right: var(--gutter);
+  }
+  /* never let the pane collapse to a useless width */
+  .rail { grid-template-columns: minmax(0, 560px) minmax(0, 1fr); }
+  @supports not selector(:has(*)) {
+    .container:not(.rail-host) .rail { display: block; }
   }
   .rail {
     display: grid;
