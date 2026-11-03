@@ -10,15 +10,6 @@
   <meta property="og:title" content="CatBot — Biomimetic Quadruped &amp; Distributed Edge Node" />
   <meta property="og:description" content="21 actuated DoF, 4.9 kg, a CAN-FD spine with one FlexNode per joint, split-brain compute and a zero-emission passive sensory stack." />
   <meta property="og:type" content="article" />
-  <style>
-    /* page-scoped: mirror the FlexNode doc's list/code styling and offset
-       in-page anchors below the fixed topbar */
-    .doc-section[id] { scroll-margin-top: 72px; }
-    .prose ul, .prose ol { margin: 0.4rem 0 0.2rem 1.2rem; }
-    .prose li { color: rgba(255,255,255,0.82); margin-bottom: 0.5rem; font-weight: 300; line-height: 1.65; }
-    .prose code { font-family: ui-monospace, "SF Mono", Menlo, monospace; background: rgba(255,255,255,0.08); padding: 0.1em 0.4em; border-radius: 6px; font-size: 0.86em; overflow-wrap: anywhere; }
-    .cap { color: var(--text-faint); font-size: 0.78rem; line-height: 1.5; margin-top: 0.55rem; padding: 0 0.2rem; }
-  </style>
 </head>
 <body>
   <picture class="bg">
@@ -53,6 +44,21 @@
         <span class="chip">Jetson Orin Nano Super</span>
       </div>
     </div>
+
+    <nav class="jump" aria-label="Sections">
+      <a href="#status">Status</a>
+      <a href="#glance">At a glance</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#flexnode">FlexNode</a>
+      <a href="#corenode">Corenode</a>
+      <a href="#actuation">Actuation</a>
+      <a href="#sensing">Sensing</a>
+      <a href="#power">Power</a>
+      <a href="#telemetry">Telemetry</a>
+      <a href="#structure">Structure</a>
+      <a href="#software">Software</a>
+      <a href="#deployment">Deployment</a>
+    </nav>
 
     <div class="card reveal" style="padding:0;overflow:hidden">
       <span style="display:block;aspect-ratio:1484/858;background:#0a0a0d">
@@ -360,5 +366,6 @@
 
   <script src="../../assets/reveal.js"></script>
   <script src="../../assets/ui.js"></script>
+  <script src="../../assets/rail.js"></script>
 </body>
 </html>

@@ -163,9 +163,73 @@
     } catch (e) {}
   }
 
+  /* ============================================================
+     Jump strip — highlight the section being read.
+     The strip itself is plain anchors and works with JS off; this
+     only adds aria-current and keeps the active chip in view.
+     ============================================================ */
+  function setupJump() {
+    var strip = document.querySelector(".jump");
+    if (!strip || !("IntersectionObserver" in window)) return;
+
+    var links = {}, targets = [];
+    var as = strip.querySelectorAll('a[href^="#"]');
+    for (var i = 0; i < as.length; i++) {
+      var id = as[i].getAttribute("href").slice(1);
+      var t = document.getElementById(id);
+      if (!t) continue;                       // never mark a dead anchor
+      links[id] = as[i];
+      targets.push(t);
+    }
+    if (!targets.length) return;
+
+    // the strip may list sections out of document order (Status leads,
+    // because it answers the reader's first question), so sort before
+    // using targets[0] as the "nothing has scrolled yet" fallback
+    targets.sort(function (a, b) {
+      return (a.compareDocumentPosition(b) & 4) ? -1 : 1;   // 4 = FOLLOWING
+    });
+
+    var currentId = null;
+
+    function mark(id) {
+      if (id === currentId) return;
+      if (currentId && links[currentId]) links[currentId].removeAttribute("aria-current");
+      var a = links[id];
+      if (a) {
+        a.setAttribute("aria-current", "true");
+        var sr = strip.getBoundingClientRect(), ar = a.getBoundingClientRect();
+        if (ar.left < sr.left + 8 || ar.right > sr.right - 8) {
+          var to = strip.scrollLeft + (ar.left - sr.left) - 16;
+          try { strip.scrollTo({ left: to, behavior: BEHAVIOR }); }
+          catch (e) { strip.scrollLeft = to; }
+        }
+      }
+      currentId = id;
+    }
+
+    // the last section whose top has crossed the reading line is the
+    // one being read; recomputed from all targets, because an
+    // observer callback only carries the entries that changed
+    function pick() {
+      var line = window.innerHeight * 0.3;
+      var best = null, bestTop = -Infinity;
+      for (var i = 0; i < targets.length; i++) {
+        var top = targets[i].getBoundingClientRect().top;
+        if (top <= line && top > bestTop) { bestTop = top; best = targets[i]; }
+      }
+      mark((best || targets[0]).id);
+    }
+
+    var io = new IntersectionObserver(pick, { rootMargin: "-10% 0px -55% 0px", threshold: 0 });
+    for (var j = 0; j < targets.length; j++) io.observe(targets[j]);
+    pick();
+  }
+
   function init() {
     var rails = document.querySelectorAll(".rail");
     for (var i = 0; i < rails.length; i++) setup(rails[i]);
+    setupJump();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
