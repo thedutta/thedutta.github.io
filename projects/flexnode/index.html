@@ -70,7 +70,7 @@
       </div>
     </div>
 
-    <section class="doc-section reveal" id="idea" data-media="m-actuator">
+    <section class="doc-section reveal" id="idea" data-media="m-board">
       <h2>The idea</h2>
       <div class="prose lede">
         <p>Most of the work in a walking robot isn't the walking. Every joint needs a motor controller; every controller needs encoder input, current sensing, thermal protection and a wire home. Add a foot sensor, a rangefinder or an IMU and that is another board, another connector, another protocol — and none of it is the thing you set out to build.</p>
@@ -122,7 +122,7 @@
       </div>
     </section>
 
-    <section class="doc-section reveal" id="specs" data-media="m-board">
+    <section class="doc-section reveal" id="specs" data-media="m-layout">
       <h2>Specifications</h2>
       <span class="kicker" style="display:block;margin:0 0 0.45rem">Power stage</span>
       <div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.7rem 1rem;margin-bottom:0.6rem">
@@ -163,7 +163,7 @@
       <div class="prose" style="margin-top:0.8rem"><p>Pin order for <strong>FLASH</strong> and the power pads is fixed as listed; confirm pin-1 orientation on the aux headers against the board silk.</p></div>
     </section>
 
-    <section class="doc-section reveal" id="safety" data-media="m-board">
+    <section class="doc-section reveal" id="safety" data-media="m-layout">
       <h2>Powering it safely</h2>
       <div class="card">
         <div class="prose">
@@ -217,9 +217,9 @@
           <figcaption>FlexNode v1.0 — the DRV8353S gate driver, STM32G4 and the six-FET power stage. 10–44 V in, 100 A peak phase.</figcaption>
         </figure>
 
-        <figure id="m-actuator" class="prism">
-          <img src="../../assets/img/flexnodexray.jpg" alt="FlexNode mounted on the rear of a geared quadruped actuator, status LED glowing" loading="lazy" />
-          <figcaption>One node per actuator, bolted to the back of the gearbox — the loop closes millimetres from the windings.</figcaption>
+        <figure id="m-layout" class="prism">
+          <img src="../../assets/img/flexnodexray.jpg" alt="Altium layout view of the FlexNode v1.0 board with all four copper layers shown — the V+ and V- power pours, the GND plane, and the three phase nets SHA, SHB and SHC routed out to the motor pads" loading="lazy" />
+          <figcaption>All four copper layers overlaid in Altium — the V+ and V- pours, the GND plane, and the three phase nets SHA / SHB / SHC running out to the motor pads.</figcaption>
         </figure>
 
         <figure id="m-foc" class="prism">

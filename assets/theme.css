@@ -630,7 +630,11 @@ body.lb-lock { overflow: hidden; }
 
   --gutter:   clamp(1rem, 2.2vw, 2.25rem);
   --rail-gap: clamp(1.75rem, 3.4vw, 3.5rem);
-  --measure:  68ch;
+  /* ch is the width of the '0' glyph, and Geist's zero (11.13px) is far
+     wider than its average lowercase character (7.67px). 68ch therefore
+     renders ~99 characters, not 68. 48ch measures ~70. Verified in
+     Chromium with canvas text metrics, not assumed. */
+  --measure:  48ch;
   --bar-media-h: 25dvh;
 
   /* weights named by job, all present in the self-hosted Geist set */
@@ -786,11 +790,12 @@ body.lb-lock { overflow: hidden; }
   .rail-media figure img, .rail-media figure video {
     flex: 1; min-height: 0; width: auto; height: 100%; object-fit: cover;
   }
+  /* a flex item gets its display blockified, so -webkit-box (and with it
+     -webkit-line-clamp) is silently dropped. One line, ellipsis, no clamp. */
   .rail-media figcaption {
     flex: 0 0 auto; padding: 0.35rem 0.5rem;
     font-size: 0.72rem; line-height: 1.3;
-    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
-    overflow: hidden;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   /* the last paragraph must never sit under the bar */
   .rail-text { padding-bottom: calc(var(--bar-media-h) + 1.5rem); }
