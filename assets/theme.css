@@ -610,3 +610,208 @@ body.lb-lock { overflow: hidden; }
 .fund-total { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .fund-total .amt { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 200; letter-spacing: 0.01em; }
 .fund-total .amt b { font-weight: 500; }
+
+/* ============================================================
+   REVAMP LAYER v1 — appended deliberately.
+   Everything above is the committed Liquid Glass world and is
+   untouched; later source order lets these win at equal
+   specificity. Delete this block to return to the old look.
+   The blue gradient wordmark above is PINNED — do not remove.
+   ============================================================ */
+
+:root {
+  /* fluid scale — replaces the old two-size system */
+  --step--1: clamp(0.78rem, 0.75rem + 0.14vw, 0.86rem);
+  --step-0:  clamp(1rem,    0.97rem + 0.16vw, 1.08rem);
+  --step-1:  clamp(1.15rem, 1.08rem + 0.34vw, 1.35rem);
+  --step-2:  clamp(1.5rem,  1.24rem + 1.10vw, 2.15rem);
+  --step-3:  clamp(2.1rem,  1.60rem + 2.40vw, 3.40rem);
+  --step-4:  clamp(3rem,    2.00rem + 5.00vw, 6.00rem);
+
+  --gutter:   clamp(1rem, 2.2vw, 2.25rem);
+  --rail-gap: clamp(1.75rem, 3.4vw, 3.5rem);
+  --measure:  68ch;
+  --bar-media-h: 25dvh;
+
+  /* weights named by job, all present in the self-hosted Geist set */
+  --w-body:    400;
+  --w-head:    500;
+  --w-display: 300;
+  --w-label:   500;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ---- type: section headings stop being smaller than their own text ---- */
+.doc-section { margin: clamp(2.5rem, 5vw, 4rem) 0; }
+.doc-section > h2 {
+  font-size: var(--step-2);
+  font-weight: var(--w-head);
+  text-transform: none;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 0 0 0.75rem;
+  padding-left: 0;
+  text-wrap: balance;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.5);
+}
+.prose p, .prose li {
+  font-size: var(--step-0);
+  font-weight: var(--w-body);
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+.doc-hero h1, .article-head h1, .phero h1 { font-weight: var(--w-display); }
+
+/* ---- the caption primitive that was never defined ---- */
+.cap {
+  color: var(--text-faint);
+  font-size: var(--step--1);
+  line-height: 1.55;
+  margin-top: 0.55rem;
+  padding: 0 0.2rem;
+  max-width: var(--measure);
+}
+
+/* ============================================================
+   Prism — chromatic aberration on the glass edge.
+   Rationed: hero frame, active rail figure, primary buttons.
+   Never on every card; plus-lighter over backdrop-filter is
+   expensive and CatBot already stacks ~14 blurred surfaces.
+   ============================================================ */
+@supports ((-webkit-mask-composite: xor) or (mask-composite: exclude)) {
+  .prism { position: relative; isolation: isolate; }
+  .prism::after {
+    content: ""; position: absolute; inset: 0; z-index: 3;
+    border-radius: inherit; padding: 1px; pointer-events: none;
+    background:
+      linear-gradient(var(--prism-a, 140deg), rgba(255, 80,140,0.55) 0%,  rgba(255, 80,140,0)    30%),
+      linear-gradient(var(--prism-a, 140deg), rgba( 90,255,215,0)    32%, rgba( 90,255,215,0.40) 54%,
+                                              rgba( 90,255,215,0)    74%),
+      linear-gradient(var(--prism-a, 140deg), rgba( 74,163,255,0)    70%, rgba( 74,163,255,0.60) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    mix-blend-mode: plus-lighter;
+    transition: opacity 0.3s var(--ease-out);
+  }
+}
+
+/* ============================================================
+   The rail — content left, media right, scroll-synced.
+   Mobile-first: plain document flow, then a bottom bar, then
+   the two-column rail at 1024px.
+   ============================================================ */
+.rail { display: block; position: relative; }
+.rail-text { min-width: 0; }
+.rail-media { min-width: 0; }
+.rail-media figure {
+  margin: 0 0 1rem; background: #0a0a0d; overflow: hidden;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+.rail-media figure:last-child { margin-bottom: 0; }
+.rail-media img, .rail-media video { display: block; width: 100%; height: auto; }
+.rail-media figcaption {
+  color: var(--text-dim); font-size: var(--step--1);
+  line-height: 1.5; padding: 0.7rem 0.9rem 0.95rem;
+}
+
+/* resync chip + collapse handle are injected by rail.js, so a
+   no-JS reader never sees a dead control */
+.rail-chip {
+  position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 40;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--font); font-size: 0.8rem; font-weight: var(--w-label);
+  color: var(--text); border: 0; cursor: pointer;
+  padding: 0.5rem 0.85rem; min-height: 36px; border-radius: var(--radius-pill);
+  background: rgba(20,22,30,0.72);
+  -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14), 0 8px 22px rgba(0,0,0,0.5);
+  opacity: 0; transform: translateY(6px); pointer-events: none;
+  transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+}
+.rail[data-rail-state="browsing"] .rail-chip { opacity: 1; transform: none; pointer-events: auto; }
+.rail-chip svg { width: 0.9rem; height: 0.9rem; }
+
+/* ---- desktop: the two-column rail ---- */
+@media (min-width: 1024px) {
+  .container.rail-host {
+    max-width: 1340px;
+    padding-left: var(--gutter); padding-right: var(--gutter);
+  }
+  .rail {
+    display: grid;
+    grid-template-columns: minmax(0, 560px) minmax(0, 1fr);
+    gap: var(--rail-gap);
+    align-items: start;
+  }
+  .rail-media {
+    position: sticky;
+    top: calc(var(--bar-h) + 1.25rem);
+    height: calc(100dvh - var(--bar-h) - 2.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.22) transparent;
+  }
+  .rail-media figure { opacity: 0.55; transition: opacity 0.35s var(--ease-out); }
+  .rail-media figure[data-active="true"] { opacity: 1; }
+  .rail-handle { display: none; }
+}
+
+/* ---- phone / tablet: sticky media bar at the bottom ---- */
+@media (max-width: 1023.98px) {
+  .rail-media {
+    position: sticky; bottom: 0; z-index: 30;
+    margin: 1.5rem calc(-1 * var(--gutter)) 0;
+    padding: 0.6rem var(--gutter);
+    height: var(--bar-media-h);
+    display: flex; gap: 0.6rem;
+    overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    background: linear-gradient(0deg, rgba(5,5,6,0.94), rgba(5,5,6,0.58));
+    -webkit-backdrop-filter: blur(20px) saturate(150%); backdrop-filter: blur(20px) saturate(150%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    transition: height 0.28s var(--ease-out);
+  }
+  .rail-media.is-collapsed { height: 2.9rem; overflow: hidden; }
+  .rail-media figure {
+    flex: 0 0 auto; height: 100%; width: auto; max-width: 78vw;
+    margin: 0; scroll-snap-align: start;
+    display: flex; flex-direction: column;
+  }
+  .rail-media figure img, .rail-media figure video {
+    flex: 1; min-height: 0; width: auto; height: 100%; object-fit: cover;
+  }
+  .rail-media figcaption {
+    flex: 0 0 auto; padding: 0.35rem 0.5rem;
+    font-size: 0.72rem; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* the last paragraph must never sit under the bar */
+  .rail-text { padding-bottom: calc(var(--bar-media-h) + 1.5rem); }
+  .rail.is-bar-collapsed .rail-text { padding-bottom: 4.5rem; }
+  .rail-handle {
+    position: fixed; bottom: calc(var(--bar-media-h) - 0.1rem);
+    left: 50%; transform: translateX(-50%);
+    width: 54px; height: 26px; padding: 0; border: 0; cursor: pointer; z-index: 4;
+    background: transparent; display: grid; place-items: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rail-handle::before {
+    content: ""; width: 36px; height: 4px; border-radius: 999px;
+    background: rgba(255,255,255,0.42);
+  }
+  .rail-chip { bottom: calc(var(--bar-media-h) + 0.9rem); }
+  .rail.is-bar-collapsed .rail-handle { bottom: 2.8rem; }
+  .rail.is-bar-collapsed .rail-chip   { bottom: 4.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-media { scroll-behavior: auto; transition: none; }
+  .rail-media figure, .rail-chip, .prism::after { transition: none; }
+}
