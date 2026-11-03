@@ -10,10 +10,69 @@
   var reduce = false;
   try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
 
+  /* ------------------------------------------------------------
+     Pointer, interpolated.
+
+     Reading the cursor straight into --mx/--my makes the spotlight
+     snap: the light has no mass. Each frame we ease the rendered
+     position toward the real one instead, so the highlight trails
+     the cursor and settles. Same idea drives --prism-a, the angle
+     of the chromatic edge, so the dispersion rotates as you move.
+
+     This is also cheaper than it looks: pointermove can fire well
+     above 60Hz and each write invalidates the card's subtree, so
+     coalescing into one rAF per frame is fewer style recalcs than
+     the raw handler it replaces.
+     ------------------------------------------------------------ */
+  var el = null;            // card currently under the pointer
+  var tx = 0, ty = 0;       // where the pointer really is
+  var cx = 0, cy = 0;       // where the light currently is
+  var raf = 0, seeded = false;
+  var EASE = 0.16;          // per-frame approach; higher = tighter
+
+  function frame() {
+    raf = 0;
+    if (!el) return;
+    cx += (tx - cx) * EASE;
+    cy += (ty - cy) * EASE;
+
+    var s = el.style;
+    s.setProperty("--mx", cx.toFixed(1) + "px");
+    s.setProperty("--my", cy.toFixed(1) + "px");
+
+    // angle from the card's centre out to the light
+    var w = el.offsetWidth, h = el.offsetHeight;
+    if (w && h) {
+      var a = Math.atan2(cy - h / 2, cx - w / 2) * 180 / Math.PI;
+      s.setProperty("--prism-a", (a + 90).toFixed(1) + "deg");
+    }
+
+    if (Math.abs(tx - cx) > 0.4 || Math.abs(ty - cy) > 0.4) {
+      raf = window.requestAnimationFrame(frame);
+    }
+  }
+
   function onMove(e) {
     var c = e.currentTarget, r = c.getBoundingClientRect();
-    c.style.setProperty("--mx", (e.clientX - r.left) + "px");
-    c.style.setProperty("--my", (e.clientY - r.top) + "px");
+    tx = e.clientX - r.left;
+    ty = e.clientY - r.top;
+
+    if (c !== el) {            // new card: start the light where the
+      el = c;                  // cursor entered, not swooping in from 0,0
+      cx = tx; cy = ty;
+      seeded = true;
+    }
+    if (reduce) {              // reduced motion: no trailing, just track
+      cx = tx; cy = ty;
+      el.style.setProperty("--mx", cx + "px");
+      el.style.setProperty("--my", cy + "px");
+      return;
+    }
+    if (!raf) raf = window.requestAnimationFrame(frame);
+  }
+
+  function onLeave(e) {
+    if (e.currentTarget === el) { el = null; seeded = false; }
   }
 
   function onDown(e) {
@@ -33,9 +92,16 @@
 
   function init() {
     if (!("PointerEvent" in window)) return; // old browsers: skip, static glass
-    var els = document.querySelectorAll(".card, .option");
+    // .prism joins the list so the chromatic edge gets an angle to turn
+    var els = document.querySelectorAll(".card, .option, .prism");
+    var fine = true;
+    try { fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches; } catch (e) {}
+
     for (var i = 0; i < els.length; i++) {
-      els[i].addEventListener("pointermove", onMove);
+      if (fine) {
+        els[i].addEventListener("pointermove", onMove);
+        els[i].addEventListener("pointerleave", onLeave);
+      }
       els[i].addEventListener("pointerdown", onDown);
     }
   }

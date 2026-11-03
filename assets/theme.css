@@ -884,3 +884,39 @@ body.lb-lock { overflow: hidden; }
   background: rgba(255,255,255,0.08); padding: 0.1em 0.4em;
   border-radius: 6px; font-size: 0.86em; overflow-wrap: anywhere;
 }
+
+/* ============================================================
+   Cross-document view transitions.
+
+   Every page carries the same background photograph and the same
+   top bar, and today the browser throws both away and repaints
+   them on every navigation — which is most of why a multi-page
+   static site feels like a pile of documents rather than one
+   thing. Naming them holds them still while the content crosses.
+
+   Chrome/Edge 126+ and Safari 18.2+. Inert everywhere else, so
+   navigation simply stays as it is today.
+   ============================================================ */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) { animation: vt-leave 200ms var(--ease-out) both; }
+::view-transition-new(root) { animation: vt-enter 320ms var(--ease-out) both; }
+@keyframes vt-leave { to   { opacity: 0; transform: translateY(-10px); } }
+@keyframes vt-enter { from { opacity: 0; transform: translateY(14px); } }
+
+/* the photograph and the bar are identical across pages: hold them */
+.bg     { view-transition-name: page-bg; }
+.topbar { view-transition-name: page-bar; }
+::view-transition-old(page-bg),  ::view-transition-new(page-bg),
+::view-transition-old(page-bar), ::view-transition-new(page-bar) {
+  animation: none; opacity: 1;
+}
+/* .bg sits at z-index -2 in the document; the transition tree does not
+   inherit that, so state the stacking explicitly or it covers content */
+::view-transition-group(page-bg)  { z-index: 0; }
+::view-transition-group(root)     { z-index: 1; }
+::view-transition-group(page-bar) { z-index: 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
