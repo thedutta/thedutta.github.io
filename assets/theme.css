@@ -648,7 +648,11 @@ body.lb-lock { overflow: hidden; }
 
 /* ---- type: section headings stop being smaller than their own text ---- */
 .doc-section { margin: clamp(2.5rem, 5vw, 4rem) 0; }
-.doc-section > h2 {
+/* .h-sec is the SAME ROLE as .doc-section > h2 — it is simply the class
+   the older pages use. Listing both is what carries the type scale to
+   /portfolio/, /projects/ and /blog/, which the first revamp missed. */
+.doc-section > h2,
+.h-sec {
   font-size: var(--step-2);
   font-weight: var(--w-head);
   text-transform: none;
@@ -659,6 +663,11 @@ body.lb-lock { overflow: hidden; }
   text-wrap: balance;
   text-shadow: 0 2px 18px rgba(0,0,0,0.5);
 }
+/* .doc-section supplies its own vertical rhythm; .h-sec is a bare sibling
+   with nothing to space it, so it carries the same gap itself. */
+.h-sec { margin-top: clamp(2.5rem, 5vw, 4rem); }
+.h-sec:first-of-type { margin-top: clamp(1.75rem, 3vw, 2.5rem); }
+
 .prose p, .prose li {
   font-size: var(--step-0);
   font-weight: var(--w-body);
@@ -929,4 +938,111 @@ body.lb-lock { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+
+/* ============================================================
+   BLEND LAYER v2 — architecture borrowed from the reference site,
+   translated into the pinned Liquid Glass world.
+   Delete from this banner down to return to revamp v1.
+
+   What is borrowed:  display scale, full-bleed ground, declarative
+                      data-* motion contract, per-section accent,
+                      one pinned set piece.
+   What is NOT:       the paper/ink palette, the typefaces, Lenis.
+                      The dark photographic world and the blue
+                      gradient wordmark are pinned. See DESIGN.md.
+   ============================================================ */
+
+:root {
+  /* The display step the scale was missing. The reference site tops
+     out at 19rem; on a dark photographic ground that much white type
+     overwhelms the photograph, so this stops at 13rem (~166px at
+     1440). Display:body moves from 3.1:1 to ~10.8:1 — the ratio is
+     what makes a scroll position feel like an arrival. */
+  --step-5: clamp(3.25rem, 0.5rem + 11vw, 13rem);
+
+  /* accent is a live channel: sections retint it as they are read.
+     Defaults to the committed blue, so a page that sets nothing
+     looks exactly as it does today. */
+  --accent:      var(--blue-bright, #4aa3ff);
+  --accent-pale: var(--blue-pale,  #9ac4ff);
+  --veil: 0;                       /* 0 = background as authored */
+}
+
+/* ---- full-bleed ground -------------------------------------------
+   `clip` not `hidden`: hidden makes the element a scroll container,
+   which silently kills `position: sticky` on the rail's media pane.
+   clip has no such side effect. */
+html, body { overflow-x: clip; }
+
+.bleed {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding-inline: var(--gutter);
+}
+
+/* ---- display type ---- */
+.display {
+  font-size: var(--step-5);
+  font-weight: var(--w-display);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-transform: none;
+  text-wrap: balance;
+  margin: 0;
+}
+
+/* ============================================================
+   The data-reveal contract (see assets/motion.js).
+   `.reveal` above keeps its own rule and still works; these add
+   the named modes. Hidden state is only ever applied by JS, so a
+   reader with JS off sees finished content, never a blank page.
+   ============================================================ */
+
+/* shared: stagger index --si is set per element by motion.js */
+[data-reveal] { transition: opacity 0.65s var(--ease-out), transform 0.65s var(--ease-out); }
+[data-reveal].pre { opacity: 0; }
+[data-reveal].in  { opacity: 1; transform: none; }
+
+[data-reveal="rise"].pre { transform: translateY(20px); }
+[data-reveal="fade"].pre { transform: none; }
+
+[data-reveal="rise"], [data-reveal="fade"] {
+  transition-delay: calc(var(--si, 0) * 70ms);
+}
+
+/* ---- chars: the word assembles letter by letter ---- */
+.sp-w { display: inline-block; white-space: nowrap; }
+.ch   { display: inline-block; }
+[data-reveal="chars"] { transition: none; }
+[data-reveal="chars"].pre { opacity: 1; }
+[data-reveal="chars"] .ch {
+  opacity: 0;
+  transform: translateY(0.42em);
+  transition: opacity 0.5s var(--ease-out), transform 0.62s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 26ms);
+}
+[data-reveal="chars"].in .ch { opacity: 1; transform: none; }
+
+/* ---- lines: each line wipes up behind its own edge ---- */
+[data-reveal="lines"] { transition: none; }
+[data-reveal="lines"].pre { opacity: 1; }
+.ln   { display: block; overflow: hidden; }
+.ln-i {
+  display: block;
+  transform: translateY(105%);
+  transition: transform 0.78s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+[data-reveal="lines"].in .ln-i { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal], [data-reveal].pre,
+  [data-reveal] .ch, [data-reveal] .ln-i {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
