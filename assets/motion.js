@@ -323,8 +323,35 @@
     var nodes = document.querySelectorAll("[data-accent]");
     if (!nodes.length) return;
 
+    /* Every [data-accent] scopes its own accent, because CSS cannot read
+       an attribute value as a colour — the attribute has to be copied
+       into a custom property for `color: var(--accent)` to see it. This
+       is what lets a project card tint its own rim and label. */
+    for (var s = 0; s < nodes.length; s++) {
+      var own = attr(nodes[s], "data-accent");
+      if (own) nodes[s].style.setProperty("--accent", own);
+    }
+
+    /* Only sections drive the page-wide wash. A card retints itself; it
+       does not repaint the whole page as it drifts past. */
+    var sections = [];
+    for (var q = 0; q < nodes.length; q++) {
+      if (nodes[q].tagName === "SECTION") sections.push(nodes[q]);
+    }
+    if (!sections.length) return;
+    nodes = sections;
+
     var base = getComputedStyle(root).getPropertyValue("--accent").trim();
     var current = null;
+
+    // the wash is injected, not authored, so a page with JS off never
+    // carries an empty decorative div and no HTML needs editing
+    if (!document.querySelector(".accent-wash")) {
+      var wash = document.createElement("div");
+      wash.className = "accent-wash";
+      wash.setAttribute("aria-hidden", "true");
+      document.body.insertBefore(wash, document.body.firstChild);
+    }
 
     function apply(el) {
       var a = el ? attr(el, "data-accent") : null;
