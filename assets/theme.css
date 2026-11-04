@@ -663,6 +663,14 @@ body.lb-lock { overflow: hidden; }
   text-wrap: balance;
   text-shadow: 0 2px 18px rgba(0,0,0,0.5);
 }
+/* .lede is centred, which is right for the short hero intro it was built
+   for. The doc pages also use it for multi-paragraph body copy, where
+   centring every line makes the left edge ragged and the text genuinely
+   harder to read. When .lede is also .prose it is body copy: left-align
+   it and drop the auto margins that pulled it to the middle. */
+.prose.lede { text-align: left; }
+.prose.lede p { max-width: var(--measure); margin-left: 0; margin-right: 0; }
+
 /* .doc-section supplies its own vertical rhythm; .h-sec is a bare sibling
    with nothing to space it, so it carries the same gap itself. */
 .h-sec { margin-top: clamp(2.5rem, 5vw, 4rem); }

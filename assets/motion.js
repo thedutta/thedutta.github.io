@@ -321,7 +321,14 @@
   function initAccent() {
     if (!hasIO) return;
     var nodes = document.querySelectorAll("[data-accent]");
-    if (!nodes.length) return;
+
+    /* data-accent on <body> is the page default, so a project page can
+       carry the same identity colour its card has on the landing page
+       with one attribute and no sections. */
+    var pageAccent = document.body.getAttribute("data-accent");
+    if (pageAccent) root.style.setProperty("--accent", pageAccent);
+
+    if (!nodes.length && !pageAccent) return;
 
     /* Every [data-accent] scopes its own accent, because CSS cannot read
        an attribute value as a colour — the attribute has to be copied
@@ -332,26 +339,30 @@
       if (own) nodes[s].style.setProperty("--accent", own);
     }
 
-    /* Only sections drive the page-wide wash. A card retints itself; it
-       does not repaint the whole page as it drifts past. */
-    var sections = [];
-    for (var q = 0; q < nodes.length; q++) {
-      if (nodes[q].tagName === "SECTION") sections.push(nodes[q]);
-    }
-    if (!sections.length) return;
-    nodes = sections;
-
-    var base = getComputedStyle(root).getPropertyValue("--accent").trim();
-    var current = null;
-
     // the wash is injected, not authored, so a page with JS off never
-    // carries an empty decorative div and no HTML needs editing
+    // carries an empty decorative div and no HTML needs editing.
+    // Injected before the sections check so a page that only sets
+    // data-accent on <body> still gets its tint.
     if (!document.querySelector(".accent-wash")) {
       var wash = document.createElement("div");
       wash.className = "accent-wash";
       wash.setAttribute("aria-hidden", "true");
       document.body.insertBefore(wash, document.body.firstChild);
     }
+
+    /* Only sections drive the page-wide wash as it is read. A card
+       retints itself; it does not repaint the page as it drifts past. */
+    var sections = [];
+    for (var q = 0; q < nodes.length; q++) {
+      if (nodes[q].tagName === "SECTION") sections.push(nodes[q]);
+    }
+    if (!sections.length) return;      // body accent alone: static tint
+    nodes = sections;
+
+    // with a page accent set, that is what an unmatched scroll falls
+    // back to, not the stylesheet blue
+    var base = getComputedStyle(root).getPropertyValue("--accent").trim();
+    var current = null;
 
     function apply(el) {
       var a = el ? attr(el, "data-accent") : null;
