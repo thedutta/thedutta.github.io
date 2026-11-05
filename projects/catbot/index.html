@@ -10,8 +10,17 @@
   <meta property="og:title" content="CatBot — Biomimetic Quadruped &amp; Distributed Edge Node" />
   <meta property="og:description" content="21 actuated DoF, 4.9 kg, a CAN-FD spine with one FlexNode per joint, split-brain compute and a zero-emission passive sensory stack." />
   <meta property="og:type" content="article" />
+  <style>
+    /* page-scoped: mirror the FlexNode doc's list/code styling and offset
+       in-page anchors below the fixed topbar */
+    .doc-section[id] { scroll-margin-top: 72px; }
+    .prose ul, .prose ol { margin: 0.4rem 0 0.2rem 1.2rem; }
+    .prose li { color: rgba(255,255,255,0.82); margin-bottom: 0.5rem; font-weight: 300; line-height: 1.65; }
+    .prose code { font-family: ui-monospace, "SF Mono", Menlo, monospace; background: rgba(255,255,255,0.08); padding: 0.1em 0.4em; border-radius: 6px; font-size: 0.86em; overflow-wrap: anywhere; }
+    .cap { color: var(--text-faint); font-size: 0.78rem; line-height: 1.5; margin-top: 0.55rem; padding: 0 0.2rem; }
+  </style>
 </head>
-<body data-accent="#4aa3ff">
+<body>
   <picture class="bg">
     <source type="image/webp" sizes="100vw"
       srcset="../../assets/bg/bg-400.webp 400w, ../../assets/bg/bg-600.webp 600w, ../../assets/bg/bg-800.webp 800w, ../../assets/bg/bg-1080.webp 1080w, ../../assets/bg/bg-1440.webp 1440w, ../../assets/bg/bg-1920.webp 1920w, ../../assets/bg/bg-2400.webp 2400w" />
@@ -29,7 +38,7 @@
     </nav>
   </header>
 
-  <div class="container rail-host">
+  <div class="container">
     <a class="back reveal" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> All projects</a>
 
     <div class="doc-hero reveal">
@@ -45,25 +54,34 @@
       </div>
     </div>
 
-    <nav class="jump" aria-label="Sections">
-      <a href="#status">Status</a>
-      <a href="#glance">At a glance</a>
-      <a href="#architecture">Architecture</a>
-      <a href="#flexnode">FlexNode</a>
-      <a href="#corenode">Corenode</a>
-      <a href="#actuation">Actuation</a>
-      <a href="#sensing">Sensing</a>
-      <a href="#power">Power</a>
-      <a href="#telemetry">Telemetry</a>
-      <a href="#structure">Structure</a>
-      <a href="#software">Software</a>
-      <a href="#deployment">Deployment</a>
-    </nav>
+    <div class="card reveal" style="padding:0;overflow:hidden">
+      <span style="display:block;aspect-ratio:1484/858;background:#0a0a0d">
+        <img src="../../assets/img/catbot-concept.jpg" alt="Concept artwork of a robotic cat with exposed mechanical spine, segmented tail and armoured limbs" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+      </span>
+    </div>
+    <p class="cap">Concept art by <strong>Marek Madej</strong>, used here as a visual reference for the form CatBot is working toward — not a render of the build. The engineering below is mine; this image is not.</p>
 
-    <div class="rail">
-     <div class="rail-text">
+    <div class="card reveal" style="padding:0;overflow:hidden;margin-top:1.1rem">
+      <span style="display:block;aspect-ratio:1600/818;background:#0a0a0d">
+        <picture>
+          <source type="image/webp" srcset="../../assets/img/catbot-v44-front.webp" />
+          <img src="../../assets/img/catbot-v44-front.jpg" alt="CatBot standing under a single overhead light — the complete assembly seen from the front three-quarter, dark composite shells, illuminated visor strip across the face, tail raised" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+        </picture>
+      </span>
+    </div>
+    <p class="cap">The actual machine, standing. The full assembly as of now — head, spine, tail and all four limbs — against the concept above. This is the design the build is chasing, and it is essentially closed.</p>
 
-<span class="kicker reveal" style="display:block;margin:1.1rem 0 0.45rem">Vitals</span>
+    <div class="card reveal" style="padding:0;overflow:hidden;margin-top:1.1rem">
+      <span style="display:block;aspect-ratio:1600/818;background:#0a0a0d">
+        <picture>
+          <source type="image/webp" srcset="../../assets/img/catbot-v44-rear.webp" />
+          <img src="../../assets/img/catbot-v44-rear.jpg" alt="CatBot from the rear three-quarter above — the Jetson enclosure and blower on the top deck, the cylindrical cell pack running the length of the spine, exposed electronics at the tail root" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </picture>
+      </span>
+    </div>
+    <p class="cap">The same assembly from behind and above, with the dorsal hatches off: the Jetson enclosure and its blower on the top deck, the cell pack running the length of the spine, and the rear electronics bay at the tail root.</p>
+
+    <span class="kicker reveal" style="display:block;margin:1.1rem 0 0.45rem">Vitals</span>
     <div class="card reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.7rem 1rem">
       <div><span class="kicker" style="display:block;font-size:0.68rem">Mass</span><strong style="font-size:1.1rem">4.9 kg</strong></div>
       <div><span class="kicker" style="display:block;font-size:0.68rem">Freedom</span><strong style="font-size:1.1rem">19 + 2 DoF</strong></div>
@@ -74,7 +92,7 @@
     </div>
     <p class="cap">Nineteen actuated degrees of freedom, plus two optional in the tail.</p>
 
-    <section class="doc-section reveal" id="glance" data-media="m2">
+    <section class="doc-section reveal" id="glance">
       <h2>At a glance</h2>
       <div class="card">
         <dl class="specs">
@@ -109,7 +127,7 @@
       </div>
     </section>
 
-    <section class="doc-section reveal" id="architecture" data-media="m3">
+    <section class="doc-section reveal" id="architecture">
       <h2>Three tiers of compute</h2>
       <div class="prose">
         <p>The stack is split so that each processor does only what its physics suits it for — massive parallel compute, deterministic reflex, or local current control.</p>
@@ -128,23 +146,43 @@
       </div>
     </section>
 
-    <section class="doc-section reveal" id="flexnode" data-media="m4">
+    <section class="doc-section reveal" id="flexnode">
       <h2>FlexNode — the electronic nervous system</h2>
       <div class="prose">
         <p>The node itself is a custom PCB derived from the open-source <a href="https://github.com/mjbots/moteus" target="_blank" rel="noopener">mjbots <strong>moteus r4.11</strong></a> controller. The proven power stage, DRV8353S gate driver and STM32G4 core are kept intact; what's added is everything a <em>distributed</em> node needs and a bare motor controller doesn't.</p>
         <p>Each node fuses a BLDC driver running FOC with an onboard 6-axis IMU, a multizone time-of-flight ranger, a programmable I²C port for load cells or secondary encoders, a servo/aux output with its own 5 V current sense, and an onboard 5 V / 3 A supply. A solder bridge selects CAN termination. The result is genuinely copy-pasteable: the same board, the same firmware image, a different node ID.</p>
         <p>At roughly <strong>$44 or ₹4000 a board</strong>, putting one on every joint costs less than the connectors and harness it replaces.</p>
       </div>
-<div class="prose" style="margin-top:1rem">
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1600/842;background:#0a0a0d">
+          <img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board render — STM32G4, DRV8353S gate driver, six Infineon power FETs and the SHA/SHB/SHC phase pads, silkscreened dutta's CATBOT flex node" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+      <div class="prose" style="margin-top:1rem">
         <p>The first v1.0 board <strong>booted on 6 September 2026</strong> and <strong>drove a motor on 8 September</strong> — a GIM 8108-8 turning open-loop from a current-limited supply, with phase-current sensing, bus sensing and FET thermals validated on the way. The encoder isn't fitted yet, so closed-loop control and CAN bring-up are the next gates. The full hardware architecture, pin map, power tree and firmware deltas live on their own page.</p>
       </div>
-<div class="actions" style="justify-content:flex-start;margin-top:0.9rem">
+      <div class="card" style="padding:0;overflow:hidden;margin:1rem auto 0.6rem;max-width:420px">
+        <span style="display:block;aspect-ratio:1035/1280;background:#0a0a0d">
+          <picture>
+            <source type="image/webp" srcset="../../assets/img/flexnode-bench.webp" />
+            <img src="../../assets/img/flexnode-bench.jpg" alt="FlexNode v1.0 mounted on a motor on the bench, status LED lit, power and debug leads attached" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+          </picture>
+        </span>
+      </div>
+      <p class="cap">A CatBot joint controller on its motor — electronics and thermals fully validated, September 2026. One of these rides on every actuator.</p>
+      <div class="actions" style="justify-content:flex-start;margin-top:0.9rem">
         <a class="btn call" href="../flexnode/">FlexNode documentation
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
-</section>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1400/1028;background:#0a0a0d">
+          <img src="../../assets/img/catbot-xray.jpg" alt="X-ray inspection image of a fabricated FlexNode board showing internal copper routing, via structure and QFN solder voiding" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+      <p class="cap">X-ray inspection of a fabricated v1.0 board — internal layers, via structure and QFN void fraction, checked before assembly.</p>
+    </section>
 
-    <section class="doc-section reveal" id="corenode" data-media="m6">
+    <section class="doc-section reveal" id="corenode">
       <h2>Corenode — the brainstem hat</h2>
       <div class="prose">
         <p>The custom board named in the compute stack above has a name and a specification of its own. <strong>Corenode</strong> is the hat that sits on the Jetson's carrier and carries the pack path across it: an 8S BMS that protects the cells with or without firmware, two synchronous rails behind eFuses, a supervisor that keeps authority when the Jetson is gone, and one CAN bus switched in the trunk so a destroyed limb takes its own branch down and nothing else. It is <strong>120 × 60 mm</strong>, it draws <strong>≈3.3 mW asleep</strong>, and it is in schematic capture at rev 11.1 after six revisions of adversarial review — including a net-level failure analysis of 339 net-by-mode rows.</p>
@@ -155,7 +193,7 @@
       </div>
     </section>
 
-    <section class="doc-section reveal" id="actuation" data-media="m5">
+    <section class="doc-section reveal" id="actuation">
       <h2>Actuation &amp; drivetrain</h2>
       <div class="prose">
         <p>Nineteen actuated degrees of freedom — seventeen in the body, two for head rotation — plus two optional tail joints for twenty-one; deliberately mixed rather than uniform. Torque density where the gait needs it, cheap mass where it doesn't.</p>
@@ -174,7 +212,7 @@
       </div>
     </section>
 
-    <section class="doc-section reveal" id="sensing" data-media="m7">
+    <section class="doc-section reveal" id="sensing">
       <h2>A sensory stack that emits nothing</h2>
       <div class="prose">
         <p>Most cheap 3D perception cheats by projecting a structured-light or IR dot pattern and reading it back. That is fine for one robot in a room and useless the moment there are two — each unit's projector blinds the other's receiver, and both degrade. It is equally useless anywhere you'd rather not announce yourself with an infrared floodlight.</p>
@@ -192,9 +230,15 @@
         <div class="decision"><h3>Whiskers fire before the brain knows</h3><p>The distributed ToF array triggers a hardware interrupt straight into the STM32 — a spinal reflex. The limb has already begun retracting by the time the obstacle appears in a Jetson frame. Latency here is bounded by interrupt priority, not by a perception pipeline.</p></div>
         <div class="decision"><h3>The same microphone feeds two consumers</h3><p>The analogue path exists so the STM32 can watch for an acoustic anomaly with the GPU completely powered down. The digital 192 kHz I²S path exists so the Jetson can do time-difference-of-arrival across the array and actually localise the source. One sensor, two very different duty cycles.</p></div>
       </div>
-</section>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1600/1175;background:#0a0a0d">
+          <img src="../../assets/img/catbot-head.jpg" alt="Rendered CatBot head shell — a smooth dark canopy housing the passive stereo camera and microphone array" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+      <p class="cap">Head shell — the canopy carries the passive stereo pair and the MEMS microphone array on a two-axis gimbal.</p>
+    </section>
 
-    <section class="doc-section reveal" id="power" data-media="m3">
+    <section class="doc-section reveal" id="power">
       <h2>Power &amp; the zero-watt state</h2>
       <div class="prose">
         <p>Energy comes from an <strong>8S2P pack of Molicel INR21700-P45B</strong> cells — sixteen cells, ~29.6 V nominal, <strong>266 Wh</strong>. The P45B was chosen for discharge headroom rather than raw capacity: a legged robot's current profile is spiky, and pack sag during a push-off is what actually limits what the gait can do.</p>
@@ -215,7 +259,7 @@
       </div>
     </section>
 
-    <section class="doc-section reveal" id="structure" data-media="m8">
+    <section class="doc-section reveal" id="structure">
       <h2>Structure &amp; materials</h2>
       <div class="prose">
         <p>The production shell is <strong>forged carbon fibre</strong> with <strong>titanium alloy</strong> fasteners and hardware — chosen for stiffness-to-mass and for surviving impacts that a printed shell would not. Forged composite in particular tolerates the complex, non-developable geometry an animal-shaped exoskeleton demands, where a laid-up sheet would need far more parts and joints.</p>
@@ -254,7 +298,7 @@
       </div>
     </section>
 
-    <section class="doc-section reveal" id="status" data-media="m8">
+    <section class="doc-section reveal" id="status">
       <h2>Status</h2>
       <div class="prose">
         <p>CatBot is an ongoing build. Honest state of play:</p>
@@ -273,7 +317,13 @@
         </ul>
         <p>Nothing on this page describes a robot that has been validated end-to-end. One FlexNode has driven a motor open-loop at 24 V on the bench; closed-loop control, CAN and everything multi-node are designed, not yet working. Where something is designed rather than working, it says so.</p>
       </div>
-</section>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1600/887;background:#0a0a0d">
+          <img src="../../assets/img/catbot-build.jpg" alt="The printed CatBot torso on a workbench — shoulder and hip housings with bearing races seated, blower fans fitted and power leads run out" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
+      <p class="cap">On the bench: the torso printed and assembled — bearing races seated in the shoulder and hip bores, blowers fitted, power leads run out. Structure before electronics.</p>
+    </section>
 
     <section class="doc-section reveal">
       <h2>Concept &amp; process</h2>
@@ -288,53 +338,6 @@
       <p class="cap">Concept and preliminary CAD sheet — anatomy references, the original ink block diagram of the compute stack, and the side elevation the current assembly grew from.</p>
     </section>
 
-
-     </div><!-- /.rail-text -->
-
-      <aside class="rail-media" aria-label="CatBot figures">
-        <figure id="m1" class="prism">
-          <img src="../../assets/img/catbot-concept.jpg" alt="Concept artwork of a robotic cat with exposed mechanical spine, segmented tail and armoured limbs" style="width:100%;height:100%;object-fit:cover" loading="eager" />
-          <figcaption>Concept art by <strong>Marek Madej</strong>, used here as a visual reference for the form CatBot is working toward — not a render of the build. The engineering below is mine; this image is not.</figcaption>
-        </figure>
-        <figure id="m2" class="prism">
-          <picture>
-          <source type="image/webp" srcset="../../assets/img/catbot-v44-front.webp" />
-          <img src="../../assets/img/catbot-v44-front.jpg" alt="CatBot standing under a single overhead light — the complete assembly seen from the front three-quarter, dark composite shells, illuminated visor strip across the face, tail raised" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
-        </picture>
-          <figcaption>The actual machine, standing. The full assembly as of now — head, spine, tail and all four limbs — against the concept above. This is the design the build is chasing, and it is essentially closed.</figcaption>
-        </figure>
-        <figure id="m3" class="prism">
-          <picture>
-          <source type="image/webp" srcset="../../assets/img/catbot-v44-rear.webp" />
-          <img src="../../assets/img/catbot-v44-rear.jpg" alt="CatBot from the rear three-quarter above — the Jetson enclosure and blower on the top deck, the cylindrical cell pack running the length of the spine, exposed electronics at the tail root" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
-        </picture>
-          <figcaption>The same assembly from behind and above, with the dorsal hatches off: the Jetson enclosure and its blower on the top deck, the cell pack running the length of the spine, and the rear electronics bay at the tail root.</figcaption>
-        </figure>
-        <figure id="m4" class="prism">
-          <img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board render — STM32G4, DRV8353S gate driver, six Infineon power FETs and the SHA/SHB/SHC phase pads, silkscreened dutta's CATBOT flex node" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
-        </figure>
-        <figure id="m5" class="prism">
-          <picture>
-            <source type="image/webp" srcset="../../assets/img/flexnode-bench.webp" />
-            <img src="../../assets/img/flexnode-bench.jpg" alt="FlexNode v1.0 mounted on a motor on the bench, status LED lit, power and debug leads attached" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
-          </picture>
-          <figcaption>A CatBot joint controller on its motor — electronics and thermals fully validated, September 2026. One of these rides on every actuator.</figcaption>
-        </figure>
-        <figure id="m6" class="prism">
-          <img src="../../assets/img/catbot-xray.jpg" alt="X-ray inspection image of a fabricated FlexNode board showing internal copper routing, via structure and QFN solder voiding" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
-          <figcaption>X-ray inspection of a fabricated v1.0 board — internal layers, via structure and QFN void fraction, checked before assembly.</figcaption>
-        </figure>
-        <figure id="m7" class="prism">
-          <img src="../../assets/img/catbot-head.jpg" alt="Rendered CatBot head shell — a smooth dark canopy housing the passive stereo camera and microphone array" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
-          <figcaption>Head shell — the canopy carries the passive stereo pair and the MEMS microphone array on a two-axis gimbal.</figcaption>
-        </figure>
-        <figure id="m8" class="prism">
-          <img src="../../assets/img/catbot-build.jpg" alt="The printed CatBot torso on a workbench — shoulder and hip housings with bearing races seated, blower fans fitted and power leads run out" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
-          <figcaption>On the bench: the torso printed and assembled — bearing races seated in the shoulder and hip bores, blowers fitted, power leads run out. Structure before electronics.</figcaption>
-        </figure>
-      </aside>
-    </div><!-- /.rail -->
-
     <section class="doc-section reveal">
       <h2>Gallery</h2>
       <div class="gallery">
@@ -344,6 +347,7 @@
         <figure><img src="../../assets/img/catbot-head.jpg" alt="CatBot head shell render" loading="lazy" /></figure>
       </div>
     </section>
+
     <footer class="site-footer reveal">
       <div class="foot-links">
         <a class="foot-icon" href="mailto:adityadutta2006@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></a>
@@ -354,8 +358,7 @@
     </footer>
   </div>
 
-  <script src="../../assets/motion.js"></script>
+  <script src="../../assets/reveal.js"></script>
   <script src="../../assets/ui.js"></script>
-  <script src="../../assets/rail.js"></script>
 </body>
 </html>

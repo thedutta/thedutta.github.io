@@ -13,10 +13,14 @@
   <style>
     /* page-scoped: mirror the blog article's list/code styling for this doc,
        and offset in-page anchors below the fixed topbar */
+    .doc-section[id], .prose p[id] { scroll-margin-top: 72px; }
+    .prose ul, .prose ol { margin: 0.4rem 0 0.2rem 1.2rem; }
+    .prose li { color: rgba(255,255,255,0.82); margin-bottom: 0.5rem; font-weight: 300; line-height: 1.65; }
+    .prose code { font-family: ui-monospace, "SF Mono", Menlo, monospace; background: rgba(255,255,255,0.08); padding: 0.1em 0.4em; border-radius: 6px; font-size: 0.86em; overflow-wrap: anywhere; }
     .prose.lede p { font-size: 1.05rem; line-height: 1.72; }
   </style>
 </head>
-<body data-accent="#58d7c8">
+<body>
   <picture class="bg">
     <source type="image/webp" sizes="100vw"
       srcset="../../assets/bg/bg-400.webp 400w, ../../assets/bg/bg-600.webp 600w, ../../assets/bg/bg-800.webp 800w, ../../assets/bg/bg-1080.webp 1080w, ../../assets/bg/bg-1440.webp 1440w, ../../assets/bg/bg-1920.webp 1920w, ../../assets/bg/bg-2400.webp 2400w" />
@@ -34,7 +38,7 @@
     </nav>
   </header>
 
-  <div class="container rail-host">
+  <div class="container">
     <a class="back reveal" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> All projects</a>
 
     <div class="doc-hero reveal">
@@ -51,24 +55,26 @@
       </div>
     </div>
 
-    <nav class="jump" aria-label="Sections">
-      <a href="#status">Where it stands</a>
-      <a href="#idea">The idea</a>
-      <a href="#specs">Specifications</a>
-      <a href="#safety">Powering it safely</a>
-      <a href="#software">Firmware &amp; CAN</a>
-    </nav>
-
-    <div class="rail">
-     <div class="rail-text">
-
     <!-- Board-in-hand utility band -->
     <div class="card reveal">
-      <h2 style="margin:0 0 0.5rem;font-size:var(--step-1);font-weight:var(--w-head)">You scanned a FlexNode.</h2>
+      <h2 style="margin:0 0 0.5rem;font-size:1.15rem">You scanned a FlexNode.</h2>
       <p class="prose" style="margin:0 0 1rem">This is a <strong>v1.0</strong> board. It booted on 6 September 2026, drove a motor two days later, and has been running <strong>closed-loop field-oriented control</strong> on its motor since October. Here is what it is for, what it can do today, and how to power it without letting the magic smoke out.</p>
+      <div class="actions" style="justify-content:flex-start">
+        <a class="btn" href="#status">Where it stands</a>
+        <a class="btn" href="#specs">Specs</a>
+        <a class="btn" href="#safety">Safety</a>
+        <a class="btn" href="#software">Firmware</a>
+      </div>
     </div>
 
-    <section class="doc-section reveal" id="idea" data-media="m-board">
+    <!-- Board hero render -->
+    <div class="card reveal" style="padding:0;overflow:hidden">
+      <span style="display:block;aspect-ratio:1600/842;background:#0a0a0d">
+        <img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board — top view showing the DRV8353 gate driver, STM32G4, six Infineon power FETs and the SHA/SHB/SHC phase pads" style="width:100%;height:100%;object-fit:cover" loading="eager" />
+      </span>
+    </div>
+
+    <section class="doc-section reveal" id="idea">
       <h2>The idea</h2>
       <div class="prose lede">
         <p>Most of the work in a walking robot isn't the walking. Every joint needs a motor controller; every controller needs encoder input, current sensing, thermal protection and a wire home. Add a foot sensor, a rangefinder or an IMU and that is another board, another connector, another protocol — and none of it is the thing you set out to build.</p>
@@ -103,11 +109,22 @@
       <div class="prose" style="margin-top:1.2rem">
         <p>The design target is <a href="../catbot/"><strong>CatBot</strong></a>, a lightweight jumping quadruped: ten FlexNodes, one per actuator, chained back to a corenode and an onboard Jetson. Split the chain left/right and a single bus fault takes down one side of the robot rather than all of it.</p>
       </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
+        <span style="display:block;aspect-ratio:1600/801;background:#0a0a0d">
+          <img src="../../assets/img/flexnodexray.jpg" alt="FlexNode mounted on the rear of a geared quadruped actuator, status LED glowing" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </span>
+      </div>
     </section>
 
-    <section class="doc-section reveal" id="status" data-media="m-foc">
+    <section class="doc-section reveal" id="status">
       <span class="kicker" style="display:block;margin-bottom:0.45rem">Validation · September–October 2026</span>
       <h2>Where it stands</h2>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:0.6rem">
+        <video style="display:block;width:100%;aspect-ratio:16/9;background:#0a0a0d;object-fit:cover" controls playsinline muted loop autoplay preload="metadata" poster="../../assets/img/flexnode-run-poster.jpg">
+          <source src="../../assets/video/flexnode-closedloop.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <p class="cap">Closed-loop field-oriented control on the test stand — October 2026.</p>
       <div class="prose">
         <p>The first article booted on <strong>6 September 2026</strong> — power tree, boot-from-flash, status LED and IMU all alive the same day — and drove its GIM 8108-8 open-loop two days later from a current-limited supply, behind bus-sag, overcurrent and FET-temperature aborts: eight movement loops, zero faults, and a deliberate bus-collapse caught and de-energized cleanly by the abort path.</p>
         <p>In October the loop closed. With the magnetic encoder calibrated, the board now runs <strong>closed-loop field-oriented control</strong> on the test stand — commutating off its own encoder, phase currents summing to zero across all three calibrated sense channels, FETs settling around 41 °C, no aborts. The v1.0 phase-swap correction, once a two-line fix checked only against the schematic, is <strong>confirmed on real hardware</strong>.</p>
@@ -120,7 +137,7 @@
       </div>
     </section>
 
-    <section class="doc-section reveal" id="specs" data-media="m-layout">
+    <section class="doc-section reveal" id="specs">
       <h2>Specifications</h2>
       <span class="kicker" style="display:block;margin:0 0 0.45rem">Power stage</span>
       <div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.7rem 1rem;margin-bottom:0.6rem">
@@ -161,7 +178,7 @@
       <div class="prose" style="margin-top:0.8rem"><p>Pin order for <strong>FLASH</strong> and the power pads is fixed as listed; confirm pin-1 orientation on the aux headers against the board silk.</p></div>
     </section>
 
-    <section class="doc-section reveal" id="safety" data-media="m-layout">
+    <section class="doc-section reveal" id="safety">
       <h2>Powering it safely</h2>
       <div class="card">
         <div class="prose">
@@ -173,7 +190,7 @@
       </div>
     </section>
 
-    <section class="doc-section reveal" id="software" data-media="m-foc">
+    <section class="doc-section reveal" id="software">
       <h2>Firmware &amp; the CAN layer</h2>
       <div class="prose">
         <p>The firmware is a fork of moteus that keeps the FOC inner loop, the FDCAN protocol and the bootloader byte-for-byte. FlexNode's changes are small and deliberately off the control path: a board-identity hardcode, an encoder chip-select remap, and a two-line drive-side pin remap that corrects the board's phase swap without touching a line of control code — confirmed correct on hardware in October 2026. On top of that sit the status and lighting driver, the IMU and the FlexNode register block. Flash a virgin board over the <strong>FLASH</strong> header with SWD; after that, updates go over CAN with <code>moteus_tool</code>, exactly as a moteus does.</p>
@@ -207,28 +224,6 @@
       </div>
     </section>
 
-     </div><!-- /.rail-text -->
-
-      <aside class="rail-media" aria-label="FlexNode figures">
-        <figure id="m-board" class="prism">
-          <img src="../../assets/img/flexnode-board.jpg" alt="FlexNode v1.0 board — top view showing the DRV8353 gate driver, STM32G4, six Infineon power FETs and the SHA/SHB/SHC phase pads" loading="eager" />
-          <figcaption>FlexNode v1.0 — the DRV8353S gate driver, STM32G4 and the six-FET power stage. 10–44 V in, 100 A peak phase.</figcaption>
-        </figure>
-
-        <figure id="m-layout" class="prism">
-          <img src="../../assets/img/flexnodexray.jpg" alt="Altium layout view of the FlexNode v1.0 board with all four copper layers shown — the V+ and V- power pours, the GND plane, and the three phase nets SHA, SHB and SHC routed out to the motor pads" loading="lazy" />
-          <figcaption>All four copper layers overlaid in Altium — the V+ and V- pours, the GND plane, and the three phase nets SHA / SHB / SHC running out to the motor pads.</figcaption>
-        </figure>
-
-        <figure id="m-foc" class="prism">
-          <video controls playsinline muted loop preload="metadata" poster="../../assets/img/flexnode-run-poster.jpg">
-            <source src="../../assets/video/flexnode-closedloop.mp4" type="video/mp4" />
-          </video>
-          <figcaption>Closed-loop field-oriented control on the test stand — October 2026.</figcaption>
-        </figure>
-      </aside>
-    </div><!-- /.rail -->
-
     <footer class="site-footer reveal">
       <div class="foot-links">
         <a class="foot-icon" href="mailto:adityadutta2006@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></a>
@@ -239,8 +234,7 @@
     </footer>
   </div>
 
-  <script src="../../assets/motion.js"></script>
+  <script src="../../assets/reveal.js"></script>
   <script src="../../assets/ui.js"></script>
-  <script src="../../assets/rail.js"></script>
 </body>
 </html>
